@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: { blue: '#003399', light: '#1A6FD4', dark: '#0A1A40' },
+              accent: { yellow: '#FFCC00', hover: '#E6B800' }
+            },
+            fontFamily: { sora: ['Sora', 'sans-serif'], body: ['DM Sans', 'sans-serif'] },
+            boxShadow: { 'soft': '0 4px 20px rgba(0,51,153,0.08)', 'hover': '0 12px 32px rgba(0,51,153,0.12)' }
+          }
+        }
+      }
+    </script>
+
+    <style>
+      /* Seus estilos customizados */
+      .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+      .hero-gradient { background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%); }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    <title>smtt_frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
