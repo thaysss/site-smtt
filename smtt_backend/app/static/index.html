@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SMTT Digital</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <strong class="brand">SMTT Digital</strong>
+        <span class="subtitle">Atendimento, autuações e alertas de trânsito</span>
+      </div>
+      <div class="session">
+        <span id="sessionStatus">Visitante</span>
+        <button id="logoutButton" class="ghost hidden" type="button">Sair</button>
+      </div>
+    </header>
+
+    <main class="shell">
+      <nav class="tabs" aria-label="Áreas do sistema">
+        <button class="tab active" type="button" data-tab="publico">Público</button>
+        <button class="tab" type="button" data-tab="cidadao">Cidadão</button>
+        <button class="tab" type="button" data-tab="servidor">Servidor</button>
+      </nav>
+
+      <section id="publico" class="view active">
+        <div class="section-head">
+          <div>
+            <h1>Portal público</h1>
+            <p>Consultas rápidas para placas, protocolos e alertas ativos.</p>
+          </div>
+          <button id="refreshAlerts" class="secondary" type="button">Atualizar alertas</button>
+        </div>
+
+        <div class="grid two">
+          <form id="plateForm" class="panel">
+            <h2>Consultar placa</h2>
+            <label>Placa
+              <input name="placa" placeholder="ABC1D23" maxlength="7" required />
+            </label>
+            <button type="submit">Consultar</button>
+            <div id="plateResult" class="result muted">Informe uma placa para verificar registros.</div>
+          </form>
+
+          <form id="protocolForm" class="panel">
+            <h2>Consultar protocolo</h2>
+            <label>Número do protocolo
+              <input name="numero" placeholder="DEF12345" required />
+            </label>
+            <button type="submit">Consultar</button>
+            <div id="protocolResult" class="result muted">Acompanhe o andamento de solicitações.</div>
+          </form>
+        </div>
+
+        <section class="panel wide">
+          <div class="panel-head">
+            <h2>Alertas de trânsito</h2>
+            <span id="alertsCount" class="badge">0 ativos</span>
+          </div>
+          <div id="publicAlerts" class="list empty">Carregando alertas...</div>
+        </section>
+      </section>
+
+      <section id="cidadao" class="view">
+        <div class="section-head">
+          <div>
+            <h1>Área do cidadão</h1>
+            <p>Acesse multas, vincule veículos e abra recursos.</p>
+          </div>
+          <span id="citizenName" class="badge">Não autenticado</span>
+        </div>
+
+        <div class="grid two">
+          <form id="citizenLoginForm" class="panel">
+            <h2>Entrar</h2>
+            <label>CPF
+              <input name="cpf" inputmode="numeric" maxlength="11" required />
+            </label>
+            <label>Senha
+              <input name="senha" type="password" required />
+            </label>
+            <button type="submit">Entrar</button>
+          </form>
+
+          <form id="citizenSignupForm" class="panel">
+            <h2>Criar cadastro</h2>
+            <label>Nome
+              <input name="nome" required />
+            </label>
+            <label>CPF
+              <input name="cpf" inputmode="numeric" maxlength="11" required />
+            </label>
+            <label>E-mail
+              <input name="email" type="email" required />
+            </label>
+            <label>Telefone
+              <input name="telefone" />
+            </label>
+            <label>Endereço
+              <input name="endereco" />
+            </label>
+            <label>Senha
+              <input name="senha" type="password" required />
+            </label>
+            <button type="submit">Cadastrar</button>
+          </form>
+        </div>
+
+        <div class="grid three">
+          <form id="vehicleForm" class="panel">
+            <h2>Vincular veículo</h2>
+            <label>Placa
+              <input name="placa" maxlength="7" required />
+            </label>
+            <label>Renavam
+              <input name="renavam" maxlength="11" required />
+            </label>
+            <button type="submit">Salvar veículo</button>
+          </form>
+
+          <form id="resourceForm" class="panel">
+            <h2>Abrir recurso</h2>
+            <label>Número do AIT
+              <input name="numero_ait" placeholder="AIT123456" required />
+            </label>
+            <label>Tipo de recurso
+              <select name="tipo_recurso">
+                <option>Defesa Prévia</option>
+                <option>Recurso JARI</option>
+                <option>Indicação de Condutor</option>
+              </select>
+            </label>
+            <label>CPF do condutor
+              <input name="condutor_indicado_cpf" maxlength="11" />
+            </label>
+            <label>CNH do condutor
+              <input name="condutor_indicado_cnh" maxlength="15" />
+            </label>
+            <button type="submit">Enviar recurso</button>
+          </form>
+
+          <form id="generalProtocolForm" class="panel">
+            <h2>Abrir protocolo</h2>
+            <label>Tipo de serviço
+              <input name="tipo_servico" placeholder="Solicitação geral" required />
+            </label>
+            <button type="submit">Abrir protocolo</button>
+          </form>
+        </div>
+
+        <section class="panel wide">
+          <div class="panel-head">
+            <h2>Minhas multas</h2>
+            <button id="loadFines" class="secondary" type="button">Carregar multas</button>
+          </div>
+          <div id="finesList" class="list empty">Entre para consultar suas multas.</div>
+        </section>
+      </section>
+
+      <section id="servidor" class="view">
+        <div class="section-head">
+          <div>
+            <h1>Painel do servidor</h1>
+            <p>Registre infrações, julgue recursos e gerencie alertas.</p>
+          </div>
+          <span id="adminName" class="badge">Não autenticado</span>
+        </div>
+
+        <div class="grid two">
+          <form id="adminLoginForm" class="panel">
+            <h2>Entrar como servidor</h2>
+            <label>Matrícula
+              <input name="matricula" required />
+            </label>
+            <label>Senha
+              <input name="senha" type="password" required />
+            </label>
+            <button type="submit">Entrar</button>
+          </form>
+
+          <form id="adminSignupForm" class="panel">
+            <h2>Cadastrar servidor</h2>
+            <label>Nome
+              <input name="nome" required />
+            </label>
+            <label>Matrícula
+              <input name="matricula" required />
+            </label>
+            <label>Cargo
+              <input name="cargo" placeholder="Analista" />
+            </label>
+            <label>Senha
+              <input name="senha" type="password" required />
+            </label>
+            <button type="submit">Cadastrar servidor</button>
+          </form>
+        </div>
+
+        <div class="grid three">
+          <form id="infractionForm" class="panel">
+            <h2>Registrar infração</h2>
+            <label>Placa
+              <input name="placa" maxlength="7" required />
+            </label>
+            <label>Data e hora
+              <input name="data_hora_infracao" type="datetime-local" required />
+            </label>
+            <label>Local
+              <input name="local_cometimento" required />
+            </label>
+            <label>Valor
+              <input name="valor_final" type="number" min="0" step="0.01" value="130.16" />
+            </label>
+            <button type="submit">Registrar</button>
+          </form>
+
+          <form id="alertForm" class="panel">
+            <h2>Publicar alerta</h2>
+            <label>Rua ou bairro
+              <input name="rua_bairro" required />
+            </label>
+            <label>Descrição
+              <textarea name="descricao" rows="4" required></textarea>
+            </label>
+            <button type="submit">Publicar</button>
+          </form>
+
+          <form id="judgeForm" class="panel">
+            <h2>Julgar recurso</h2>
+            <label>ID do recurso
+              <input name="recurso_id" type="number" min="1" required />
+            </label>
+            <label>Resultado
+              <select name="resultado_julgamento">
+                <option>Deferido</option>
+                <option>Indeferido</option>
+              </select>
+            </label>
+            <label>Justificativa
+              <textarea name="justificativa_julgamento" rows="3"></textarea>
+            </label>
+            <button type="submit">Concluir julgamento</button>
+          </form>
+        </div>
+
+        <div class="grid two">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Recursos pendentes</h2>
+              <button id="loadResources" class="secondary" type="button">Atualizar</button>
+            </div>
+            <div id="resourcesList" class="list empty">Nenhum recurso carregado.</div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Gestão de alertas</h2>
+              <button id="loadAdminAlerts" class="secondary" type="button">Atualizar</button>
+            </div>
+            <div id="adminAlerts" class="list empty">Nenhum alerta carregado.</div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

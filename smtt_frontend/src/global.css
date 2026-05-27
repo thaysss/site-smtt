@@ -1,0 +1,91 @@
+/* src/global.css */
+
+:root {
+  /* Paleta Oficial Institucional - Estilo Aracaju/Propriá */
+  --cor-primaria: #071d49; /* Azul bem escuro do topo e rodapé */
+  --cor-secundaria: #007bff; /* Azul claro do logotipo para destaques */
+  --cor-fundo: #f4f6f9;
+  --cor-texto: #333333;
+  --cor-texto-claro: #666666;
+  --sombra-card: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+}
+
+/* Padronização de Inputs */
+input, select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px rgba(0, 66, 130, 0.1);
+}
+
+/* Padronização de Botões */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primario {
+  background-color: var(--cor-primaria);
+  color: white;
+}
+
+.btn-primario:hover {
+  background-color: #003366;
+  transform: translateY(-1px);
+}
+
+.btn-sucesso {
+  background-color: var(--cor-sucesso);
+  color: white;
+}
+
+.btn-sucesso:hover {
+  background-color: #059669;
+}
+
+.btn-alerta {
+  background-color: var(--cor-secundaria);
+  color: #1e293b;
+}
+
+.btn-alerta:hover {
+  background-color: #e0a800;
+}
+
+/* Estilo para os Cards (Caixas brancas) */
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--sombra-card);
+  padding: 30px;
+  border: 1px solid #f1f5f9;
+}
