@@ -1,5 +1,7 @@
 # app/routes/admin.py
-from flask import Blueprint, jsonify, request
+import os
+from werkzeug.utils import secure_filename
+from flask import Blueprint, jsonify, request, current_app
 from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB
 from app.models.portal import AlertaTransito
@@ -87,31 +89,40 @@ def listar_recursos():
         })
     return jsonify(resultado), 200
 
-@admin_bp.route('/recursos/<int:recurso_id>/julgar', methods=['PUT'])
-def julgar_recurso(recurso_id):
-    dados = request.get_json()
-    decisao = dados.get('decisao') # 'Deferido' ou 'Indeferido'
-    justificativa = dados.get('justificativa_jari', 'Análise concluída pelo agente.')
+@admin_bp.route('/recursos/<int:id>/julgar', methods=['PUT'])
+def julgar_recurso(id):
+    recurso = RecursoMulta.query.get_or_404(id)
     
-    recurso = RecursoMulta.query.get(recurso_id)
-    if not recurso:
-        return jsonify({"erro": "Recurso não encontrado no sistema."}), 404
+    # Como agora enviamos arquivo, usamos request.form em vez de request.get_json()
+    decisao = request.form.get('decisao')
+    justificativa = request.form.get('justificativa_jari')
+    
+    # LÓGICA DE UPLOAD DE ARQUIVO
+    arquivo = request.files.get('arquivo_resposta')
+    if arquivo and arquivo.filename != '':
+        # 1. Cria a pasta 'uploads' dentro de 'app/static' caso não exista
+        pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads')
+        os.makedirs(pasta_destino, exist_ok=True)
         
+        # 2. Limpa o nome do arquivo (tira espaços e caracteres especiais) e salva
+        nome_seguro = secure_filename(f"resposta_{id}_{arquivo.filename}")
+        caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
+        arquivo.save(caminho_arquivo)
+        
+        # 3. Guarda o link no banco de dados
+        recurso.anexo_resposta_jari = f"/static/uploads/{nome_seguro}"
+
+    # Atualiza as informações normais do julgamento
     recurso.resultado_julgamento = decisao
     recurso.justificativa_julgamento = justificativa
-    recurso.data_julgamento = datetime.utcnow().date()
+    recurso.data_julgamento = datetime.utcnow()
     
-    if recurso.infracao:
-        if decisao == 'Deferido':
-            recurso.infracao.fase_atual = 'Cancelada'
-        else:
-            recurso.infracao.fase_atual = 'Penalidade (Multa)'
-            
     if recurso.protocolo:
         recurso.protocolo.status = 'Concluído'
         
     db.session.commit()
-    return jsonify({"mensagem": "Recurso julgado com sucesso!"}), 200
+    
+    return jsonify({"mensagem": "Julgamento e anexos registrados com sucesso!"}), 200
 
 
 # ==========================================
