@@ -140,7 +140,7 @@ function AdminPainel() {
                     
                     {/* 👉 OLHE O 'rec.' AQUI NO HREF 👇 */}
                     <a 
-                      href={rec.arquivo_recurso_cidadao || "#"}
+                      href={rec.arquivo_recurso_cidadao ? `http://127.0.0.1:5000${rec.arquivo_recurso_cidadao}` : "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm font-bold text-brand-blue bg-blue-50 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200"
