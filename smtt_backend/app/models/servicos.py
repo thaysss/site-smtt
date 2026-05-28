@@ -18,13 +18,17 @@ class AutoInfracao(db.Model):
     numero_ait = db.Column(db.String(20), unique=True, nullable=False)
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculos.id'), nullable=False)
     veiculo = db.relationship('Veiculo', backref='multas_registradas', lazy=True)
+    codigo_infracao = db.Column(db.String(20), db.ForeignKey('tipos_infracao_ctb.codigo_infracao'))
+    tipo = db.relationship('TipoInfracaoCTB', backref='infracoes', lazy=True)
     
     # Campos atualizados para corresponder ao teu Supabase
     data_hora_infracao = db.Column(db.DateTime, nullable=False)
     local_cometimento = db.Column(db.String(255), nullable=False)
     fase_atual = db.Column(db.String(50), default='Autuação')
     valor_final = db.Column(db.Numeric(10, 2))
+    data_vencimento_defesa = db.Column(db.Date, nullable=True)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+     # Novo campo para controle de vencimento da defesa prévia
 
     def to_dict(self):
         return {
@@ -32,7 +36,8 @@ class AutoInfracao(db.Model):
             "data_hora_infracao": self.data_hora_infracao.strftime("%d/%m/%Y %H:%M"),
             "local_cometimento": self.local_cometimento,
             "fase_atual": self.fase_atual,
-            "valor_final": float(self.valor_final) if self.valor_final else None
+            "valor_final": float(self.valor_final) if self.valor_final else None,
+            "tipo_infracao": self.tipo.to_dict() if self.tipo else None
         }
 
 class Protocolo(db.Model):
@@ -60,6 +65,10 @@ class RecursoMulta(db.Model):
     resultado_julgamento = db.Column(db.String(30), default='Em Análise')
     justificativa_julgamento = db.Column(db.Text)
     data_julgamento = db.Column(db.Date)
+    protocolo = db.relationship('Protocolo', backref='recurso_jari', lazy=True)
+    infracao = db.relationship('AutoInfracao', backref='recurso_jari', lazy=True)
+    anexo_resposta_jari = db.Column(db.String(255), nullable=True)
+    arquivo_recurso_cidadao = db.Column(db.String(255), nullable=True)
     
 # Adicione em app/models/servicos.py
 class TipoInfracaoCTB(db.Model):

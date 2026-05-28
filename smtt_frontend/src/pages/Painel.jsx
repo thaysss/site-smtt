@@ -5,8 +5,10 @@ import api from '../services/api';
 import html2pdf from 'html2pdf.js';
 import { 
   Building2, LogOut, Car, AlertCircle, FileText, Download, 
-  Upload, Plus, ShieldAlert, CheckCircle, FileDigit 
+  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X 
 } from 'lucide-react';
+import formularioPDF from '../assets/formulario_jari.pdf'; 
+
 
 function Painel() {
   const [veiculos, setVeiculos] = useState([]);
@@ -27,6 +29,7 @@ function Painel() {
 
   const navigate = useNavigate();
   const nomeUsuario = localStorage.getItem('nomeUsuario');
+  const [arquivoCidadao, setArquivoCidadao] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -68,15 +71,39 @@ function Painel() {
 
   const handleEnviarRecurso = async (e) => {
     e.preventDefault();
-    setRecursoErro(''); setRecursoSucesso('');
+    setRecursoErro(''); 
+    setRecursoSucesso('');
+
+    if (!arquivoCidadao) {
+      setRecursoErro('Por favor, anexe o formulário preenchido.');
+      return;
+    }
+
     try {
-      const response = await api.post(`/servicos/infracoes/${multaSelecionada.id}/recurso`, {
-        justificativa: "Recurso anexado via formulário padrão."
-      });
+      const tokenValido = localStorage.getItem('token');
+
+      // Cria o pacote de envio com arquivo (FormData)
+      const formData = new FormData();
+      formData.append('arquivo_recurso', arquivoCidadao);
+
+      const response = await api.post(
+        `/servicos/infracoes/${multaSelecionada.id}/recurso`,
+        formData, // Envia o formData em vez de {}
+        {
+          headers: {
+            Authorization: `Bearer ${tokenValido}`,
+            'Content-Type': 'multipart/form-data' // Avisa que tem arquivo
+          }
+        }
+      );
+
       setRecursoSucesso(`Sucesso! Seu protocolo é: ${response.data.protocolo}`);
-      carregarDados();
+      setArquivoCidadao(null); // Limpa o arquivo
+      carregarDados(); 
+
     } catch (error) {
-      setRecursoErro(error.response?.data?.erro || 'Erro ao abrir recurso.');
+      console.error(error.response);
+      setRecursoErro(error.response?.data?.erro || 'Erro ao enviar recurso.');
     }
   };
 
@@ -317,34 +344,41 @@ function Painel() {
               <form onSubmit={handleEnviarRecurso} className="space-y-6">
                 
                 {/* Passo 1 */}
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 text-center">
-                  <p className="text-sm text-blue-800 font-medium mb-3">1º Passo: Baixe o requerimento padrão da JARI, imprima, preencha e assine.</p>
-                  <a href="/requerimento_jari_padrao.pdf" download className="inline-flex items-center gap-2 bg-white text-brand-blue border border-brand-blue font-bold px-4 py-2 rounded-lg text-sm hover:bg-brand-blue hover:text-white transition-colors shadow-sm">
-                    <Download className="w-4 h-4" /> Baixar Formulário
+                <div className="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                  <h4 className="font-bold text-brand-dark mb-2 text-sm">Passo a Passo para o Recurso:</h4>
+                  <ol className="text-sm text-gray-700 list-decimal ml-4 space-y-1 mb-4">
+                    <li>Baixe o formulário oficial abaixo.</li>
+                    <li>Preencha, assine e escaneie (ou tire uma foto nítida).</li>
+                    <li>Anexe o documento preenchido e envie.</li>
+                  </ol>
+                  
+                  {/* ESTE É O BOTÃO DE DOWNLOAD QUE PEGA O ARQUIVO DA PASTA PUBLIC */}
+                  <a 
+                    href={formularioPDF}
+                    download="Requerimento_JARI_SMTT.pdf" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-brand-blue font-bold hover:bg-gray-50 transition-colors text-sm shadow-sm"
+                  >
+                    <Download className="w-4 h-4" /> Baixar Formulário Padrão JARI
                   </a>
                 </div>
 
-                {/* Passo 2 */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">2º Passo: Anexe o requerimento assinado</label>
-                  <div className="relative">
-                    <input 
-                      type="file" 
-                      accept=".pdf,image/*"
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 border border-gray-200 rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-brand-blue transition-all"
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Aceita arquivos em PDF, JPG ou PNG.</p>
+                {/* Campo para anexar o arquivo (Futuramente ligaremos isso ao Supabase Storage) */}
+                <div className="mb-6">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Anexar Formulário Preenchido *</label>
+                  <input 
+                    type="file" 
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setArquivoCidadao(e.target.files[0])} // 👉 ADICIONE ISSO
+                    required 
+                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm" 
+                  />
                 </div>
-                
-                <div className="flex gap-3 pt-4 border-t border-gray-100">
-                  <button type="button" onClick={() => setModalAberto(false)} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">
-                    Cancelar
-                  </button>
-                  <button type="submit" className="flex-1 bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
-                    <Upload className="w-4 h-4" /> Enviar Defesa
-                  </button>
+
+                <div className="flex gap-3">
+                  <button onClick={() => setModalRecurso(false)} className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancelar</button>
+                  <button onClick={handleEnviarRecurso} className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors">Enviar Recurso</button>
                 </div>
               </form>
             )}

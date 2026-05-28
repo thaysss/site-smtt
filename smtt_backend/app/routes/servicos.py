@@ -110,26 +110,49 @@ def abrir_recurso(id):
     novo_protocolo = Protocolo(
         numero_protocolo=numero_protocolo,
         cidadao_id=cidadao_id,
+        tipo_servico='Recurso JARI',
         status='Em Análise'
     )
     db.session.add(novo_protocolo)
     db.session.flush() # Salva temporariamente para pegar o ID gerado
     
     # Cria o Recurso atrelado à multa e ao protocolo
+    import os
+    from werkzeug.utils import secure_filename
+    from flask import current_app
+
+    # Lógica para salvar o arquivo do cidadão
+    caminho_salvo = None
+    arquivo = request.files.get('arquivo_recurso') # Pega o arquivo do React
+    
+    if arquivo and arquivo.filename != '':
+        # Salva numa subpasta 'cidadao' para organizar
+        pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
+        os.makedirs(pasta_destino, exist_ok=True)
+        
+        nome_seguro = secure_filename(f"req_{numero_protocolo}_{arquivo.filename}")
+        caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
+        arquivo.save(caminho_arquivo)
+        
+        caminho_salvo = f"/static/uploads/cidadao/{nome_seguro}"
+
+    # Cria o Recurso vinculando o arquivo
     novo_recurso = RecursoMulta(
         auto_infracao_id=infracao.id,
         protocolo_id=novo_protocolo.id,
         tipo_recurso='Defesa Prévia',
-        resultado_julgamento='Em Análise'
+        resultado_julgamento='Em Análise',
+        arquivo_recurso_cidadao=caminho_salvo  # 👉 Grava o link no banco!
     )
+    
     db.session.add(novo_recurso)
     
-    # Atualiza o status da multa para o cidadão ver que está suspensa
-    infracao.fase_atual = 'Em Análise (JARI)'
+    # Atualiza a fase da infração (Mantenha o seu código)
+    infracao.fase_atual = 'Em Recurso'
     
     db.session.commit()
-    
+
     return jsonify({
-        "mensagem": "Recurso enviado com sucesso!", 
+        "mensagem": "Recurso enviado com sucesso!",
         "protocolo": numero_protocolo
     }), 201
