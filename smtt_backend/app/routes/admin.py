@@ -120,6 +120,12 @@ def julgar_recurso(id):
     if recurso.protocolo:
         recurso.protocolo.status = 'Concluído'
         
+    if recurso.infracao:
+        if decisao == 'Deferido':
+            recurso.infracao.fase_atual = 'Defesa Deferida (Cancelada)'
+        elif decisao == 'Indeferido':
+            recurso.infracao.fase_atual = 'Defesa Indeferida'
+            
     db.session.commit()
     
     return jsonify({"mensagem": "Julgamento e anexos registrados com sucesso!"}), 200
