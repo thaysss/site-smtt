@@ -10,6 +10,13 @@ import {
 import formularioPDF from '../assets/formulario_jari.pdf'; 
 
 
+const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
+const montarUrlArquivo = (caminho) => {
+  if (!caminho) return '';
+  if (/^https?:\/\//i.test(caminho)) return caminho;
+  return `${apiBaseUrl}${caminho}`;
+};
+
 function Painel() {
   const [veiculos, setVeiculos] = useState([]);
   const [multas, setMultas] = useState([]);
@@ -26,6 +33,7 @@ function Painel() {
   const [multaSelecionada, setMultaSelecionada] = useState(null);
   const [recursoSucesso, setRecursoSucesso] = useState('');
   const [recursoErro, setRecursoErro] = useState('');
+  const [tipoRecurso, setTipoRecurso] = useState('Defesa Prévia');
 
   const navigate = useNavigate();
   const nomeUsuario = localStorage.getItem('nomeUsuario');
@@ -85,6 +93,7 @@ function Painel() {
       // Cria o pacote de envio com arquivo (FormData)
       const formData = new FormData();
       formData.append('arquivo_recurso', arquivoCidadao);
+      formData.append('tipo_recurso', tipoRecurso);
 
       const response = await api.post(
         `/servicos/infracoes/${multaSelecionada.id}/recurso`,
@@ -99,6 +108,7 @@ function Painel() {
 
       setRecursoSucesso(`Sucesso! Seu protocolo é: ${response.data.protocolo}`);
       setArquivoCidadao(null); // Limpa o arquivo
+      setTipoRecurso('Defesa Prévia');
       carregarDados(); 
 
     } catch (error) {
@@ -266,43 +276,97 @@ function Painel() {
                     
                     {/* Cabeçalho do Card da Multa */}
                     <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex flex-wrap justify-between items-center gap-2">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <span className="bg-brand-dark text-accent-yellow font-bold text-xs px-2 py-1 rounded uppercase tracking-wider">{multa.placa_veiculo}</span>
                         <span className="text-sm font-bold text-gray-700">{multa.numero_ait}</span>
+                        {multa.recurso?.protocolo && (
+                          <span className="text-xs font-mono font-bold bg-blue-50 text-brand-blue border border-blue-200 px-2 py-0.5 rounded">
+                            Protocolo: {multa.recurso.protocolo}
+                          </span>
+                        )}
                       </div>
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full border ${multa.fase_atual.includes('Análise') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                        multa.fase_atual.includes('Cancelada') || multa.fase_atual.includes('Deferida')
+                          ? 'bg-green-50 text-green-700 border-green-200'
+                          : multa.fase_atual.includes('Análise') || multa.fase_atual.includes('Recurso')
+                          ? 'bg-blue-50 text-blue-700 border-blue-200'
+                          : 'bg-red-50 text-red-700 border-red-200'
+                      }`}>
                         {multa.fase_atual}
                       </span>
                     </div>
                     
                     {/* Corpo do Card da Multa */}
-                    <div className="p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-800"><strong className="text-gray-500">Data:</strong> {multa.data_hora_infracao}</p>
-                        <p className="text-sm text-gray-800"><strong className="text-gray-500">Local:</strong> {multa.local_cometimento}</p>
-                        <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
-                      </div>
-                      
-                      {/* Ações */}
-                      <div className="w-full md:w-auto">
-                        {!multa.fase_atual.includes('Análise') && !multa.fase_atual.includes('Cancelada') && (
-                          <button 
-                            onClick={() => { setMultaSelecionada(multa); setModalAberto(true); setRecursoSucesso(''); setRecursoErro(''); }}
-                            className="w-full md:w-auto bg-accent-yellow hover:bg-accent-hover text-brand-dark font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-                          >
-                            <FileText className="w-4 h-4" /> Recorrer (JARI)
-                          </button>
-                        )}
+                    <div className="p-5">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-800"><strong className="text-gray-500">Data:</strong> {multa.data_hora_infracao}</p>
+                          <p className="text-sm text-gray-800"><strong className="text-gray-500">Local:</strong> {multa.local_cometimento}</p>
+                          <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
+                        </div>
+                        
+                        {/* Ações */}
+                        <div className="w-full md:w-auto">
+                          {!multa.recurso && !multa.fase_atual.includes('Cancelada') && !multa.fase_atual.includes('Deferida') && (
+                            <button 
+                              onClick={() => { setMultaSelecionada(multa); setModalAberto(true); setRecursoSucesso(''); setRecursoErro(''); setTipoRecurso('Defesa Prévia'); }}
+                              className="w-full md:w-auto bg-accent-yellow hover:bg-accent-hover text-brand-dark font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                            >
+                              <FileText className="w-4 h-4" /> Recorrer (JARI)
+                            </button>
+                          )}
 
-                        {multa.fase_atual.includes('Análise') && (
-                          <button 
-                            onClick={() => gerarPDF(multa)}
-                            className="w-full md:w-auto bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-                          >
-                            <Download className="w-4 h-4" /> Baixar PDF
-                          </button>
-                        )}
+                          {(multa.recurso || multa.fase_atual.includes('Análise') || multa.fase_atual.includes('Recurso')) && (
+                            <button 
+                              onClick={() => gerarPDF(multa)}
+                              className="w-full md:w-auto bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Download className="w-4 h-4" /> Baixar PDF
+                            </button>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Caixa de detalhes do recurso aberto e resposta da JARI */}
+                      {multa.recurso && (
+                        <div className="mt-5 p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3 relative overflow-hidden text-left">
+                          <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-blue"></div>
+                          
+                          <div className="flex flex-wrap justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-wider pl-2">
+                            <span>Protocolo: <span className="text-brand-blue font-mono font-bold">{multa.recurso.protocolo}</span></span>
+                            <span>Tipo: <span className="text-gray-700">{multa.recurso.tipo_recurso}</span></span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-sm pl-2">
+                            <span className="font-bold text-gray-600">Resultado:</span>
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                              multa.recurso.resultado_julgamento === 'Deferido' ? 'bg-green-50 text-green-700 border-green-200' :
+                              multa.recurso.resultado_julgamento === 'Indeferido' ? 'bg-red-50 text-red-700 border-red-200' :
+                              'bg-yellow-50 text-yellow-700 border-yellow-200'
+                            }`}>
+                              {multa.recurso.resultado_julgamento}
+                            </span>
+                          </div>
+
+                          {multa.recurso.resultado_julgamento !== 'Em Análise' && multa.recurso.justificativa_julgamento && (
+                            <div className="text-sm text-gray-700 bg-white p-4 rounded-xl border border-gray-200 mt-2 pl-4">
+                              <strong className="text-xs uppercase tracking-wider text-gray-400 block mb-1">Parecer Oficial da Junta (JARI):</strong>
+                              <p className="italic leading-relaxed text-gray-800">"{multa.recurso.justificativa_julgamento}"</p>
+                              
+                              {multa.recurso.anexo_resposta_jari && (
+                                <a 
+                                  href={montarUrlArquivo(multa.recurso.anexo_resposta_jari)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-brand-blue font-bold rounded-lg hover:bg-blue-100 transition-colors text-xs mt-3 shadow-sm"
+                                >
+                                  <Download className="w-3.5 h-3.5" /> Baixar Resposta Oficial JARI
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                   </div>
@@ -364,6 +428,20 @@ function Painel() {
                   </a>
                 </div>
 
+                {/* Campo para escolher o tipo de recurso */}
+                <div className="mb-5">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Tipo de Recurso *</label>
+                  <select
+                    value={tipoRecurso}
+                    onChange={(e) => setTipoRecurso(e.target.value)}
+                    required
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-brand-blue outline-none transition-all cursor-pointer"
+                  >
+                    <option value="Defesa Prévia">Defesa Prévia</option>
+                    <option value="Recurso JARI">Recurso JARI</option>
+                  </select>
+                </div>
+
                 {/* Campo para anexar o arquivo (Futuramente ligaremos isso ao Supabase Storage) */}
                 <div className="mb-6">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Anexar Formulário Preenchido *</label>
@@ -377,8 +455,8 @@ function Painel() {
                 </div>
 
                 <div className="flex gap-3">
-                  <button onClick={() => setModalRecurso(false)} className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancelar</button>
-                  <button onClick={handleEnviarRecurso} className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors">Enviar Recurso</button>
+                  <button type="button" onClick={() => setModalAberto(false)} className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancelar</button>
+                  <button type="submit" className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors">Enviar Recurso</button>
                 </div>
               </form>
             )}

@@ -7,6 +7,13 @@ import {
   Car, AlertTriangle, CheckCircle, XCircle, FileText, Paperclip, Upload
 } from 'lucide-react';
 
+const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
+const montarUrlArquivo = (caminho) => {
+  if (!caminho) return '';
+  if (/^https?:\/\//i.test(caminho)) return caminho;
+  return `${apiBaseUrl}${caminho}`;
+};
+
 function AdminPainel() {
   const [recursos, setRecursos] = useState([]);
   const [mensagem, setMensagem] = useState('');
@@ -45,11 +52,17 @@ function AdminPainel() {
     }
     
     try {
-      // Nota de Integração: No futuro, para enviar arquivos reais ao Python, 
-      // precisaremos usar o FormData() em vez de JSON. Por enquanto, enviamos a justificativa.
-      await api.put(`/admin/recursos/${id}/julgar`, {
-        decisao: decisao,
-        justificativa_jari: justificativaJari
+      const formData = new FormData();
+      formData.append('decisao', decisao);
+      formData.append('justificativa_jari', justificativaJari);
+      if (arquivoResposta) {
+        formData.append('arquivo_resposta', arquivoResposta);
+      }
+
+      await api.put(`/admin/recursos/${id}/julgar`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
       
       setMensagem(`Recurso ${decisao} com sucesso! O cidadão já pode ver a resposta.`);
@@ -57,7 +70,7 @@ function AdminPainel() {
       setArquivoResposta(null); // Limpa o arquivo selecionado
       setRecursoFoco(null);
       carregarRecursos();
-    } catch (error) {
+    } catch {
       alert("Erro ao julgar recurso.");
     }
   };
@@ -138,12 +151,16 @@ function AdminPainel() {
                   <div className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
                     <p className="text-sm text-gray-700 italic mb-3">"Recurso anexado via formulário padrão."</p>
                     
-                    {/* 👉 OLHE O 'rec.' AQUI NO HREF 👇 */}
                     <a 
-                      href={rec.arquivo_recurso_cidadao ? `http://127.0.0.1:5000${rec.arquivo_recurso_cidadao}` : "#"}
+                      href={rec.arquivo_recurso_cidadao ? montarUrlArquivo(rec.arquivo_recurso_cidadao) : undefined}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-bold text-brand-blue bg-blue-50 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200"
+                      aria-disabled={!rec.arquivo_recurso_cidadao}
+                      className={`inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-lg transition-colors border ${
+                        rec.arquivo_recurso_cidadao
+                          ? 'text-brand-blue bg-blue-50 hover:bg-blue-100 border-blue-200'
+                          : 'text-gray-400 bg-gray-100 border-gray-200 pointer-events-none'
+                      }`}
                     >
                       <Paperclip className="w-4 h-4" /> Visualizar Anexo do Cidadão
                     </a>

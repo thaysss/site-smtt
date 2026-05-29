@@ -81,6 +81,20 @@ def listar_minhas_infracoes():
     
     lista = []
     for inf in infracoes:
+        # Busca se há um recurso associado a esta infração, priorizando o mais recente
+        recurso = RecursoMulta.query.filter_by(auto_infracao_id=inf.id).order_by(RecursoMulta.id.desc()).first()
+        recurso_info = None
+        if recurso:
+            recurso_info = {
+                "id": recurso.id,
+                "tipo_recurso": recurso.tipo_recurso,
+                "protocolo": recurso.protocolo.numero_protocolo if recurso.protocolo else None,
+                "resultado_julgamento": recurso.resultado_julgamento,
+                "justificativa_julgamento": recurso.justificativa_julgamento,
+                "anexo_resposta_jari": recurso.anexo_resposta_jari,
+                "data_julgamento": recurso.data_julgamento.strftime("%d/%m/%Y") if recurso.data_julgamento else None
+            }
+
         lista.append({
             "id": inf.id,
             "numero_ait": inf.numero_ait,
@@ -88,7 +102,8 @@ def listar_minhas_infracoes():
             "data_hora_infracao": inf.data_hora_infracao.strftime("%d/%m/%Y %H:%M"),
             "local_cometimento": inf.local_cometimento,
             "valor_final": f"{inf.valor_final:.2f}",
-            "fase_atual": inf.fase_atual
+            "fase_atual": inf.fase_atual,
+            "recurso": recurso_info
         })
         
     return jsonify(lista), 200
@@ -136,19 +151,22 @@ def abrir_recurso(id):
         
         caminho_salvo = f"/static/uploads/cidadao/{nome_seguro}"
 
+    # Captura o tipo de recurso enviado pelo cidadão
+    tipo_recurso = request.form.get('tipo_recurso', 'Defesa Prévia')
+
     # Cria o Recurso vinculando o arquivo
     novo_recurso = RecursoMulta(
         auto_infracao_id=infracao.id,
         protocolo_id=novo_protocolo.id,
-        tipo_recurso='Defesa Prévia',
+        tipo_recurso=tipo_recurso,
         resultado_julgamento='Em Análise',
         arquivo_recurso_cidadao=caminho_salvo  # 👉 Grava o link no banco!
     )
     
     db.session.add(novo_recurso)
     
-    # Atualiza a fase da infração (Mantenha o seu código)
-    infracao.fase_atual = 'Em Recurso'
+    # Atualiza a fase da infração dinamicamente
+    infracao.fase_atual = f"Em Análise ({tipo_recurso})"
     
     db.session.commit()
 
