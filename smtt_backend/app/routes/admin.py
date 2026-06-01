@@ -34,7 +34,7 @@ def registrar_infracao():
             descricao=dados.get('descricao_infracao', 'Descrição não informada'),
             gravidade=dados.get('gravidade', 'Média'),
             pontos=int(dados.get('pontos', 4)),
-            valor_base=float(dados.get('valor_final', 130.16))
+            valor_base=float(dados.get('valor_final', 0.00))
         )
         db.session.add(tipo_infracao)
         db.session.flush()
@@ -55,7 +55,7 @@ def registrar_infracao():
         veiculo_id=veiculo.id, 
         data_hora_infracao=data_hora_infracao,
         local_cometimento=dados.get('local_cometimento', 'Local não informado'),
-        valor_final=dados.get('valor_final', 130.16),
+        valor_final=dados.get('valor_final', 0.00),
         codigo_infracao=codigo_ctb,
         data_vencimento_defesa=data_vencimento
     )
@@ -80,7 +80,10 @@ def listar_recursos():
     for r in recursos:
         resultado.append({
             "id": r.id,
+            "tipo_recurso": r.tipo_recurso,
             "resultado_julgamento": r.resultado_julgamento,
+            "arquivo_recurso_cidadao": r.arquivo_recurso_cidadao,
+            "anexos": [{"caminho_arquivo": a.caminho_arquivo, "nome_original": a.nome_original} for a in r.anexos],
             "protocolo": {"numero_protocolo": r.protocolo.numero_protocolo} if r.protocolo else {},
             "infracao": {
                 "numero_ait": r.infracao.numero_ait if r.infracao else "N/A",

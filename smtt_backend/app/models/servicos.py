@@ -69,7 +69,18 @@ class RecursoMulta(db.Model):
     infracao = db.relationship('AutoInfracao', backref='recurso_jari', lazy=True)
     anexo_resposta_jari = db.Column(db.String(255), nullable=True)
     arquivo_recurso_cidadao = db.Column(db.String(255), nullable=True)
+
+class RecursoAnexo(db.Model):
+    __tablename__ = 'recursos_anexos'
     
+    id = db.Column(db.Integer, primary_key=True)
+    recurso_id = db.Column(db.Integer, db.ForeignKey('recursos_multas.id'), nullable=False)
+    caminho_arquivo = db.Column(db.String(255), nullable=False)
+    nome_original = db.Column(db.String(150), nullable=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    recurso = db.relationship('RecursoMulta', backref=db.backref('anexos', lazy=True, cascade="all, delete-orphan"))
+
 # Adicione em app/models/servicos.py
 class TipoInfracaoCTB(db.Model):
     __tablename__ = 'tipos_infracao_ctb'

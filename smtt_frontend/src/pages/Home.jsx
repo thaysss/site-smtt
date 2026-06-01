@@ -113,7 +113,7 @@ function Home() {
                 </button>
               </li>
               <li><a href="#noticias" className="px-4 py-2 font-sora text-sm font-semibold text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md transition-colors">Notícias</a></li>
-              <li><button onClick={() => navigate('/consultar')} className="px-4 py-2 font-sora text-sm font-semibold text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md transition-colors">Protocolos JARI</button></li>
+              <li><button onClick={() => navigate('/consultar')} className="px-4 py-2 font-sora text-sm font-semibold text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md transition-colors">Consultar Protocolos </button></li>
             </ul>
           </nav>
 
@@ -196,7 +196,7 @@ function Home() {
             <div className="w-12 h-12 bg-blue-100 text-brand-blue rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"><FileText /></div>
             <div>
               <h3 className="font-sora font-bold text-gray-800 text-sm">Consultar Protocolo</h3>
-              <p className="text-xs text-gray-500 mt-1">Acompanhe recursos JARI</p>
+              <p className="text-xs text-gray-500 mt-1">Acompanhe o andamento dos recursos</p>
             </div>
           </div>
           <div className="flex-1 p-6 flex items-center gap-4 hover:bg-orange-50 transition-colors border-r border-gray-100 group cursor-pointer" onClick={() => navigate('/login')}>
@@ -338,7 +338,7 @@ function Home() {
             <div>
               <h4 className="text-white font-sora font-bold mb-6 text-sm uppercase tracking-wider">Sede Central</h4>
               <address className="not-italic text-gray-400 text-sm space-y-4">
-                <p className="flex items-start gap-3"><MapPin className="w-5 h-5 text-accent-yellow" /> Centro - Propriá/SE</p>
+                <p className="flex items-start gap-3"><MapPin className="w-5 h-5 text-accent-yellow" /> Avenida João Barbosa Pôrto, 1829 - Propriá/SE</p>
                 <p className="flex items-center gap-3"><PhoneCall className="w-5 h-5 text-accent-yellow" /> (79) 3000-0000</p>
               </address>
             </div>
