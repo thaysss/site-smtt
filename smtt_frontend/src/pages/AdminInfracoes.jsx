@@ -11,12 +11,12 @@ function AdminInfracoes() {
   const [placa, setPlaca] = useState('');
   const [dataHora, setDataHora] = useState('');
   const [local, setLocal] = useState('');
-  const [valor, setValor] = useState('130.16');
+  const [valor, setValor] = useState('0.00');
   
   const [codigoInfracao, setCodigoInfracao] = useState('');
   const [descricaoInfracao, setDescricaoInfracao] = useState('');
   const [gravidade, setGravidade] = useState('Média');
-  const [pontos, setPontos] = useState('4');
+  const [pontos, setPontos] = useState('0');
   const [vencimentoDefesa, setVencimentoDefesa] = useState('');
 
   const [mensagem, setMensagem] = useState('');

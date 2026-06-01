@@ -7,7 +7,7 @@ import {
   Building2, LogOut, Car, AlertCircle, FileText, Download, 
   Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X 
 } from 'lucide-react';
-import formularioPDF from '../assets/formulario_jari.pdf'; 
+import formularioPDF from '../assets/formulario_jari1.pdf'; 
 
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
@@ -34,6 +34,8 @@ function Painel() {
   const [recursoSucesso, setRecursoSucesso] = useState('');
   const [recursoErro, setRecursoErro] = useState('');
   const [tipoRecurso, setTipoRecurso] = useState('Defesa Prévia');
+  const [abaAtiva, setAbaAtiva] = useState('formulario'); // 'formulario' ou 'anexos'
+  const [arquivosAdicionais, setArquivosAdicionais] = useState([]);
 
   const navigate = useNavigate();
   const nomeUsuario = localStorage.getItem('nomeUsuario');
@@ -95,20 +97,26 @@ function Painel() {
       formData.append('arquivo_recurso', arquivoCidadao);
       formData.append('tipo_recurso', tipoRecurso);
 
+      // Anexar múltiplos arquivos adicionais
+      arquivosAdicionais.forEach(file => {
+        formData.append('arquivos', file);
+      });
+
       const response = await api.post(
         `/servicos/infracoes/${multaSelecionada.id}/recurso`,
-        formData, // Envia o formData em vez de {}
+        formData, // Envia o formData
         {
           headers: {
-            Authorization: `Bearer ${tokenValido}`,
-            'Content-Type': 'multipart/form-data' // Avisa que tem arquivo
+            Authorization: `Bearer ${tokenValido}`
           }
         }
       );
 
       setRecursoSucesso(`Sucesso! Seu protocolo é: ${response.data.protocolo}`);
-      setArquivoCidadao(null); // Limpa o arquivo
+      setArquivoCidadao(null); // Limpa o arquivo principal
+      setArquivosAdicionais([]); // Limpa arquivos adicionais
       setTipoRecurso('Defesa Prévia');
+      setAbaAtiva('formulario');
       carregarDados(); 
 
     } catch (error) {
@@ -309,10 +317,18 @@ function Painel() {
                         <div className="w-full md:w-auto">
                           {!multa.recurso && !multa.fase_atual.includes('Cancelada') && !multa.fase_atual.includes('Deferida') && (
                             <button 
-                              onClick={() => { setMultaSelecionada(multa); setModalAberto(true); setRecursoSucesso(''); setRecursoErro(''); setTipoRecurso('Defesa Prévia'); }}
+                              onClick={() => { 
+                                setMultaSelecionada(multa); 
+                                setModalAberto(true); 
+                                setRecursoSucesso(''); 
+                                setRecursoErro(''); 
+                                setTipoRecurso('Defesa Prévia'); 
+                                setAbaAtiva('formulario'); 
+                                setArquivosAdicionais([]); 
+                              }}
                               className="w-full md:w-auto bg-accent-yellow hover:bg-accent-hover text-brand-dark font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                             >
-                              <FileText className="w-4 h-4" /> Recorrer (JARI)
+                              <FileText className="w-4 h-4" /> Recorrer 
                             </button>
                           )}
 
@@ -392,6 +408,39 @@ function Painel() {
             </p>
 
             {recursoErro && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-100 flex items-center gap-2"><ShieldAlert className="w-4 h-4 shrink-0" />{recursoErro}</div>}
+
+            {/* Abas do Modal */}
+            {!recursoSucesso && (
+              <div className="flex border-b border-gray-200 mb-6">
+                <button
+                  type="button"
+                  onClick={() => setAbaAtiva('formulario')}
+                  className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
+                    abaAtiva === 'formulario'
+                      ? 'border-brand-blue text-brand-blue'
+                      : 'border-transparent text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  1. Dados do Recurso
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAbaAtiva('anexos')}
+                  className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all flex items-center justify-center gap-1.5 ${
+                    abaAtiva === 'anexos'
+                      ? 'border-brand-blue text-brand-blue'
+                      : 'border-transparent text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  2. Documentos Adicionais
+                  {arquivosAdicionais.length > 0 && (
+                    <span className="bg-brand-blue text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                      {arquivosAdicionais.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
             
             {recursoSucesso ? (
               <div className="text-center py-6">
@@ -407,57 +456,166 @@ function Painel() {
             ) : (
               <form onSubmit={handleEnviarRecurso} className="space-y-6">
                 
-                {/* Passo 1 */}
-                <div className="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
-                  <h4 className="font-bold text-brand-dark mb-2 text-sm">Passo a Passo para o Recurso:</h4>
-                  <ol className="text-sm text-gray-700 list-decimal ml-4 space-y-1 mb-4">
-                    <li>Baixe o formulário oficial abaixo.</li>
-                    <li>Preencha, assine e escaneie (ou tire uma foto nítida).</li>
-                    <li>Anexe o documento preenchido e envie.</li>
-                  </ol>
-                  
-                  {/* ESTE É O BOTÃO DE DOWNLOAD QUE PEGA O ARQUIVO DA PASTA PUBLIC */}
-                  <a 
-                    href={formularioPDF}
-                    download="Requerimento_JARI_SMTT.pdf" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-brand-blue font-bold hover:bg-gray-50 transition-colors text-sm shadow-sm"
-                  >
-                    <Download className="w-4 h-4" /> Baixar Formulário Padrão JARI
-                  </a>
-                </div>
+                {abaAtiva === 'formulario' && (
+                  <div className="space-y-6">
+                    {/* Passo a Passo */}
+                    <div className="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                      <h4 className="font-bold text-brand-dark mb-2 text-sm">Passo a Passo para o Recurso:</h4>
+                      <ol className="text-sm text-gray-700 list-decimal ml-4 space-y-1 mb-4">
+                        <li>Baixe o formulário oficial abaixo.</li>
+                        <li>Preencha, assine e escaneie (ou tire uma foto nítida).</li>
+                        <li>Anexe o documento preenchido e envie.</li>
+                      </ol>
+                      
+                      <a 
+                        href={formularioPDF}
+                        download="Requerimento_JARI_SMTT.pdf" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-brand-blue font-bold hover:bg-gray-50 transition-colors text-sm shadow-sm"
+                      >
+                        <Download className="w-4 h-4" /> Baixar Formulário de Requerimento Único 
+                      </a>
+                    </div>
 
-                {/* Campo para escolher o tipo de recurso */}
-                <div className="mb-5">
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Tipo de Recurso *</label>
-                  <select
-                    value={tipoRecurso}
-                    onChange={(e) => setTipoRecurso(e.target.value)}
-                    required
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-brand-blue outline-none transition-all cursor-pointer"
-                  >
-                    <option value="Defesa Prévia">Defesa Prévia</option>
-                    <option value="Recurso JARI">Recurso JARI</option>
-                  </select>
-                </div>
+                    {/* Campo para escolher o tipo de recurso */}
+                    <div className="mb-5">
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Tipo de Recurso *</label>
+                      <select
+                        value={tipoRecurso}
+                        onChange={(e) => setTipoRecurso(e.target.value)}
+                        required
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-brand-blue outline-none transition-all cursor-pointer"
+                      >
+                        <option value="Defesa Prévia">Defesa Prévia</option>
+                        <option value="Recurso JARI">Recurso JARI</option>
+                        <option value="Indicação de Real Infrator">Indicação de Real Infrator</option>
+                      </select>
+                    </div>
 
-                {/* Campo para anexar o arquivo (Futuramente ligaremos isso ao Supabase Storage) */}
-                <div className="mb-6">
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Anexar Formulário Preenchido *</label>
-                  <input 
-                    type="file" 
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setArquivoCidadao(e.target.files[0])} // 👉 ADICIONE ISSO
-                    required 
-                    className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm" 
-                  />
-                </div>
+                    {/* Campo para anexar o arquivo principal */}
+                    <div className="mb-6">
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Anexar Formulário Preenchido *</label>
+                      <input 
+                        type="file" 
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => setArquivoCidadao(e.target.files[0])}
+                        required 
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-pointer" 
+                      />
+                      {arquivoCidadao && (
+                        <p className="text-xs text-green-600 font-bold mt-1.5 flex items-center gap-1">
+                          <CheckCircle className="w-3.5 h-3.5" /> Arquivo selecionado: {arquivoCidadao.name}
+                        </p>
+                      )}
+                    </div>
 
-                <div className="flex gap-3">
-                  <button type="button" onClick={() => setModalAberto(false)} className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancelar</button>
-                  <button type="submit" className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors">Enviar Recurso</button>
-                </div>
+                    <div className="flex gap-3 pt-2">
+                      <button type="button" onClick={() => setModalAberto(false)} className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancelar</button>
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          if (!arquivoCidadao) {
+                            setRecursoErro('Por favor, anexe o formulário principal antes de prosseguir.');
+                            return;
+                          }
+                          setRecursoErro('');
+                          setAbaAtiva('anexos');
+                        }}
+                        className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors"
+                      >
+                        Continuar (Anexos)
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {abaAtiva === 'anexos' && (
+                  <div className="space-y-6">
+                    {/* Checklist Baseado no PDF */}
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                      <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500 mb-2.5">📋 Documentação Recomendada (PDF)</h4>
+                      <ul className="text-xs text-gray-600 space-y-2">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                          <span><strong>Identificação:</strong> Cópia da CNH ou RG com assinatura legível.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                          <span><strong>Veículo:</strong> Cópia legível do CRLV do veículo.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                          <span><strong>Infração:</strong> Cópia da Notificação de Autuação / Penalidade.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span><strong>Provas adicionais:</strong> Fotos de placas de sinalização, radares, ou procuração (se for o caso).</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Campo para escolher múltiplos arquivos adicionais */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                        <Upload className="w-3.5 h-3.5 text-gray-500" /> Selecionar Arquivos Adicionais
+                      </label>
+                      <input 
+                        type="file" 
+                        multiple
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          const novos = Array.from(e.target.files);
+                          setArquivosAdicionais(prev => [...prev, ...novos]);
+                        }}
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-pointer" 
+                      />
+                    </div>
+
+                    {/* Lista de Arquivos Selecionados */}
+                    {arquivosAdicionais.length > 0 && (
+                      <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                        <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Arquivos Selecionados ({arquivosAdicionais.length})</h5>
+                        {arquivosAdicionais.map((file, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl border border-gray-200 hover:border-red-200 transition-colors">
+                            <span className="flex items-center gap-2 text-xs font-semibold text-gray-700 truncate max-w-[280px]">
+                              <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+                              {file.name}
+                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] font-bold text-gray-400">
+                                {(file.size / 1024).toFixed(0)} KB
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setArquivosAdicionais(prev => prev.filter((_, i) => i !== idx))}
+                                className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex gap-3 pt-2">
+                      <button 
+                        type="button" 
+                        onClick={() => setAbaAtiva('formulario')} 
+                        className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors border border-gray-200"
+                      >
+                        Voltar
+                      </button>
+                      <button 
+                        type="submit" 
+                        className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors"
+                      >
+                        Enviar Recurso
+                      </button>
+                    </div>
+                  </div>
+                )}
               </form>
             )}
           </div>

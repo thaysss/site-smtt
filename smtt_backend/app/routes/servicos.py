@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
-from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo
+from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, RecursoAnexo
 import random
 from datetime import datetime
 
@@ -118,8 +118,12 @@ def abrir_recurso(id):
     cidadao_id = get_jwt_identity()
     infracao = AutoInfracao.query.get_or_404(id)
     
-    # Gera um número de protocolo único (Ex: JARI202605271234)
-    numero_protocolo = f"JARI{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
+    print("DEBUG ABRIR RECURSO:")
+    print("request.files:", request.files)
+    print("request.form:", request.form)
+    
+    # Gera um número de protocolo único (Ex: REC202605271234)
+    numero_protocolo = f"REC{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
     
     # Cria o Protocolo Base
     novo_protocolo = Protocolo(
@@ -162,8 +166,32 @@ def abrir_recurso(id):
         resultado_julgamento='Em Análise',
         arquivo_recurso_cidadao=caminho_salvo  # 👉 Grava o link no banco!
     )
-    
     db.session.add(novo_recurso)
+    db.session.flush() # Sincroniza para obter o ID do recurso para os anexos
+
+    # Lógica para salvar múltiplos arquivos adicionais
+    arquivos_adicionais = []
+    for key in request.files:
+        if key.startswith('arquivos'):
+            arquivos_adicionais.extend(request.files.getlist(key))
+            
+    pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
+    os.makedirs(pasta_destino, exist_ok=True)
+
+    for idx, arq in enumerate(arquivos_adicionais):
+        if arq and arq.filename != '':
+            nome_seguro_anexo = secure_filename(f"anexo_{numero_protocolo}_{idx}_{arq.filename}")
+            caminho_anexo = os.path.join(pasta_destino, nome_seguro_anexo)
+            arq.save(caminho_anexo)
+            
+            caminho_salvo_anexo = f"/static/uploads/cidadao/{nome_seguro_anexo}"
+            
+            novo_anexo = RecursoAnexo(
+                recurso_id=novo_recurso.id,
+                caminho_arquivo=caminho_salvo_anexo,
+                nome_original=arq.filename
+            )
+            db.session.add(novo_anexo)
     
     # Atualiza a fase da infração dinamicamente
     infracao.fase_atual = f"Em Análise ({tipo_recurso})"
