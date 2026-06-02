@@ -1,6 +1,6 @@
 // src/pages/Login.jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { Building2, ArrowLeft, User, Lock, Mail, Phone, MapPin, FileDigit } from 'lucide-react';
 
@@ -15,6 +15,15 @@ function Login() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.mensagem) {
+      setErro(location.state.mensagem);
+      // Limpa o state para não reexibir ao recarregar a página
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

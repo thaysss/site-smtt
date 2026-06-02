@@ -61,7 +61,7 @@ function Painel() {
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       if (error.response?.status === 401) {
-        handleLogout();
+        handleLogout('Sua sessão expirou. Por favor, faça login novamente.');
       }
     }
   };
@@ -126,42 +126,265 @@ function Painel() {
   };
 
   const gerarPDF = (multa) => {
+    const isNIP = !!multa.linha_digitavel;
+    const documentTitle = isNIP ? 'NOTIFICAÇÃO DA IMPOSIÇÃO DE PENALIDADE - NIP' : 'NOTIFICAÇÃO DA AUTUAÇÃO DE INFRAÇÃO DE TRÂNSITO - NAIT';
+    const docNumberLabel = isNIP ? 'Nº da NIP' : 'Nº da NAIT';
+    const docNumberValue = isNIP ? (multa.numero_nip || '7003190223') : (multa.numero_nait || '7003209824');
+    const valorNominal = multa.valor_final || '0.00';
+    const valorDesconto = (parseFloat(valorNominal) * 0.8).toFixed(2);
+
     const elemento = document.createElement('div');
     elemento.innerHTML = `
-      <div style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;">
-        <div style="border-bottom: 3px solid #003399; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
-          <div>
-            <h1 style="color: #003399; margin: 0; font-size: 24px;">SMTT Digital</h1>
-            <p style="margin: 5px 0 0 0; color: #555; font-size: 14px;">Secretaria Municipal de Trânsito e Transporte - Propriá/SE</p>
-          </div>
-          <div style="text-align: right; font-size: 12px; color: #888;">
-            Emissão: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
-          </div>
-        </div>
+      <div style="padding: 15px; font-family: Arial, sans-serif; color: #111; font-size: 11px; max-width: 800px; margin: auto; border: 1px solid #ccc; background-color: #fff;">
         
-        <div style="background-color: #f8f9fa; border: 1px dashed #ccc; padding: 20px; text-align: center; margin-bottom: 30px; border-radius: 8px;">
-          <h2 style="margin: 0; color: #003399; font-size: 18px; text-transform: uppercase;">Comprovante de Abertura de Recurso</h2>
-          <p style="margin: 10px 0 0 0; font-size: 16px;">Auto de Infração: <strong>${multa.numero_ait}</strong></p>
+        <!-- CABEÇALHO -->
+        <div style="display: flex; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 12px; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #003399; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">SMTT</div>
+            <div>
+              <h2 style="margin: 0; color: #003399; font-size: 11px; font-weight: bold; text-transform: uppercase;">Secretaria Municipal de Trânsito e Transporte</h2>
+              <p style="margin: 1px 0 0 0; color: #555; font-size: 9px; font-weight: bold;">SMTT PROPRIA - PROPRIÁ/SE</p>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-weight: bold; font-size: 10px; color: #333; display: block; text-transform: uppercase;">${documentTitle}</span>
+            <span style="font-size: 8px; color: #666;">Documento Eletrônico Oficial</span>
+          </div>
         </div>
 
-        <h3 style="color: #003399; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 16px;">Detalhes do Processo</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
-          <tr><td style="padding: 12px 0; border-bottom: 1px solid #eee; width: 30%; color: #666;"><strong>Requerente:</strong></td> <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #111;">${nomeUsuario}</td></tr>
-          <tr><td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Data da Infração:</strong></td> <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #111;">${multa.data_hora_infracao}</td></tr>
-          <tr><td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Local:</strong></td> <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #111;">${multa.local_cometimento}</td></tr>
-          <tr><td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Status Atual:</strong></td> <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #003399;"><b>${multa.fase_atual}</b></td></tr>
-          <tr><td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Efeito Suspensivo:</strong></td> <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #111;">Ativo (Cobrança suspensa)</td></tr>
-        </table>
+        <!-- DADOS DA INFRAÇÃO -->
+        <div style="border: 1px solid #333; margin-bottom: 12px; border-radius: 4px; overflow: hidden;">
+          <div style="background-color: #333; color: white; padding: 4px 8px; font-weight: bold; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;">Dados da Infração</div>
+          <div style="padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; border-bottom: 1px solid #eee;">
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Órgão Autuador:</strong>
+              <span>SMTT PROPRIA</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Código Órgão Autuador:</strong>
+              <span>0232130</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Placa/UF:</strong>
+              <span style="font-weight: bold; text-transform: uppercase;">${multa.placa_veiculo || 'N/A'}/SE</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Nº do Auto (AIT):</strong>
+              <span style="font-weight: bold; color: #d32f2f;">${multa.numero_ait}</span>
+            </div>
+          </div>
 
-        <div style="margin-top: 40px; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; font-size: 12px; color: #856404;">
-          <strong>Informação Importante:</strong> O andamento deste processo pode ser acompanhado consultando o número do protocolo na tela inicial do portal da SMTT Digital.
+          <div style="padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; border-bottom: 1px solid #eee; background-color: #fafafa;">
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Ano Fabricação:</strong>
+              <span>${multa.veiculo?.ano_fabricacao || '2016'}</span>
+            </div>
+            <div style="grid-column: span 2;">
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Marca/Modelo/Espécie:</strong>
+              <span style="text-transform: uppercase;">${multa.veiculo?.marca_modelo || 'RENAULT/OROCH 16 EXP42'}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Cor do Veículo:</strong>
+              <span style="text-transform: uppercase;">${multa.veiculo?.cor || 'CINZA'}</span>
+            </div>
+          </div>
+
+          <div style="padding: 6px; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 6px; border-bottom: 1px solid #eee;">
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Local do Cometimento:</strong>
+              <span style="text-transform: uppercase;">${multa.local_cometimento}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Data da Autuação:</strong>
+              <span>${multa.data_hora_infracao.split(' ')[0]}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Hora da Autuação:</strong>
+              <span>${multa.data_hora_infracao.split(' ')[1] || '00:00'}</span>
+            </div>
+          </div>
+
+          <div style="padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; border-bottom: 1px solid #eee; background-color: #fafafa;">
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Enquadramento (CTB):</strong>
+              <span>${multa.tipo_infracao?.amparo_legal || 'Art. 181, XVII'}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Cód. Infração / Desdobr.:</strong>
+              <span>${multa.tipo_infracao?.codigo_infracao || multa.codigo_infracao || '5541'} / ${multa.desdobramento || '1'}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Pontuação/Gravidade:</strong>
+              <span>${multa.tipo_infracao?.gravidade || 'Média'} (${multa.tipo_infracao?.pontos || '4'} Pts)</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Agente / Aparelho:</strong>
+              <span>${multa.agente_aparelho || '1170'}</span>
+            </div>
+          </div>
+
+          <div style="padding: 6px; border-bottom: 1px solid #eee;">
+            <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Descrição da Infração:</strong>
+            <span style="font-weight: bold; text-transform: uppercase; font-size: 9.5px;">${multa.tipo_infracao?.descricao || 'ESTACIONAR EM DESACORDO COM A REGULAMENTACAO ESPECIFICADA PELA SINALIZACAO'}</span>
+          </div>
+
+          <div style="padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background-color: #fafafa;">
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Medição Aferida:</strong>
+              <span>${multa.medicao_aferida || '0000.00 KM/H'}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Medição Considerada:</strong>
+              <span>${multa.medicao_considerada || '0000.00 KM/H'}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Velocidade Regulamentada:</strong>
+              <span>${multa.medicao_regulamentada || '0000.00 KM/H'}</span>
+            </div>
+            <div>
+              <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">${docNumberLabel}:</strong>
+              <span style="font-weight: bold;">${docNumberValue}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DADOS DE CONTROLE DE EMISSÃO -->
+        <div style="border: 1px solid #333; margin-bottom: 12px; border-radius: 4px; overflow: hidden; display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 6px; gap: 10px; background-color: #fcfcfc;">
+          <div>
+            <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Código RENAINF / INFRAEST:</strong>
+            <span>${multa.codigo_renainf || '0000000000'}</span>
+          </div>
+          <div>
+            <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Data de Expedição:</strong>
+            <span>${multa.data_expedicao || multa.data_hora_infracao.split(' ')[0]}</span>
+          </div>
+          <div>
+            <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Limite p/ Defesa/Recurso:</strong>
+            <span style="font-weight: bold; color: #d32f2f;">${multa.data_vencimento_defesa || 'A consultar'}</span>
+          </div>
+        </div>
+
+        <!-- SEÇÃO CONDICIONAL: NAIT OU NIP -->
+        ${!isNIP ? `
+          <div style="border: 1px solid #333; border-radius: 4px; overflow: hidden; margin-top: 20px;">
+            <div style="background-color: #333; color: white; padding: 4px 8px; font-weight: bold; font-size: 9px; text-transform: uppercase; text-align: center; letter-spacing: 0.5px;">FORMULÁRIO DE INDICAÇÃO DO REAL INFRATOR (DECLARAÇÃO DO REAL INFRATOR)</div>
+            <div style="padding: 8px; font-size: 8.5px; line-height: 1.4; color: #555; border-bottom: 1px solid #eee;">
+              Não sendo V.Sa. o responsável pela infração, ou sendo o veículo registrado em nome de pessoa jurídica, preencha o formulário abaixo informando o real condutor infrator no prazo legal estabelecido.
+            </div>
+            
+            <div style="padding: 8px; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; border-bottom: 1px solid #eee;">
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Nome Completo do Condutor:</strong>
+                <span style="color: #ccc;">____________________________________________________</span>
+              </div>
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Registro CNH:</strong>
+                <span style="color: #ccc;">_______________</span>
+              </div>
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">UF:</strong>
+                <span style="color: #ccc;">_____</span>
+              </div>
+            </div>
+
+            <div style="padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
+              <div style="padding-top: 10px;">
+                <div style="border-top: 1px solid #333; width: 85%; margin: auto; padding-top: 4px; font-size: 7.5px; font-weight: bold;">ASSINATURA DO CONDUTOR INDICADO</div>
+              </div>
+              <div style="padding-top: 10px;">
+                <div style="border-top: 1px solid #333; width: 85%; margin: auto; padding-top: 4px; font-size: 7.5px; font-weight: bold;">ASSINATURA DO PROPRIETÁRIO DO VEÍCULO</div>
+              </div>
+            </div>
+          </div>
+        ` : `
+          <!-- SEÇÃO BOLETO BANESE -->
+          <div style="border: 2px dashed #003399; margin-top: 25px; border-radius: 4px; overflow: hidden; background-color: #fff;">
+            <div style="background-color: #003399; color: white; padding: 6px 12px; font-weight: bold; font-size: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: bold; letter-spacing: 0.5px;">FICHA DE COMPENSAÇÃO DE MULTA - SMTT DIGITAL</span>
+              <span style="font-weight: bold; letter-spacing: 1px;">BANESE 037-2</span>
+            </div>
+
+            <div style="padding: 6px; border-bottom: 1px solid #999; display: grid; grid-template-columns: 3fr 1fr; gap: 8px;">
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Local de Pagamento:</strong>
+                <span style="font-size: 8.5px; font-weight: bold;">PAGÁVEL SOMENTE NAS AGÊNCIAS E CANAIS DE ARRECADAÇÃO DO BANESE</span>
+              </div>
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Vencimento:</strong>
+                <span style="font-size: 9.5px; font-weight: bold; color: #d32f2f;">${multa.data_vencimento_boleto ? new Date(multa.data_vencimento_boleto).toLocaleDateString('pt-BR') : multa.data_vencimento_defesa}</span>
+              </div>
+            </div>
+
+            <div style="padding: 6px; border-bottom: 1px solid #999; display: grid; grid-template-columns: 3fr 1fr; gap: 8px;">
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Beneficiário:</strong>
+                <span style="font-size: 8.5px; font-weight: bold;">SMTT PROPRIA - CNPJ: 13.001.002/0001-03</span>
+              </div>
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Nosso Número (Nº Documento):</strong>
+                <span style="font-size: 8.5px; font-weight: bold;">${multa.nosso_numero || '416162817'}</span>
+              </div>
+            </div>
+
+            <div style="padding: 6px; border-bottom: 1px solid #999; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background-color: #fafafa;">
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Data do Documento:</strong>
+                <span>${multa.data_expedicao || '26/05/2026'}</span>
+              </div>
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Número do Auto (AIT):</strong>
+                <span style="font-weight: bold;">${multa.numero_ait}</span>
+              </div>
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Espécie Moeda:</strong>
+                <span>REAL (R$)</span>
+              </div>
+              <div>
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Valor Nominal do Doc:</strong>
+                <span style="font-weight: bold; color: #d32f2f;">R$ ${valorNominal}</span>
+              </div>
+            </div>
+
+            <div style="padding: 6px; border-bottom: 1px solid #999; display: grid; grid-template-columns: 3fr 1fr; gap: 8px;">
+              <div style="font-size: 8px; line-height: 1.3; color: #555;">
+                <strong>Instruções de Responsabilidade do Beneficiário:</strong><br/>
+                - Não receber após o vencimento.<br/>
+                - Pagamento com 20% de desconto garantido até a data de vencimento expressa (Art. 284 do CTB).<br/>
+                - Após o vencimento, atualize a guia no órgão de trânsito.
+              </div>
+              <div style="background-color: #fafafa; border-left: 1px solid #eee; padding-left: 8px;">
+                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">(-) Desconto de 20% (Art. 284):</strong>
+                <span style="font-weight: bold; color: #2e7d32; font-size: 9px;">R$ ${valorDesconto}</span>
+              </div>
+            </div>
+
+            <div style="padding: 6px; border-bottom: 1px solid #999; background-color: #fdfdfd;">
+              <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Pagador / Proprietário:</strong>
+              <span style="font-weight: bold; font-size: 9px;">${nomeUsuario || 'JOSE GUILHERME DOS S. FILHO'}</span><br/>
+              <span style="font-size: 8px; color: #555;">Endereço: RUA PRESIDENTE GETÚLIO VARGAS, 285 - CENTRO, PROPRIÁ/SE - CEP: 49900-000</span>
+            </div>
+
+            <!-- LINHA DIGITÁVEL E CÓDIGO DE BARRAS GRÁFICO -->
+            <div style="padding: 10px; display: flex; flex-direction: column; align-items: center; background-color: #fafafa; justify-content: center; gap: 4px;">
+              <div style="font-family: monospace; font-size: 10px; font-weight: bold; letter-spacing: 0.5px; color: #333;">
+                ${multa.linha_digitavel}
+              </div>
+              
+              <!-- Simulação gráfica de código de barras de banco -->
+              <div style="display: flex; height: 32px; width: 90%; background: repeating-linear-gradient(90deg, #111, #111 2px, #fff 2px, #fff 5px, #111 5px, #111 6px, #fff 6px, #fff 9px); margin-top: 4px;"></div>
+            </div>
+          </div>
+        `}
+
+        <div style="margin-top: 15px; border-top: 1px solid #ccc; padding-top: 6px; font-size: 7.5px; color: #777; text-align: center; font-style: italic;">
+          Emitido via Sistema SMTT Digital - Portal do Cidadão. Código de verificação da autenticidade da notificação disponível nos registros eletrônicos do município.
         </div>
       </div>
     `;
 
     const opcoes = {
-      margin: 10,
-      filename: `Comprovante_${multa.numero_ait}.pdf`,
+      margin: 8,
+      filename: `${isNIP ? 'NIP' : 'NAIT'}_Notificacao_${multa.numero_ait}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -170,10 +393,10 @@ function Painel() {
     html2pdf().set(opcoes).from(elemento).save();
   };
 
-  const handleLogout = () => {
+  const handleLogout = (mensagemOpcional) => {
     localStorage.removeItem('token');
     localStorage.removeItem('nomeUsuario');
-    navigate('/login');
+    navigate('/login', { state: { mensagem: mensagemOpcional || null } });
   };
 
   return (
@@ -307,14 +530,28 @@ function Painel() {
                     {/* Corpo do Card da Multa */}
                     <div className="p-5">
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div className="space-y-1">
+                        <div className="space-y-1 text-left">
                           <p className="text-sm text-gray-800"><strong className="text-gray-500">Data:</strong> {multa.data_hora_infracao}</p>
                           <p className="text-sm text-gray-800"><strong className="text-gray-500">Local:</strong> {multa.local_cometimento}</p>
                           <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
+                          
+                          {multa.veiculo && (multa.veiculo.marca_modelo || multa.veiculo.cor) && (
+                            <p className="text-xs text-gray-600 bg-gray-100 px-2.5 py-1.5 rounded-lg mt-1.5 inline-block">
+                              <strong className="text-gray-500 font-bold uppercase text-[9px] block">Características do Carro</strong>
+                              <span className="font-semibold text-gray-700">{multa.veiculo.marca_modelo || 'N/D'} • {multa.veiculo.cor || 'N/D'} • {multa.veiculo.ano_fabricacao || 'N/D'}</span>
+                            </p>
+                          )}
+
+                          {multa.medicao_aferida && (
+                            <p className="text-xs text-gray-600 bg-blue-50/50 border border-blue-100 px-2.5 py-1.5 rounded-lg mt-1.5 block">
+                              <strong className="text-blue-800 font-bold uppercase text-[9px] block">Medição do Equipamento</strong>
+                              <span className="text-gray-700">Regulamentada: <strong>{multa.medicao_regulamentada}</strong> | Aferida: <strong>{multa.medicao_aferida}</strong> | Considerada: <strong>{multa.medicao_considerada}</strong></span>
+                            </p>
+                          )}
                         </div>
                         
                         {/* Ações */}
-                        <div className="w-full md:w-auto">
+                        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2 shrink-0">
                           {!multa.recurso && !multa.fase_atual.includes('Cancelada') && !multa.fase_atual.includes('Deferida') && (
                             <button 
                               onClick={() => { 
@@ -332,16 +569,49 @@ function Painel() {
                             </button>
                           )}
 
-                          {(multa.recurso || multa.fase_atual.includes('Análise') || multa.fase_atual.includes('Recurso')) && (
-                            <button 
-                              onClick={() => gerarPDF(multa)}
-                              className="w-full md:w-auto bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Download className="w-4 h-4" /> Baixar PDF
-                            </button>
-                          )}
+                          <button 
+                            onClick={() => gerarPDF(multa)}
+                            className="w-full md:w-auto bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Download className="w-4 h-4" /> Notificação ({multa.linha_digitavel ? 'NIP' : 'NAIT'})
+                          </button>
                         </div>
                       </div>
+
+                      {/* Boleto de Arrecadação BANESE caso disponível */}
+                      {multa.linha_digitavel && (
+                        <div className="mt-4 p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-3 text-left">
+                          <div className="flex justify-between items-center flex-wrap gap-1">
+                            <span className="text-xs font-bold text-brand-blue flex items-center gap-1.5 uppercase tracking-wide">
+                              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                              Boleto de Arrecadação BANESE
+                            </span>
+                            {multa.data_vencimento_boleto && (
+                              <span className="text-xs font-bold text-gray-500">
+                                Vencimento: {multa.data_vencimento_boleto}
+                              </span>
+                            )}
+                          </div>
+                          <div className="font-mono text-xs text-gray-700 bg-white p-3 rounded-lg border border-blue-200 select-all break-all leading-relaxed shadow-inner">
+                            {multa.linha_digitavel}
+                          </div>
+                          <div className="flex justify-between items-center flex-wrap gap-2">
+                            <span className="text-xs text-gray-500 font-medium">
+                              Valor com 20% desc. (até vencimento): <strong className="text-green-700 font-bold text-sm">R$ {(parseFloat(multa.valor_final) * 0.8).toFixed(2)}</strong>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(multa.linha_digitavel);
+                                alert('Código de barras copiado com sucesso! Já pode pagar no app do seu banco.');
+                              }}
+                              className="px-4 py-2 bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                            >
+                              Copiar Código de Barras
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Caixa de detalhes do recurso aberto e resposta da JARI */}
                       {multa.recurso && (

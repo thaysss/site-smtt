@@ -92,7 +92,7 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <a href="#top" className="flex items-center gap-3 group">
             {/* Antes estava aquele nome gigante: 484322399_2421491... */}
-            <img src="/logo.jpg" alt="Logo SMTT" className="w-14 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300" />
+            <img src="/logo.png" alt="Logo SMTT" className="w-14 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300" />
             <div>
               <h1 className="font-sora text-xl font-bold text-brand-blue tracking-tight leading-none group-hover:text-brand-light transition-colors">SMTT</h1>
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mt-1">Propriá / SE</span>
@@ -108,9 +108,22 @@ function Home() {
                 </button>
               </li>
               <li className="relative group">
-                <button className="px-4 py-2 font-sora text-sm font-semibold text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md flex items-center gap-1 transition-colors">
+                <a href="#servicos" className="px-4 py-2 font-sora text-sm font-semibold text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md flex items-center gap-1 transition-colors">
                   Serviços <ChevronDown className="w-4 h-4" />
-                </button>
+                </a>
+                
+                {/* Dropdown de Serviços ao Cidadão */}
+                <div className="absolute left-0 mt-2 w-56 rounded-xl bg-white shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <button onClick={() => navigate('/login')} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-brand-blue transition-colors font-medium flex items-center gap-2">
+                    <Search className="w-4 h-4 text-brand-blue" /> Minhas Multas
+                  </button>
+                  <button onClick={() => navigate('/login')} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-brand-blue transition-colors font-medium flex items-center gap-2">
+                    <Scale className="w-4 h-4 text-brand-blue" /> Defesa Prévia / JARI
+                  </button>
+                  <button onClick={() => navigate('/consultar')} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-brand-blue transition-colors font-medium flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-brand-blue" /> Consultar Protocolo
+                  </button>
+                </div>
               </li>
               <li><a href="#noticias" className="px-4 py-2 font-sora text-sm font-semibold text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md transition-colors">Notícias</a></li>
               <li><button onClick={() => navigate('/consultar')} className="px-4 py-2 font-sora text-sm font-semibold text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md transition-colors">Consultar Protocolos </button></li>
@@ -138,10 +151,21 @@ function Home() {
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="p-4 overflow-y-auto no-scrollbar flex-1">
-            <a href="#top" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg bg-blue-50 text-brand-blue font-sora font-semibold mb-2">Início</a>
-            <button onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }} className="block w-full text-left py-3 px-4 rounded-lg text-gray-700 font-sora font-semibold hover:bg-gray-50 mb-2">Meu Painel / Login</button>
-            <button onClick={() => { setIsMobileMenuOpen(false); navigate('/consultar'); }} className="block w-full text-left py-3 px-4 rounded-lg text-gray-700 font-sora font-semibold hover:bg-gray-50 mb-2">Consultar Protocolo</button>
+          <div className="p-4 overflow-y-auto no-scrollbar flex-1 space-y-4">
+            <a href="#top" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 px-4 rounded-lg bg-blue-50 text-brand-blue font-sora font-semibold">Início</a>
+            
+            <div className="border-t border-gray-100 pt-4">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block px-4 mb-2">Serviços ao Cidadão</span>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }} className="w-full text-left py-3 px-4 rounded-lg text-gray-700 font-sora font-semibold hover:bg-gray-50 flex items-center gap-2 mb-1">
+                <Search className="w-4 h-4 text-brand-blue" /> Minhas Multas
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }} className="w-full text-left py-3 px-4 rounded-lg text-gray-700 font-sora font-semibold hover:bg-gray-50 flex items-center gap-2 mb-1">
+                <Scale className="w-4 h-4 text-brand-blue" /> Defesa Prévia / JARI
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/consultar'); }} className="w-full text-left py-3 px-4 rounded-lg text-gray-700 font-sora font-semibold hover:bg-gray-50 flex items-center gap-2 mb-1">
+                <FileText className="w-4 h-4 text-brand-blue" /> Consultar Protocolo
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -317,7 +341,7 @@ function Home() {
             <div>
               <a href="#top" className="flex items-center gap-3 mb-6">
                 {/* Antes estava aquele nome gigante: 484322399_2421491... */}
-                <img src="/logo.jpg" alt="Logo SMTT" className="w-14 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300" />  
+                <img src="/logon.png" alt="Logo SMTT" className="w-14 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300" />  
                 <div>
                   <h1 className="font-sora text-xl font-bold text-white leading-none">SMTT</h1>
                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block mt-1">Propriá / SE</span>
@@ -339,7 +363,7 @@ function Home() {
               <h4 className="text-white font-sora font-bold mb-6 text-sm uppercase tracking-wider">Sede Central</h4>
               <address className="not-italic text-gray-400 text-sm space-y-4">
                 <p className="flex items-start gap-3"><MapPin className="w-5 h-5 text-accent-yellow" /> Avenida João Barbosa Pôrto, 1829 - Propriá/SE</p>
-                <p className="flex items-center gap-3"><PhoneCall className="w-5 h-5 text-accent-yellow" /> (79) 3000-0000</p>
+                <p className="flex items-center gap-3"><PhoneCall className="w-5 h-5 text-accent-yellow" /> (79) 99665-4115</p>
               </address>
             </div>
           </div>
