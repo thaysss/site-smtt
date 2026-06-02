@@ -9,6 +9,11 @@ class Veiculo(db.Model):
     placa = db.Column(db.String(7), unique=True, nullable=False)
     renavam = db.Column(db.String(11), unique=True, nullable=True)
     cidadao_id = db.Column(db.Integer, db.ForeignKey('cidadaos.id'), nullable=True)
+    
+    # Novos campos do veículo
+    ano_fabricacao = db.Column(db.Integer, nullable=True)
+    marca_modelo = db.Column(db.String(100), nullable=True)
+    cor = db.Column(db.String(50), nullable=True)
 
 
 class AutoInfracao(db.Model):
@@ -28,16 +33,52 @@ class AutoInfracao(db.Model):
     valor_final = db.Column(db.Numeric(10, 2))
     data_vencimento_defesa = db.Column(db.Date, nullable=True)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
-     # Novo campo para controle de vencimento da defesa prévia
+    
+    # Novos campos legais e fiscais da notificação
+    agente_aparelho = db.Column(db.String(50), nullable=True)
+    desdobramento = db.Column(db.String(10), default='1')
+    medicao_aferida = db.Column(db.String(30), nullable=True)
+    medicao_considerada = db.Column(db.String(30), nullable=True)
+    medicao_regulamentada = db.Column(db.String(30), nullable=True)
+    codigo_renainf = db.Column(db.String(30), nullable=True)
+    numero_nait = db.Column(db.String(30), nullable=True)
+    numero_nip = db.Column(db.String(30), nullable=True)
+    data_expedicao = db.Column(db.Date, nullable=True)
+    linha_digitavel = db.Column(db.String(100), nullable=True)
+    nosso_numero = db.Column(db.String(50), nullable=True)
+    data_vencimento_boleto = db.Column(db.Date, nullable=True)
 
     def to_dict(self):
         return {
+            "id": self.id,
             "numero_ait": self.numero_ait,
             "data_hora_infracao": self.data_hora_infracao.strftime("%d/%m/%Y %H:%M"),
             "local_cometimento": self.local_cometimento,
             "fase_atual": self.fase_atual,
             "valor_final": float(self.valor_final) if self.valor_final else None,
-            "tipo_infracao": self.tipo.to_dict() if self.tipo else None
+            "tipo_infracao": self.tipo.to_dict() if self.tipo else None,
+            "data_vencimento_defesa": self.data_vencimento_defesa.strftime("%d/%m/%Y") if self.data_vencimento_defesa else None,
+            
+            # Novos campos expostos
+            "agente_aparelho": self.agente_aparelho,
+            "desdobramento": self.desdobramento,
+            "medicao_aferida": self.medicao_aferida,
+            "medicao_considerada": self.medicao_considerada,
+            "medicao_regulamentada": self.medicao_regulamentada,
+            "codigo_renainf": self.codigo_renainf,
+            "numero_nait": self.numero_nait,
+            "numero_nip": self.numero_nip,
+            "data_expedicao": self.data_expedicao.strftime("%d/%m/%Y") if self.data_expedicao else None,
+            "linha_digitavel": self.linha_digitavel,
+            "nosso_numero": self.nosso_numero,
+            "data_vencimento_boleto": self.data_vencimento_boleto.strftime("%d/%m/%Y") if self.data_vencimento_boleto else None,
+            "veiculo": {
+                "placa": self.veiculo.placa if self.veiculo else "",
+                "renavam": self.veiculo.renavam if self.veiculo else "",
+                "ano_fabricacao": self.veiculo.ano_fabricacao if self.veiculo else None,
+                "marca_modelo": self.veiculo.marca_modelo if self.veiculo else "",
+                "cor": self.veiculo.cor if self.veiculo else ""
+            }
         }
 
 class Protocolo(db.Model):
@@ -92,4 +133,16 @@ class TipoInfracaoCTB(db.Model):
     pontos = db.Column(db.Integer)
     valor_base = db.Column(db.Numeric(10, 2))
     competencia = db.Column(db.String(50))
+
+    def to_dict(self):
+        return {
+            "codigo_infracao": self.codigo_infracao,
+            "descricao": self.descricao,
+            "amparo_legal": self.amparo_legal,
+            "gravidade": self.gravidade,
+            "pontos": self.pontos,
+            "valor_base": float(self.valor_base) if self.valor_base else 0.0,
+            "competencia": self.competencia
+        }
+
 

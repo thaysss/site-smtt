@@ -95,16 +95,12 @@ def listar_minhas_infracoes():
                 "data_julgamento": recurso.data_julgamento.strftime("%d/%m/%Y") if recurso.data_julgamento else None
             }
 
-        lista.append({
-            "id": inf.id,
-            "numero_ait": inf.numero_ait,
-            "placa_veiculo": inf.veiculo.placa,
-            "data_hora_infracao": inf.data_hora_infracao.strftime("%d/%m/%Y %H:%M"),
-            "local_cometimento": inf.local_cometimento,
-            "valor_final": f"{inf.valor_final:.2f}",
-            "fase_atual": inf.fase_atual,
-            "recurso": recurso_info
-        })
+        inf_dict = inf.to_dict()
+        inf_dict["placa_veiculo"] = inf.veiculo.placa
+        inf_dict["recurso"] = recurso_info
+        if inf.valor_final:
+            inf_dict["valor_final"] = f"{inf.valor_final:.2f}"
+        lista.append(inf_dict)
         
     return jsonify(lista), 200
 

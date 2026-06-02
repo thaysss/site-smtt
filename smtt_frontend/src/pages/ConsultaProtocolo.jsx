@@ -47,7 +47,7 @@ function ConsultaProtocolo() {
             <div className="w-16 h-16 bg-blue-50 text-brand-blue rounded-full flex items-center justify-center mx-auto mb-4">
               <FileText className="w-8 h-8" />
             </div>
-            <h2 className="text-3xl font-sora font-bold text-gray-900 mb-2">Consulta de Processo JARI</h2>
+            <h2 className="text-3xl font-sora font-bold text-gray-900 mb-2">Consulta de Processo </h2>
             <p className="text-gray-500">Acompanhe o andamento do seu recurso de defesa de infração.</p>
           </div>
           
