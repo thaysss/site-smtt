@@ -94,9 +94,9 @@ function Home() {
             {/* Antes estava aquele nome gigante: 484322399_2421491... */}
             <img src="/logo.png" alt="Logo SMTT" className="w-14 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300" />
             <div>
-              <h1 className="font-sora text-xl font-bold text-brand-blue tracking-tight leading-none group-hover:text-brand-light transition-colors">SMTT</h1>
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mt-1">Propriá / SE</span>
-            </div>
+              <h1 className="font-arial text-xl font-bold text-brand-blue tracking-tight leading-none group-hover:text-brand-light transition-colors">SMTT</h1>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mt-1">Propriá / SE</span>
+            </div>
           </a>
 
           <nav className="hidden lg:block">
