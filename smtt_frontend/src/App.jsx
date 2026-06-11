@@ -9,6 +9,9 @@ import AdminAlertas from './pages/AdminAlertas';
 import AdminInfracoes from './pages/AdminInfracoes';
 import AdminVeiculos from './pages/AdminVeiculos';
 import ConsultaProtocolo from './pages/ConsultaProtocolo'; // <-- 1. Importe aqui
+import SolicitacaoEvento from './pages/SolicitacaoEvento';
+import PortalNoticias from './pages/PortalNoticias';
+import NoticiaDetalhe from './pages/NoticiaDetalhe';
 
 function App() {
   return (
@@ -24,6 +27,9 @@ function App() {
         <Route path="/admin/infracoes" element={<AdminInfracoes />} />
         <Route path="/admin/veiculos" element={<AdminVeiculos />} />
         <Route path="/consultar" element={<ConsultaProtocolo />} /> {/* <-- 2. Adicione a rota */}
+        <Route path="/solicitacao-evento" element={<SolicitacaoEvento />} />
+        <Route path="/noticias" element={<PortalNoticias />} />
+        <Route path="/noticias/:id" element={<NoticiaDetalhe />} />
       </Routes>
     </BrowserRouter>
   );

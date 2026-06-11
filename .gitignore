@@ -4,3 +4,6 @@ smtt_backend/sql/20260529_create_memorandos.sql
 smtt_backend/app/static/uploads/resposta_5_Municipio_Online.pdf
 smtt_backend/app/static/uploads/cidadao/req_JARI202605293389_Municipio_Online.pdf
 smtt_frontend/public/formulario_jari.pdf
+smtt_backend/app/routes/__pycache__/public.cpython-312.pyc
+smtt_backend/app/routes/__pycache__/admin.cpython-312.pyc
+smtt_backend/app/models/__pycache__/servicos.cpython-312.pyc
