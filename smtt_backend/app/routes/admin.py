@@ -3,8 +3,8 @@ import os
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, current_app
 from app.extensions import db
-from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB
-from app.models.portal import AlertaTransito
+from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento
+from app.models.portal import AlertaTransito, Noticia
 from datetime import datetime
 import random
 
@@ -107,6 +107,12 @@ def registrar_infracao():
         "mensagem": "Infração registrada com sucesso pelo equipamento/agente!",
         "numero_ait": numero_gerado
     }), 201
+
+
+@admin_bp.route('/infracoes', methods=['GET'])
+def listar_infracoes():
+    infracoes = AutoInfracao.query.order_by(AutoInfracao.criado_em.desc()).all()
+    return jsonify([i.to_dict() for i in infracoes]), 200
 
 
 # ==========================================
@@ -323,3 +329,129 @@ def consultar_placa_externa(placa):
             "ano_fabricacao": 2017,
             "renavam": "00736182917"
         }), 200
+
+
+@admin_bp.route('/eventos', methods=['GET'])
+def listar_eventos_admin():
+    eventos = SolicitacaoEvento.query.order_by(SolicitacaoEvento.id.desc()).all()
+    resultado = [e.to_dict() for e in eventos]
+    return jsonify(resultado), 200
+
+
+@admin_bp.route('/eventos/<int:id>/julgar', methods=['PUT'])
+def julgar_evento(id):
+    evento = SolicitacaoEvento.query.get_or_404(id)
+    
+    if request.is_json:
+        dados = request.get_json()
+        decisao = dados.get('decisao')
+        parecer = dados.get('justificativa_jari')
+    else:
+        decisao = request.form.get('decisao')
+        parecer = request.form.get('justificativa_jari')
+        
+    if not decisao:
+        return jsonify({"erro": "A decisão é obrigatória."}), 400
+        
+    evento.resposta_analise = parecer or f"Solicitação avaliada pela equipe e classificada como: {decisao}."
+    
+    if evento.protocolo:
+        evento.protocolo.status = decisao # Ex: 'Aprovado' ou 'Negado'
+        
+    db.session.commit()
+    return jsonify({"mensagem": "Solicitação de evento julgada com sucesso!"}), 200
+
+
+@admin_bp.route('/noticias', methods=['GET'])
+def listar_noticias_admin():
+    noticias = Noticia.query.order_by(Noticia.criado_em.desc()).all()
+    return jsonify([n.to_dict() for n in noticias]), 200
+
+
+@admin_bp.route('/noticias', methods=['POST'])
+def criar_noticia_admin():
+    titulo = request.form.get('titulo')
+    subtitulo = request.form.get('subtitulo', '')
+    conteudo = request.form.get('conteudo')
+    categoria = request.form.get('categoria', 'Geral')
+    
+    if not titulo or not conteudo:
+        return jsonify({"erro": "Título e Conteúdo são obrigatórios."}), 400
+        
+    imagem_url = None
+    if 'imagem' in request.files:
+        file = request.files['imagem']
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            ext = os.path.splitext(filename)[1]
+            filename = f"news_{int(datetime.now().timestamp())}_{random.randint(1000,9999)}{ext}"
+            
+            pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'noticias')
+            os.makedirs(pasta_destino, exist_ok=True)
+            
+            file.save(os.path.join(pasta_destino, filename))
+            imagem_url = f"/static/uploads/noticias/{filename}"
+            
+    noticia = Noticia(
+        titulo=titulo,
+        subtitulo=subtitulo,
+        conteudo=conteudo,
+        categoria=categoria,
+        imagem_url=imagem_url
+    )
+    db.session.add(noticia)
+    db.session.commit()
+    
+    return jsonify({"mensagem": "Notícia criada com sucesso!", "noticia": noticia.to_dict()}), 201
+
+
+@admin_bp.route('/noticias/<int:id>', methods=['PUT'])
+def editar_noticia_admin(id):
+    noticia = Noticia.query.get_or_404(id)
+    
+    titulo = request.form.get('titulo')
+    subtitulo = request.form.get('subtitulo', '')
+    conteudo = request.form.get('conteudo')
+    categoria = request.form.get('categoria', 'Geral')
+    
+    if titulo:
+        noticia.titulo = titulo
+    if subtitulo is not None:
+        noticia.subtitulo = subtitulo
+    if conteudo:
+        noticia.conteudo = conteudo
+    if categoria:
+        noticia.categoria = categoria
+        
+    if 'imagem' in request.files:
+        file = request.files['imagem']
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            ext = os.path.splitext(filename)[1]
+            filename = f"news_{int(datetime.now().timestamp())}_{random.randint(1000,9999)}{ext}"
+            
+            pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'noticias')
+            os.makedirs(pasta_destino, exist_ok=True)
+            
+            file.save(os.path.join(pasta_destino, filename))
+            noticia.imagem_url = f"/static/uploads/noticias/{filename}"
+            
+    db.session.commit()
+    return jsonify({"mensagem": "Notícia editada com sucesso!", "noticia": noticia.to_dict()}), 200
+
+
+@admin_bp.route('/noticias/<int:id>', methods=['DELETE'])
+def excluir_noticia_admin(id):
+    noticia = Noticia.query.get_or_404(id)
+    
+    if noticia.imagem_url:
+        filepath = os.path.join(current_app.root_path, noticia.imagem_url.lstrip('/'))
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except Exception as e:
+                print(f"Erro ao deletar imagem física: {e}")
+                
+    db.session.delete(noticia)
+    db.session.commit()
+    return jsonify({"mensagem": "Notícia excluída com sucesso!"}), 200

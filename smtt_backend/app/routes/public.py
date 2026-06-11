@@ -1,6 +1,6 @@
 # app/routes/public.py
 from flask import Blueprint, jsonify
-from app.models.portal import AlertaTransito
+from app.models.portal import AlertaTransito, Noticia
 
 # Cria o Blueprint chamado 'public'
 public_bp = Blueprint('public', __name__, url_prefix='/api/public')
@@ -16,7 +16,14 @@ def get_alertas():
     return jsonify(resultado), 200
 
 # app/routes/public.py (Adicione os imports necessários no topo se faltar)
-from app.models.servicos import Protocolo, RecursoMulta, AutoInfracao
+from app.models.servicos import Protocolo, RecursoMulta, AutoInfracao, SolicitacaoEvento
+from flask import request
+from app.extensions import db
+import os
+import random
+from datetime import datetime
+from werkzeug.utils import secure_filename
+from flask import current_app
 
 @public_bp.route('/protocolos/<numero>', methods=['GET'])
 def consultar_protocolo(numero):
@@ -25,15 +32,87 @@ def consultar_protocolo(numero):
     if not protocolo:
         return jsonify({"erro": "Protocolo não encontrado. Verifique o número digitado."}), 404
         
-    recurso = RecursoMulta.query.filter_by(protocolo_id=protocolo.id).first()
+    if protocolo.tipo_servico == 'Solicitação de Evento':
+        evento = SolicitacaoEvento.query.filter_by(protocolo_id=protocolo.id).first()
+        return jsonify({
+            "numero_protocolo": protocolo.numero_protocolo,
+            "data_abertura": protocolo.criado_em.strftime("%d/%m/%Y"),
+            "tipo_servico": protocolo.tipo_servico,
+            "status_julgamento": protocolo.status,
+            "parecer_jari": evento.resposta_analise if evento else "Sua solicitação de evento está em análise pela equipe técnica da SMTT."
+        }), 200
+    else:
+        recurso = RecursoMulta.query.filter_by(protocolo_id=protocolo.id).first()
+        
+        # Retorna o status do julgamento para a tela do cidadão
+        return jsonify({
+            "numero_protocolo": protocolo.numero_protocolo,
+            "data_abertura": protocolo.criado_em.strftime("%d/%m/%Y"),
+            "tipo_servico": protocolo.tipo_servico,
+            "status_julgamento": recurso.resultado_julgamento if recurso else protocolo.status,
+            "parecer_jari": recurso.justificativa_julgamento if recurso else "Sua defesa está em análise pela equipe técnica."
+        }), 200
+
+
+@public_bp.route('/solicitacao-evento', methods=['POST'])
+def enviar_solicitacao_evento():
+    nome = request.form.get('nome')
+    cpf_cnpj = request.form.get('cpf_cnpj')
+    email = request.form.get('email')
+    telefone = request.form.get('telefone')
+    data_evento = request.form.get('data_evento')
+    local_evento = request.form.get('local_evento')
+    descricao = request.form.get('descricao', '')
     
-    # Retorna o status do julgamento para a tela do cidadão
+    if not (nome and cpf_cnpj and email and telefone and data_evento and local_evento):
+        return jsonify({"erro": "Todos os campos obrigatórios devem ser preenchidos."}), 400
+        
+    arquivo = request.files.get('arquivo')
+    if not arquivo or arquivo.filename == '':
+        return jsonify({"erro": "O formulário de requerimento assinado é obrigatório."}), 400
+        
+    # Gera um número de protocolo único (Ex: EVE202606114819)
+    numero_protocolo = f"EVE{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
+    
+    # Salva o arquivo enviado
+    pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'eventos')
+    os.makedirs(pasta_destino, exist_ok=True)
+    
+    nome_seguro = secure_filename(f"evento_{numero_protocolo}_{arquivo.filename}")
+    caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
+    arquivo.save(caminho_arquivo)
+    
+    caminho_salvo = f"/static/uploads/eventos/{nome_seguro}"
+    
+    # Cria o protocolo geral (sem cidadao_id vinculando uma conta)
+    novo_protocolo = Protocolo(
+        numero_protocolo=numero_protocolo,
+        cidadao_id=None,
+        tipo_servico='Solicitação de Evento',
+        status='Em Análise'
+    )
+    db.session.add(novo_protocolo)
+    db.session.flush() # Sincroniza para obter id
+    
+    # Cria a solicitação do evento
+    nova_solicitacao = SolicitacaoEvento(
+        protocolo_id=novo_protocolo.id,
+        nome_solicitante=nome,
+        cpf_cnpj=cpf_cnpj,
+        email=email,
+        telefone=telefone,
+        data_evento=data_evento,
+        local_evento=local_evento,
+        descricao=descricao,
+        caminho_arquivo=caminho_salvo
+    )
+    db.session.add(nova_solicitacao)
+    db.session.commit()
+    
     return jsonify({
-        "numero_protocolo": protocolo.numero_protocolo,
-        "data_abertura": protocolo.criado_em.strftime("%d/%m/%Y"),
-        "status_julgamento": recurso.resultado_julgamento,
-        "parecer_jari": recurso.justificativa_julgamento
-    }), 200
+        "mensagem": "Solicitação de evento enviada com sucesso!",
+        "protocolo": numero_protocolo
+    }), 201
 
 # app/routes/public.py (Adicione no final do arquivo)
 from flask import request
@@ -61,3 +140,15 @@ def consulta_publica_placa():
         "quantidade": len(infracoes),
         "mensagem": f"Atenção: Encontramos {len(infracoes)} infração(ões) registrada(s) para a placa {placa}."
     }), 200
+
+
+@public_bp.route('/noticias', methods=['GET'])
+def get_noticias():
+    noticias = Noticia.query.order_by(Noticia.criado_em.desc()).all()
+    return jsonify([n.to_dict() for n in noticias]), 200
+
+
+@public_bp.route('/noticias/<int:id>', methods=['GET'])
+def get_noticia(id):
+    noticia = Noticia.query.get_or_404(id)
+    return jsonify(noticia.to_dict()), 200

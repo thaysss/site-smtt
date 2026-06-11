@@ -146,3 +146,39 @@ class TipoInfracaoCTB(db.Model):
         }
 
 
+class SolicitacaoEvento(db.Model):
+    __tablename__ = 'solicitacoes_eventos'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    protocolo_id = db.Column(db.Integer, db.ForeignKey('protocolos.id'), nullable=False)
+    nome_solicitante = db.Column(db.String(150), nullable=False)
+    cpf_cnpj = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    telefone = db.Column(db.String(20), nullable=False)
+    data_evento = db.Column(db.String(50), nullable=False)
+    local_evento = db.Column(db.String(255), nullable=False)
+    descricao = db.Column(db.Text, nullable=True)
+    caminho_arquivo = db.Column(db.String(255), nullable=False)
+    resposta_analise = db.Column(db.Text, default='Sua solicitação de evento está em análise pela equipe técnica da SMTT.')
+    
+    protocolo = db.relationship('Protocolo', backref=db.backref('evento', uselist=False), lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "protocolo_id": self.protocolo_id,
+            "nome_solicitante": self.nome_solicitante,
+            "cpf_cnpj": self.cpf_cnpj,
+            "email": self.email,
+            "telefone": self.telefone,
+            "data_evento": self.data_evento,
+            "local_evento": self.local_evento,
+            "descricao": self.descricao,
+            "caminho_arquivo": self.caminho_arquivo,
+            "resposta_analise": self.resposta_analise,
+            "numero_protocolo": self.protocolo.numero_protocolo if self.protocolo else None,
+            "status": self.protocolo.status if self.protocolo else None,
+            "criado_em": self.protocolo.criado_em.strftime("%d/%m/%Y") if self.protocolo else None
+        }
+
+

@@ -62,37 +62,78 @@ function AdminAlertas() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 font-body text-gray-800 selection:bg-brand-blue selection:text-white">
+    <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
       
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-brand-dark text-white flex flex-col shadow-2xl z-20 hidden md:flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-primary-900 text-white flex flex-col shadow-2xl z-20 hidden md:flex">
         <div className="p-6 border-b border-white/10 flex items-center gap-3">
-          <Building2 className="text-accent-yellow w-8 h-8 shrink-0" />
+          <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain shrink-0" />
           <div>
-            <h2 className="font-sora font-bold text-lg leading-tight">SMTT Admin</h2>
+            <h2 className="font-bold text-lg leading-tight">SMTT Admin</h2>
             <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Portal do Servidor</span>
           </div>
         </div>
 
         <nav className="flex-1 py-6 px-4 space-y-2">
-          <button onClick={() => navigate('/admin/painel')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-            <LayoutDashboard className="w-5 h-5" /> Recursos JARI
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'recursos');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-folder-open w-5 text-center text-gray-400"></i> Recursos 
           </button>
-          <button onClick={() => navigate('/admin/infracoes')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-            <FileEdit className="w-5 h-5" /> Lançar Infração
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'eventos');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-calendar-days w-5 text-center text-gray-400"></i> Eventos
           </button>
-          <button onClick={() => navigate('/admin/veiculos')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-            <Car className="w-5 h-5" /> Base de Veículos
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'infracoes');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-list-check w-5 text-center text-gray-400"></i> Infrações Lançadas
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold bg-brand-blue text-white rounded-xl shadow-md transition-colors border border-blue-600">
-            <AlertTriangle className="w-5 h-5 text-accent-yellow" /> Avisos de Interdição
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'noticias');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-newspaper w-5 text-center text-gray-400"></i> Notícias
+          </button>
+          <button 
+            onClick={() => navigate('/admin/infracoes')} 
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-file-signature w-5 text-center text-gray-400"></i> Lançar Infração
+          </button>
+          <button 
+            onClick={() => navigate('/admin/veiculos')} 
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-car w-5 text-center text-gray-400"></i> Base de Veículos
+          </button>
+          <button 
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold bg-primary-600 text-white rounded-xl shadow-md transition-colors border border-primary-700 text-left"
+          >
+            <i className="fa-solid fa-triangle-exclamation w-5 text-center text-secondary-500"></i> Avisos de Interdição
           </button>
         </nav>
 
         <div className="p-6 border-t border-white/10 bg-black/20">
           <div className="text-xs text-gray-400 mb-3">Agente:<br/><strong className="text-white text-sm">{adminNome}</strong></div>
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-lg transition-colors text-sm border border-red-500/20">
-            Sair <LogOut className="w-4 h-4" />
+            Sair <i className="fa-solid fa-right-from-bracket text-xs"></i>
           </button>
         </div>
       </aside>
@@ -100,16 +141,16 @@ function AdminAlertas() {
       {/* ÁREA PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-6 md:p-10">
         <header className="mb-10">
-          <h1 className="text-3xl font-sora font-bold text-gray-900 mb-2">Comunicação Viária</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Comunicação Viária</h1>
           <p className="text-gray-500">Publique alertas de interdição, obras e acidentes que aparecerão no portal público.</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Formulário */}
-          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
-            <h3 className="font-sora font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
-              <TrafficCone className="text-brand-blue" /> Novo Alerta
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
+            <h3 className="font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
+              <TrafficCone className="text-primary-600" /> Novo Alerta
             </h3>
             
             {mensagem && <div className="bg-green-50 text-green-700 p-3 rounded-xl text-sm mb-5 border border-green-200 flex items-center gap-2 font-medium"><CheckCircle className="w-4 h-4" />{mensagem}</div>}
@@ -119,7 +160,7 @@ function AdminAlertas() {
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Local (Rua / Bairro) *</label>
                 <div className="relative">
                   <MapPin className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input type="text" placeholder="Ex: Av. João Alves, Centro" value={ruaBairro} onChange={(e) => setRuaBairro(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: Av. João Alves, Centro" value={ruaBairro} onChange={(e) => setRuaBairro(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
               
@@ -127,19 +168,19 @@ function AdminAlertas() {
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Descrição do Ocorrido *</label>
                 <div className="relative">
                   <AlignLeft className="w-5 h-5 absolute left-3 top-4 text-gray-400" />
-                  <textarea rows="3" placeholder="Ex: Via parcialmente interditada devido a obras da DESO..." value={descricao} onChange={(e) => setDescricao(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all resize-none" />
+                  <textarea rows="3" placeholder="Ex: Via parcialmente interditada devido a obras da DESO..." value={descricao} onChange={(e) => setDescricao(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all resize-none" />
                 </div>
               </div>
 
-              <button type="submit" className="w-full bg-accent-yellow hover:bg-accent-hover text-brand-dark font-sora font-bold py-3.5 rounded-xl shadow-md transition-all mt-4">
+              <button type="submit" className="w-full bg-secondary-500 hover:bg-secondary-600 text-primary-950 font-bold py-3.5 rounded-xl shadow-md transition-all mt-4">
                 Publicar Alerta
               </button>
             </form>
           </div>
 
           {/* Lista de Alertas Ativos */}
-          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
-            <h3 className="font-sora font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
+            <h3 className="font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
               <AlertTriangle className="text-red-500" /> Alertas Ativos
             </h3>
 

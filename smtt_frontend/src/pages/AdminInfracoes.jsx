@@ -145,40 +145,72 @@ function AdminInfracoes() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 font-body text-gray-800 selection:bg-brand-blue selection:text-white">
+    <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
       
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-brand-dark text-white flex flex-col shadow-2xl z-20 hidden md:flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-primary-900 text-white flex flex-col shadow-2xl z-20 hidden md:flex">
         <div className="p-6 border-b border-white/10 flex items-center gap-3">
-          <Building2 className="text-accent-yellow w-8 h-8 shrink-0" />
+          <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain shrink-0" />
           <div>
-            <h2 className="font-sora font-bold text-lg leading-tight">SMTT Admin</h2>
+            <h2 className="font-bold text-lg leading-tight">SMTT Admin</h2>
             <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Portal do Servidor</span>
           </div>
         </div>
 
         <nav className="flex-1 py-6 px-4 space-y-2">
-          <button onClick={() => navigate('/admin/painel')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-            <LayoutDashboard className="w-5 h-5" /> Recursos JARI
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'recursos');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-folder-open w-5 text-center text-gray-400"></i> Recursos 
           </button>
-          
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold bg-brand-blue text-white rounded-xl shadow-md transition-colors border border-blue-600">
-            <FileEdit className="w-5 h-5 text-accent-yellow" /> Lançar Infração
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'eventos');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-calendar-days w-5 text-center text-gray-400"></i> Eventos
           </button>
-          
-          <button onClick={() => navigate('/admin/veiculos')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-            <Car className="w-5 h-5" /> Base de Veículos
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'infracoes');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-list-check w-5 text-center text-gray-400"></i> Infrações Lançadas
           </button>
-          
-          <button onClick={() => navigate('/admin/alertas')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-            <AlertTriangle className="w-5 h-5" /> Avisos de Interdição
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'noticias');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-newspaper w-5 text-center text-gray-400"></i> Notícias
+          </button>
+          <button 
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold bg-primary-600 text-white rounded-xl shadow-md transition-colors border border-primary-700 text-left"
+          >
+            <i className="fa-solid fa-file-signature w-5 text-center text-secondary-500"></i> Lançar Infração
+          </button>
+          <button onClick={() => navigate('/admin/veiculos')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent">
+            <i className="fa-solid fa-car w-5 text-center text-gray-400"></i> Base de Veículos
+          </button>
+          <button onClick={() => navigate('/admin/alertas')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent">
+            <i className="fa-solid fa-triangle-exclamation w-5 text-center text-gray-400"></i> Avisos de Interdição
           </button>
         </nav>
 
         <div className="p-6 border-t border-white/10 bg-black/20">
           <div className="text-xs text-gray-400 mb-3">Agente Autuador:<br/><strong className="text-white text-sm">{adminNome}</strong></div>
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-lg transition-colors text-sm border border-red-500/20">
-            Encerrar Sessão <LogOut className="w-4 h-4" />
+            Encerrar Sessão <i className="fa-solid fa-right-from-bracket text-xs"></i>
           </button>
         </div>
       </aside>
@@ -186,13 +218,13 @@ function AdminInfracoes() {
       {/* ÁREA PRINCIPAL DO FORMULÁRIO */}
       <main className="flex-1 overflow-y-auto p-6 md:p-10">
         <header className="mb-10">
-          <span className="text-brand-blue font-sora text-xs font-bold tracking-wider uppercase bg-blue-100 px-3 py-1 rounded-full mb-3 inline-block">Operacional</span>
-          <h1 className="text-3xl font-sora font-bold text-gray-900 mb-2">Lançamento de AIT</h1>
+          <span className="text-primary-600 font-semibold text-xs font-bold tracking-wider uppercase bg-blue-100 px-3 py-1 rounded-full mb-3 inline-block">Operacional</span>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Lançamento de AIT</h1>
           <p className="text-gray-500">Registre os Autos de Infração com todos os dados legais necessários para notificação.</p>
         </header>
 
-        <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 max-w-4xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-blue to-accent-yellow"></div>
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8 max-w-4xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
 
           {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
           {erro && <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 border border-red-200 flex items-start gap-3 font-medium"><ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />{erro}</div>}
@@ -201,8 +233,8 @@ function AdminInfracoes() {
             
             {/* SEÇÃO 1: VEÍCULO */}
             <div className="space-y-4">
-              <h3 className="font-sora font-bold text-lg text-brand-dark border-b border-gray-100 pb-2 flex items-center gap-2">
-                <Car className="text-brand-blue w-5 h-5" /> 1. Veículo e Local
+              <h3 className="font-bold text-lg text-primary-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+                <Car className="text-primary-600 w-5 h-5" /> 1. Veículo e Local
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
@@ -217,14 +249,14 @@ function AdminInfracoes() {
                         value={placa} 
                         onChange={(e) => handlePlacaChange(e.target.value)} 
                         required 
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none uppercase font-bold text-gray-800 transition-all" 
+                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none uppercase font-bold text-gray-800 transition-all" 
                       />
                     </div>
                     <button
                       type="button"
                       disabled={buscandoPlaca || placa.replace('-', '').trim().length < 7}
                       onClick={() => handleConsultarPlaca()}
-                      className="px-5 bg-brand-blue hover:bg-blue-800 disabled:bg-gray-200 text-white font-sora font-bold text-xs rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5 shrink-0"
+                      className="px-5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5 shrink-0"
                     >
                       {buscandoPlaca ? (
                         <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -238,7 +270,7 @@ function AdminInfracoes() {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data e Hora *</label>
                   <div className="relative">
                     <Calendar className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input type="datetime-local" value={dataHora} onChange={(e) => setDataHora(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none font-medium text-gray-700 transition-all" />
+                    <input type="datetime-local" value={dataHora} onChange={(e) => setDataHora(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-medium text-gray-700 transition-all" />
                   </div>
                 </div>
               </div>
@@ -247,15 +279,15 @@ function AdminInfracoes() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Marca / Modelo</label>
-                  <input type="text" placeholder="Ex: RENAULT/OROCH 16" value={marcaModelo} onChange={(e) => setMarcaModelo(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: RENAULT/OROCH 16" value={marcaModelo} onChange={(e) => setMarcaModelo(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Cor do Veículo</label>
-                  <input type="text" placeholder="Ex: Cinza" value={cor} onChange={(e) => setCor(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: Cinza" value={cor} onChange={(e) => setCor(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Ano de Fabricação</label>
-                  <input type="number" placeholder="Ex: 2016" value={anoFabricacao} onChange={(e) => setAnoFabricacao(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="number" placeholder="Ex: 2016" value={anoFabricacao} onChange={(e) => setAnoFabricacao(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
 
@@ -263,15 +295,15 @@ function AdminInfracoes() {
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Local do Cometimento *</label>
                 <div className="relative">
                   <MapPin className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input type="text" value={local} onChange={(e) => setLocal(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" value={local} onChange={(e) => setLocal(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
             </div>
 
             {/* SEÇÃO 2: DETALHES DA INFRAÇÃO (CTB) */}
             <div className="space-y-4">
-              <h3 className="font-sora font-bold text-lg text-brand-dark border-b border-gray-100 pb-2 flex items-center gap-2">
-                <AlignLeft className="text-brand-blue w-5 h-5" /> 2. Enquadramento e Tipo (CTB)
+              <h3 className="font-bold text-lg text-primary-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+                <AlignLeft className="text-primary-600 w-5 h-5" /> 2. Enquadramento e Tipo (CTB)
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -279,19 +311,19 @@ function AdminInfracoes() {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Código (CTB) *</label>
                   <div className="relative">
                     <FileDigit className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input type="text" placeholder="Ex: 5541" value={codigoInfracao} onChange={(e) => setCodigoInfracao(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none font-bold text-gray-700 transition-all" />
+                    <input type="text" placeholder="Ex: 5541" value={codigoInfracao} onChange={(e) => setCodigoInfracao(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-gray-700 transition-all" />
                   </div>
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Descrição do Tipo de Infração *</label>
-                  <input type="text" placeholder="Ex: Estacionar em desacordo com a regulamentação..." value={descricaoInfracao} onChange={(e) => setDescricaoInfracao(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: Estacionar em desacordo com a regulamentação..." value={descricaoInfracao} onChange={(e) => setDescricaoInfracao(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Gravidade *</label>
-                  <select value={gravidade} onChange={(e) => setGravidade(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all cursor-pointer">
+                  <select value={gravidade} onChange={(e) => setGravidade(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all cursor-pointer">
                     <option value="Leve">Leve</option>
                     <option value="Média">Média</option>
                     <option value="Grave">Grave</option>
@@ -300,95 +332,80 @@ function AdminInfracoes() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Pontos *</label>
-                  <input type="number" min="0" max="7" value={pontos} onChange={(e) => setPontos(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="number" min="0" max="7" value={pontos} onChange={(e) => setPontos(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Valor Base (R$) *</label>
-                  <input type="number" step="0.01" value={valor} onChange={(e) => setValor(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none font-bold text-red-600 transition-all" />
+                  <input type="number" step="0.01" value={valor} onChange={(e) => setValor(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-red-600 transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Vencimento Defesa *</label>
-                  <input type="date" value={vencimentoDefesa} onChange={(e) => setVencimentoDefesa(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="date" value={vencimentoDefesa} onChange={(e) => setVencimentoDefesa(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
             </div>
 
             {/* SEÇÃO 3: MEDIÇÕES ADICIONAIS (OPCIONAL) */}
             <div className="space-y-4">
-              <h3 className="font-sora font-bold text-lg text-brand-dark border-b border-gray-100 pb-2 flex items-center gap-2">
-                <Clock className="text-brand-blue w-5 h-5" /> 3. Dados de Medição (Radar/Bafômetro - Opcional)
+              <h3 className="font-bold text-lg text-primary-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+                <Clock className="text-primary-600 w-5 h-5" /> 3. Dados de Medição (Radar/Bafômetro - Opcional)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Medição Aferida</label>
-                  <input type="text" placeholder="Ex: 84 km/h" value={medicaoAferida} onChange={(e) => setMedicaoAferida(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 84 km/h" value={medicaoAferida} onChange={(e) => setMedicaoAferida(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Medição Considerada</label>
-                  <input type="text" placeholder="Ex: 77 km/h" value={medicaoConsiderada} onChange={(e) => setMedicaoConsiderada(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 77 km/h" value={medicaoConsiderada} onChange={(e) => setMedicaoConsiderada(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Medição Regulamentada</label>
-                  <input type="text" placeholder="Ex: 60 km/h" value={medicaoRegulamentada} onChange={(e) => setMedicaoRegulamentada(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 60 km/h" value={medicaoRegulamentada} onChange={(e) => setMedicaoRegulamentada(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
             </div>
 
-            {/* SEÇÃO 4: DADOS DE CONTROLE LEGAIS E BOLETO */}
+            {/* SEÇÃO 4: DADOS DE CONTROLE LEGAIS */}
             <div className="space-y-4">
-              <h3 className="font-sora font-bold text-lg text-brand-dark border-b border-gray-100 pb-2 flex items-center gap-2">
-                <Info className="text-brand-blue w-5 h-5" /> 4. Identificação Legal e Boleto (Banese)
+              <h3 className="font-bold text-lg text-primary-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+                <Info className="text-primary-600 w-5 h-5" /> 4. Identificação Legal e Controle
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Código RENAINF</label>
-                  <input type="text" placeholder="Ex: 11255979160" value={codigoRenainf} onChange={(e) => setCodigoRenainf(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 11255979160" value={codigoRenainf} onChange={(e) => setCodigoRenainf(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Agente / Aparelho</label>
-                  <input type="text" placeholder="Ex: 257" value={agenteAparelho} onChange={(e) => setAgenteAparelho(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 257" value={agenteAparelho} onChange={(e) => setAgenteAparelho(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número NAIT</label>
-                  <input type="text" placeholder="Ex: 7003209824" value={numeroNait} onChange={(e) => setNumeroNait(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 7003209824" value={numeroNait} onChange={(e) => setNumeroNait(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número NIP</label>
-                  <input type="text" placeholder="Ex: 7003190223" value={numeroNip} onChange={(e) => setNumeroNip(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 7003190223" value={numeroNip} onChange={(e) => setNumeroNip(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Linha Digitável (Código de Barras)</label>
-                  <input type="text" placeholder="85650000026 347600260025..." value={linhaDigitavel} onChange={(e) => setLinhaDigitavel(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none font-mono text-sm transition-all" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Nº Arrecadação (Nosso Número)</label>
-                  <input type="text" placeholder="Ex: 416162817" value={nossoNumero} onChange={(e) => setNossoNumero(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Desdobramento</label>
-                  <input type="text" placeholder="Ex: 1" value={desdobramento} onChange={(e) => setDesdobramento(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="text" placeholder="Ex: 1" value={desdobramento} onChange={(e) => setDesdobramento(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
+                <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data de Expedição</label>
-                  <input type="date" value={dataExpedicao} onChange={(e) => setDataExpedicao(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Vencimento do Boleto</label>
-                  <input type="date" value={dataVencimentoBoleto} onChange={(e) => setDataVencimentoBoleto(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" />
+                  <input type="date" value={dataExpedicao} onChange={(e) => setDataExpedicao(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
               </div>
             </div>
 
             <div className="pt-4 mt-6">
-              <button type="submit" className="w-full bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
-                <AlertOctagon className="w-5 h-5 text-accent-yellow" /> Gravar Auto de Infração Oficial
+              <button type="submit" className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
+                <AlertOctagon className="w-5 h-5 text-secondary-500" /> Gravar Auto de Infração Oficial
               </button>
             </div>
 

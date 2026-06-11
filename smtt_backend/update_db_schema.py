@@ -30,6 +30,10 @@ with app.app_context():
         db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS nosso_numero VARCHAR(50);"))
         db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS data_vencimento_boleto DATE;"))
         
+        # 3. Alterar tabela protocolos para permitir cidadao_id nulo (para solicitações públicas de eventos)
+        print("Alterando tabela protocolos para permitir cidadao_id nulo...")
+        db.session.execute(text("ALTER TABLE protocolos ALTER COLUMN cidadao_id DROP NOT NULL;"))
+        
         db.session.commit()
         print("[SUCCESS] Migração concluída com sucesso no Supabase!")
     except Exception as e:

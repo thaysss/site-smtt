@@ -400,23 +400,23 @@ function Painel() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-body text-gray-800 selection:bg-brand-blue selection:text-white pb-20">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white pb-20">
       
-      {/* HEADER DO PAINEL */}
-      <header className="bg-brand-dark text-white py-4 px-6 shadow-md sticky top-0 z-40">
+      {/* Header */}
+      <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Building2 className="text-accent-yellow w-6 h-6" />
+            <img src="/logo.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
             <div>
-              <h1 className="font-sora font-bold text-lg leading-none hidden sm:block">SMTT Digital</h1>
-              <span className="text-xs text-gray-400">Área do Cidadão</span>
+              <h1 className="font-bold text-lg text-gray-900 leading-tight">SMTT Propriá</h1>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Área do Cidadão</p>
             </div>
           </div>
           
           <div className="flex items-center gap-6">
-            <span className="text-sm font-medium hidden md:block">Olá, <strong className="text-accent-yellow">{nomeUsuario}</strong></span>
-            <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors font-bold bg-white/5 px-4 py-2 rounded-lg">
-              Sair <LogOut className="w-4 h-4" />
+            <span className="text-sm font-medium hidden md:block">Olá, <strong className="text-primary-600">{nomeUsuario}</strong></span>
+            <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors font-semibold border border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg bg-white">
+              Sair <i className="fa-solid fa-right-from-bracket"></i>
             </button>
           </div>
         </div>
@@ -427,11 +427,11 @@ function Painel() {
         {/* COLUNA ESQUERDA: GESTÃO DE VEÍCULOS */}
         <div className="lg:col-span-1 space-y-6">
           
-          {/* Adicionar Veículo */}
-          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
+          {/* Vincular Veículo */}
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
             <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
-              <Car className="text-brand-blue w-5 h-5" />
-              <h2 className="font-sora font-bold text-lg text-gray-900">Vincular Veículo</h2>
+              <Car className="text-primary-600 w-5 h-5" />
+              <h2 className="font-bold text-lg text-gray-900">Vincular Veículo</h2>
             </div>
             
             {mensagem && <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm mb-4 border border-green-100 flex items-center gap-2"><CheckCircle className="w-4 h-4 shrink-0" />{mensagem}</div>}
@@ -440,24 +440,24 @@ function Painel() {
             <form onSubmit={handleCadastrarVeiculo} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Placa</label>
-                <input type="text" maxLength="7" placeholder="ABC1D23" value={placa} onChange={(e) => setPlaca(e.target.value.toUpperCase())} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none uppercase font-bold text-gray-700 transition-all" required />
+                <input type="text" maxLength="7" placeholder="ABC1D23" value={placa} onChange={(e) => setPlaca(e.target.value.toUpperCase())} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none uppercase font-bold text-gray-700 transition-all" required />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Renavam</label>
                 <div className="relative">
                   <FileDigit className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input type="text" maxLength="11" placeholder="Somente números" value={renavam} onChange={(e) => setRenavam(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-blue outline-none transition-all" required />
+                  <input type="text" maxLength="11" placeholder="Somente números" value={renavam} onChange={(e) => setRenavam(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" required />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
+              <button type="submit" className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
                 <Plus className="w-4 h-4" /> Adicionar Veículo
               </button>
             </form>
           </div>
 
           {/* Lista de Veículos */}
-          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
-            <h3 className="font-sora font-bold text-sm text-gray-500 uppercase tracking-wider mb-4">Meus Veículos</h3>
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+            <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-4">Meus Veículos</h3>
             {veiculos.length === 0 ? (
               <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                 <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -466,12 +466,12 @@ function Painel() {
             ) : (
               <div className="space-y-3">
                 {veiculos.map(v => (
-                  <div key={v.id} className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:border-brand-blue/30 transition-colors">
+                  <div key={v.id} className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:border-primary-500/30 transition-colors">
                     <div>
-                      <span className="block font-sora font-bold text-lg text-brand-dark uppercase tracking-widest">{v.placa}</span>
+                      <span className="block font-bold text-lg text-primary-900 uppercase tracking-widest">{v.placa}</span>
                       <span className="text-xs text-gray-500">Renavam: {v.renavam}</span>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-brand-blue flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 text-primary-600 flex items-center justify-center">
                       <Car className="w-4 h-4" />
                     </div>
                   </div>
@@ -483,11 +483,11 @@ function Painel() {
 
         {/* COLUNA DIREITA: MULTAS E INFRAÇÕES */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 sm:p-8">
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 sm:p-8">
             <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
               <div className="flex items-center gap-2">
                 <AlertCircle className="text-red-500 w-6 h-6" />
-                <h2 className="font-sora font-bold text-xl text-gray-900">Minhas Infrações</h2>
+                <h2 className="font-bold text-xl text-gray-900">Minhas Infrações</h2>
               </div>
               <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
                 {multas.length} registro(s)
@@ -497,7 +497,7 @@ function Painel() {
             {multas.length === 0 ? (
               <div className="text-center py-16 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                 <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-400" />
-                <p className="font-sora font-bold text-lg text-gray-600">Nada Consta</p>
+                <p className="font-bold text-lg text-gray-600">Nada Consta</p>
                 <p className="text-sm mt-1">Nenhuma infração registrada para os seus veículos.</p>
               </div>
             ) : (
@@ -508,10 +508,10 @@ function Painel() {
                     {/* Cabeçalho do Card da Multa */}
                     <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex flex-wrap justify-between items-center gap-2">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="bg-brand-dark text-accent-yellow font-bold text-xs px-2 py-1 rounded uppercase tracking-wider">{multa.placa_veiculo}</span>
+                        <span className="bg-primary-900 text-secondary-500 font-bold text-xs px-2 py-1 rounded uppercase tracking-wider">{multa.placa_veiculo}</span>
                         <span className="text-sm font-bold text-gray-700">{multa.numero_ait}</span>
                         {multa.recurso?.protocolo && (
-                          <span className="text-xs font-mono font-bold bg-blue-50 text-brand-blue border border-blue-200 px-2 py-0.5 rounded">
+                          <span className="text-xs font-mono font-bold bg-blue-50 text-primary-600 border border-blue-200 px-2 py-0.5 rounded">
                             Protocolo: {multa.recurso.protocolo}
                           </span>
                         )}
@@ -543,8 +543,8 @@ function Painel() {
                           )}
 
                           {multa.medicao_aferida && (
-                            <p className="text-xs text-gray-600 bg-blue-50/50 border border-blue-100 px-2.5 py-1.5 rounded-lg mt-1.5 block">
-                              <strong className="text-blue-800 font-bold uppercase text-[9px] block">Medição do Equipamento</strong>
+                            <p className="text-xs text-gray-600 bg-blue-50/30 border border-blue-100 px-2.5 py-1.5 rounded-lg mt-1.5 block">
+                              <strong className="text-primary-800 font-bold uppercase text-[9px] block">Medição do Equipamento</strong>
                               <span className="text-gray-700">Regulamentada: <strong>{multa.medicao_regulamentada}</strong> | Aferida: <strong>{multa.medicao_aferida}</strong> | Considerada: <strong>{multa.medicao_considerada}</strong></span>
                             </p>
                           )}
@@ -563,7 +563,7 @@ function Painel() {
                                 setAbaAtiva('formulario'); 
                                 setArquivosAdicionais([]); 
                               }}
-                              className="w-full md:w-auto bg-accent-yellow hover:bg-accent-hover text-brand-dark font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                              className="w-full md:w-auto bg-secondary-500 hover:bg-secondary-600 text-primary-950 font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                             >
                               <FileText className="w-4 h-4" /> Recorrer 
                             </button>
@@ -571,7 +571,7 @@ function Painel() {
 
                           <button 
                             onClick={() => gerarPDF(multa)}
-                            className="w-full md:w-auto bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                            className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                           >
                             <Download className="w-4 h-4" /> Notificação ({multa.linha_digitavel ? 'NIP' : 'NAIT'})
                           </button>
@@ -582,7 +582,7 @@ function Painel() {
                       {multa.linha_digitavel && (
                         <div className="mt-4 p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-3 text-left">
                           <div className="flex justify-between items-center flex-wrap gap-1">
-                            <span className="text-xs font-bold text-brand-blue flex items-center gap-1.5 uppercase tracking-wide">
+                            <span className="text-xs font-bold text-primary-600 flex items-center gap-1.5 uppercase tracking-wide">
                               <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                               Boleto de Arrecadação BANESE
                             </span>
@@ -605,7 +605,7 @@ function Painel() {
                                 navigator.clipboard.writeText(multa.linha_digitavel);
                                 alert('Código de barras copiado com sucesso! Já pode pagar no app do seu banco.');
                               }}
-                              className="px-4 py-2 bg-brand-blue hover:bg-blue-800 text-white font-sora font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
                             >
                               Copiar Código de Barras
                             </button>
@@ -616,10 +616,10 @@ function Painel() {
                       {/* Caixa de detalhes do recurso aberto e resposta da JARI */}
                       {multa.recurso && (
                         <div className="mt-5 p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3 relative overflow-hidden text-left">
-                          <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-blue"></div>
+                          <div className="absolute top-0 left-0 w-1.5 h-full bg-primary-600"></div>
                           
                           <div className="flex flex-wrap justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-wider pl-2">
-                            <span>Protocolo: <span className="text-brand-blue font-mono font-bold">{multa.recurso.protocolo}</span></span>
+                            <span>Protocolo: <span className="text-primary-600 font-mono font-bold">{multa.recurso.protocolo}</span></span>
                             <span>Tipo: <span className="text-gray-700">{multa.recurso.tipo_recurso}</span></span>
                           </div>
                           
@@ -644,7 +644,7 @@ function Painel() {
                                   href={montarUrlArquivo(multa.recurso.anexo_resposta_jari)}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-brand-blue font-bold rounded-lg hover:bg-blue-100 transition-colors text-xs mt-3 shadow-sm"
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-primary-600 font-bold rounded-lg hover:bg-blue-100 transition-colors text-xs mt-3 shadow-sm"
                                 >
                                   <Download className="w-3.5 h-3.5" /> Baixar Resposta Oficial JARI
                                 </a>
@@ -665,16 +665,16 @@ function Painel() {
 
       {/* JANELA MODAL DE RECURSO */}
       {modalAberto && (
-        <div className="fixed inset-0 bg-brand-dark/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-primary-950/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-lg shadow-2xl relative overflow-hidden">
             
             <button onClick={() => setModalAberto(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors">
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="font-sora font-bold text-2xl text-gray-900 mb-2">Abertura de Recurso</h3>
+            <h3 className="font-bold text-2xl text-gray-900 mb-2">Abertura de Recurso</h3>
             <p className="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-100">
-              Auto de Infração: <strong className="text-brand-blue">{multaSelecionada?.numero_ait}</strong>
+              Auto de Infração: <strong className="text-primary-600">{multaSelecionada?.numero_ait}</strong>
             </p>
 
             {recursoErro && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-100 flex items-center gap-2"><ShieldAlert className="w-4 h-4 shrink-0" />{recursoErro}</div>}
@@ -687,7 +687,7 @@ function Painel() {
                   onClick={() => setAbaAtiva('formulario')}
                   className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
                     abaAtiva === 'formulario'
-                      ? 'border-brand-blue text-brand-blue'
+                      ? 'border-primary-600 text-primary-600'
                       : 'border-transparent text-gray-400 hover:text-gray-600'
                   }`}
                 >
@@ -698,13 +698,13 @@ function Painel() {
                   onClick={() => setAbaAtiva('anexos')}
                   className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all flex items-center justify-center gap-1.5 ${
                     abaAtiva === 'anexos'
-                      ? 'border-brand-blue text-brand-blue'
+                      ? 'border-primary-600 text-primary-600'
                       : 'border-transparent text-gray-400 hover:text-gray-600'
                   }`}
                 >
                   2. Documentos Adicionais
                   {arquivosAdicionais.length > 0 && (
-                    <span className="bg-brand-blue text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                    <span className="bg-primary-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
                       {arquivosAdicionais.length}
                     </span>
                   )}
@@ -717,7 +717,7 @@ function Painel() {
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-8 h-8" />
                 </div>
-                <h4 className="font-sora font-bold text-lg text-gray-900 mb-2">Defesa Enviada!</h4>
+                <h4 className="font-bold text-lg text-gray-900 mb-2">Defesa Enviada!</h4>
                 <p className="text-gray-600 text-sm mb-6">{recursoSucesso}</p>
                 <button onClick={() => setModalAberto(false)} className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 px-6 rounded-xl transition-colors w-full">
                   Fechar Janela
@@ -730,7 +730,7 @@ function Painel() {
                   <div className="space-y-6">
                     {/* Passo a Passo */}
                     <div className="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
-                      <h4 className="font-bold text-brand-dark mb-2 text-sm">Passo a Passo para o Recurso:</h4>
+                      <h4 className="font-bold text-primary-900 mb-2 text-sm">Passo a Passo para o Recurso:</h4>
                       <ol className="text-sm text-gray-700 list-decimal ml-4 space-y-1 mb-4">
                         <li>Baixe o formulário oficial abaixo.</li>
                         <li>Preencha, assine e escaneie (ou tire uma foto nítida).</li>
@@ -742,7 +742,7 @@ function Painel() {
                         download="Requerimento_JARI_SMTT.pdf" 
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-brand-blue font-bold hover:bg-gray-50 transition-colors text-sm shadow-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-primary-600 font-bold hover:bg-gray-50 transition-colors text-sm shadow-sm"
                       >
                         <Download className="w-4 h-4" /> Baixar Formulário de Requerimento Único 
                       </a>
@@ -752,10 +752,10 @@ function Painel() {
                     <div className="mb-5">
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Tipo de Recurso *</label>
                       <select
-                        value={tipoRecurso}
-                        onChange={(e) => setTipoRecurso(e.target.value)}
-                        required
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-brand-blue outline-none transition-all cursor-pointer"
+                         value={tipoRecurso}
+                         onChange={(e) => setTipoRecurso(e.target.value)}
+                         required
+                         className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all cursor-pointer"
                       >
                         <option value="Defesa Prévia">Defesa Prévia</option>
                         <option value="Recurso JARI">Recurso JARI</option>
@@ -792,7 +792,7 @@ function Painel() {
                           setRecursoErro('');
                           setAbaAtiva('anexos');
                         }}
-                        className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors"
+                        className="flex-1 py-3 bg-primary-600 text-white font-bold rounded-xl shadow-md hover:bg-primary-700 transition-colors"
                       >
                         Continuar (Anexos)
                       </button>
@@ -879,7 +879,7 @@ function Painel() {
                       </button>
                       <button 
                         type="submit" 
-                        className="flex-1 py-3 bg-brand-blue text-white font-bold rounded-xl shadow-md hover:bg-blue-800 transition-colors"
+                        className="flex-1 py-3 bg-primary-600 text-white font-bold rounded-xl shadow-md hover:bg-primary-700 transition-colors"
                       >
                         Enviar Recurso
                       </button>

@@ -1,5 +1,6 @@
 # app/models/portal.py
 from app.extensions import db
+from datetime import datetime
 
 class AlertaTransito(db.Model):
     __tablename__ = 'alertas_transito'
@@ -18,4 +19,27 @@ class AlertaTransito(db.Model):
             "descricao": self.descricao,
             "rua_bairro": self.rua_bairro,
             "status": self.status
+        }
+
+
+class Noticia(db.Model):
+    __tablename__ = 'noticias'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(255), nullable=False)
+    subtitulo = db.Column(db.String(255))
+    conteudo = db.Column(db.Text, nullable=False)
+    categoria = db.Column(db.String(100), default='Geral')
+    imagem_url = db.Column(db.String(255))
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "titulo": self.titulo,
+            "subtitulo": self.subtitulo,
+            "conteudo": self.conteudo,
+            "categoria": self.categoria,
+            "imagem_url": self.imagem_url,
+            "criado_em": self.criado_em.strftime("%d/%m/%Y %H:%M") if self.criado_em else None
         }
