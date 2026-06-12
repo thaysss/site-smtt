@@ -18,7 +18,8 @@ class AlertaTransito(db.Model):
             "id": self.id,
             "descricao": self.descricao,
             "rua_bairro": self.rua_bairro,
-            "status": self.status
+            "status": self.status,
+            "data_inicio": self.data_inicio.strftime("%d/%m/%Y %H:%M") if self.data_inicio else None
         }
 
 
@@ -42,4 +43,23 @@ class Noticia(db.Model):
             "categoria": self.categoria,
             "imagem_url": self.imagem_url,
             "criado_em": self.criado_em.strftime("%d/%m/%Y %H:%M") if self.criado_em else None
+        }
+
+
+class Estatistica(db.Model):
+    __tablename__ = 'estatisticas'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(100), nullable=False)
+    valor = db.Column(db.String(50), nullable=False)
+    icone = db.Column(db.String(50), default='fa-chart-simple')
+    ordem = db.Column(db.Integer, default=0)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "titulo": self.titulo,
+            "valor": self.valor,
+            "icone": self.icone,
+            "ordem": self.ordem
         }

@@ -195,6 +195,15 @@ function AdminInfracoes() {
             <i className="fa-solid fa-newspaper w-5 text-center text-gray-400"></i> Notícias
           </button>
           <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'estatisticas');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-chart-line w-5 text-center text-gray-400"></i> Estatísticas
+          </button>
+          <button 
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold bg-primary-600 text-white rounded-xl shadow-md transition-colors border border-primary-700 text-left"
           >
             <i className="fa-solid fa-file-signature w-5 text-center text-secondary-500"></i> Lançar Infração

@@ -89,3 +89,92 @@ input:focus, select:focus {
   padding: 30px;
   border: 1px solid #f1f5f9;
 }
+
+/* ==========================================================================
+   ACESSIBILIDADE: MODO ALTO CONTRASTE
+   ========================================================================== */
+body.alto-contraste {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  background-image: none !important;
+}
+
+body.alto-contraste header,
+body.alto-contraste footer,
+body.alto-contraste section,
+body.alto-contraste div,
+body.alto-contraste article,
+body.alto-contraste aside,
+body.alto-contraste nav,
+body.alto-contraste main {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+body.alto-contraste p,
+body.alto-contraste h1,
+body.alto-contraste h2,
+body.alto-contraste h3,
+body.alto-contraste h4,
+body.alto-contraste h5,
+body.alto-contraste h6,
+body.alto-contraste span,
+body.alto-contraste time,
+body.alto-contraste strong,
+body.alto-contraste b,
+body.alto-contraste label {
+  color: #ffffff !important;
+}
+
+body.alto-contraste a,
+body.alto-contraste button,
+body.alto-contraste .nav-link {
+  color: #ffff00 !important; /* Amarelo de alto contraste para links/botões */
+  text-decoration: underline !important;
+}
+
+body.alto-contraste a:hover,
+body.alto-contraste button:hover {
+  color: #00ffff !important; /* Ciano no hover */
+  background-color: #000000 !important;
+  text-decoration: underline !important;
+}
+
+body.alto-contraste input,
+body.alto-contraste textarea,
+body.alto-contraste select {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.alto-contraste .bg-secondary-500,
+body.alto-contraste .bg-primary-900,
+body.alto-contraste .bg-primary-600,
+body.alto-contraste .bg-primary-50,
+body.alto-contraste .bg-red-50,
+body.alto-contraste .bg-red-100,
+body.alto-contraste .bg-green-50,
+body.alto-contraste .bg-gray-50,
+body.alto-contraste .bg-white {
+  background-color: #000000 !important;
+  border: 1px solid #ffffff !important;
+}
+
+body.alto-contraste .text-secondary-500,
+body.alto-contraste .text-primary-600,
+body.alto-contraste .text-primary-100,
+body.alto-contraste .text-red-600,
+body.alto-contraste .text-red-700,
+body.alto-contraste .text-red-800,
+body.alto-contraste .text-green-800,
+body.alto-contraste .text-gray-400,
+body.alto-contraste .text-gray-500,
+body.alto-contraste .text-gray-600,
+body.alto-contraste .text-gray-700,
+body.alto-contraste .text-gray-900 {
+  color: #ffffff !important;
+}

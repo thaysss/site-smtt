@@ -10,12 +10,28 @@ function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showTopBtn, setShowTopBtn] = useState(false);
 
+  // Estados de Acessibilidade e Modais
+  const [altoContraste, setAltoContraste] = useState(() => localStorage.getItem('altoContraste') === 'true');
+  const [modalConteudo, setModalConteudo] = useState(null);
+  const [servicoIndisponivel, setServicoIndisponivel] = useState('');
+
   // Estados de Dados (Busca, Alertas e Notícias)
   const [alertas, setAlertas] = useState([]);
   const [placaBusca, setPlacaBusca] = useState('');
   const [resultadoBusca, setResultadoBusca] = useState(null);
   const [buscando, setBuscando] = useState(false);
   const [noticias, setNoticias] = useState([]);
+  const [estatisticas, setEstatisticas] = useState([]);
+
+  // Efeito do Modo Alto Contraste (Acessibilidade)
+  useEffect(() => {
+    if (altoContraste) {
+      document.body.classList.add('alto-contraste');
+    } else {
+      document.body.classList.remove('alto-contraste');
+    }
+    localStorage.setItem('altoContraste', altoContraste);
+  }, [altoContraste]);
 
   // Efeito do Slider Hero
   useEffect(() => {
@@ -49,6 +65,12 @@ function Home() {
       } catch (error) {
         console.error("Erro ao carregar notícias:", error);
       }
+      try {
+        const resStats = await api.get('/public/estatisticas');
+        setEstatisticas(resStats.data);
+      } catch (error) {
+        console.error("Erro ao carregar estatísticas:", error);
+      }
     };
     carregarDados();
   }, []);
@@ -74,7 +96,8 @@ function Home() {
 
   // Funções para serviços indisponíveis temporariamente
   const handleServicoBreve = (nomeServico) => {
-    alert(`O serviço "${nomeServico}" estará disponível online em breve! Por favor, dirija-se à sede da SMTT Propriá para atendimento presencial.`);
+    setServicoIndisponivel(nomeServico);
+    setModalConteudo('servico-breve');
   };
 
   return (
@@ -85,7 +108,12 @@ function Home() {
         <div className="flex space-x-4">
           <a href="#main-content" className="hover:underline focus:outline-none focus:ring-2 focus:ring-white">Ir para o conteúdo</a>
           <span>|</span>
-          <a href="#" className="hover:underline focus:outline-none focus:ring-2 focus:ring-white">Alto Contraste</a>
+          <button 
+            onClick={() => setAltoContraste(!altoContraste)} 
+            className="hover:underline focus:outline-none focus:ring-2 focus:ring-white flex items-center gap-1"
+          >
+            <i className="fa-solid fa-circle-half-stroke"></i> Alto Contraste
+          </button>
         </div>
         <div className="hidden sm:block">
           <span>Bem-Vindo à Superintendência Municipal de Transportes e Trânsito de Propriá!</span>
@@ -117,13 +145,25 @@ function Home() {
                   Institucional <i className="fa-solid fa-chevron-down text-xs"></i>
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-100 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <a href="#" onClick={(e) => { e.preventDefault(); alert("SMTT - Superintendência Municipal de Transportes e Trânsito de Propriá/SE."); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Sobre a SMTT</a>
-                  <a href="#" onClick={(e) => { e.preventDefault(); alert("Portal de legislação municipal e resoluções de trânsito em breve."); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Legislação</a>
-                  <a href="#" onClick={(e) => { e.preventDefault(); alert("Equipe diretiva e organograma da SMTT de Propriá."); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Equipe Diretiva</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('sobre'); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Sobre a SMTT</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('legislacao'); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Legislação</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('equipe'); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Equipe Diretiva</a>
                 </div>
               </div>
 
-              <a href="#servicos" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Serviços</a>
+              {/* Dropdown Serviços */}
+              <div className="relative group">
+                <button className="text-gray-700 hover:text-primary-600 font-medium transition-colors flex items-center gap-1 focus:outline-none">
+                  Serviços <i className="fa-solid fa-chevron-down text-xs"></i>
+                </button>
+                <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-100 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <a href="/login"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Multas</a>
+                  <a href="/solicitacao-evento"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Solicitação de Evento</a>
+                  <a href="/consultar"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Protocolo</a>
+                </div>
+              </div>
+
+              
               <a href="#noticias" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Notícias</a>
               <a href="#contato" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contato</a>
             </nav>
@@ -212,37 +252,64 @@ function Home() {
               </div>
             </div>
 
-            {/* Quick Info Card: Avisos Importantes */}
+            {/* Quick Info Card: Avisos Importantes (Glassmorphism & Dynamic alerts) */}
             <div className="lg:w-1/2 w-full max-w-md mx-auto">
-              <div className="bg-white rounded-xl shadow-2xl overflow-hidden text-gray-800 border border-gray-100">
-                <div className="bg-primary-50 p-4 border-b border-primary-100 flex items-center justify-between">
+              <div className="backdrop-blur-md bg-white/90 rounded-2xl shadow-2xl overflow-hidden text-gray-800 border border-white/20 relative">
+                <div className="bg-primary-900/5 p-4 border-b border-gray-150 flex items-center justify-between">
                   <h3 className="font-bold text-primary-900 flex items-center gap-2">
-                    <i className="fa-solid fa-triangle-exclamation text-secondary-500"></i> Avisos Importantes
+                    <i className="fa-solid fa-triangle-exclamation text-secondary-500 animate-bounce"></i> Avisos Importantes
                   </h3>
-                  <span className="bg-primary-100 text-primary-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Hoje</span>
+                  <span className="bg-red-100 text-red-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wider animate-pulse uppercase">Alerta</span>
                 </div>
                 <div className="p-6">
                   {alertas.length === 0 ? (
                     <div className="text-center py-6 text-gray-500">
                       <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i className="fa-solid fa-circle-check text-xl"></i>
+                        <i className="fa-solid fa-circle-check text-xl animate-pulse"></i>
                       </div>
                       <p className="font-semibold text-sm text-gray-700">Trânsito fluindo normalmente</p>
-                      <p className="text-xs text-gray-500 mt-1">Não há alertas ou interdições registradas no momento em Propriá.</p>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">Não há alertas ou interdições registradas no momento em Propriá.</p>
                     </div>
                   ) : (
-                    <div className="space-y-4 max-h-[260px] overflow-y-auto pr-1">
-                      {alertas.map((alerta, index) => (
-                        <div key={alerta.id || index} className={`flex gap-4 items-start ${index < alertas.length - 1 ? 'pb-4 border-b border-gray-100' : ''}`}>
-                          <div className="bg-red-100 text-red-600 p-2.5 rounded-lg flex-shrink-0">
-                            <i className="fa-solid fa-cone"></i>
+                    <div className="space-y-4 max-h-[280px] overflow-y-auto pr-1">
+                      {alertas.map((alerta, index) => {
+                        const descLow = (alerta.descricao || '').toLowerCase();
+                        const ruaLow = (alerta.rua_bairro || '').toLowerCase();
+                        
+                        let cardBg = 'bg-red-50/55 border-red-100 text-red-800';
+                        let iconBg = 'bg-red-100 text-red-600';
+                        let iconClass = 'fa-road-barrier';
+                        
+                        if (descLow.includes('acidente') || descLow.includes('perigo') || descLow.includes('colisão') || ruaLow.includes('perigo')) {
+                          cardBg = 'bg-amber-50/55 border-amber-100 text-amber-800';
+                          iconBg = 'bg-amber-100 text-amber-600';
+                          iconClass = 'fa-triangle-exclamation';
+                        } else if (descLow.includes('evento') || descLow.includes('festa') || descLow.includes('desvio') || descLow.includes('procissão')) {
+                          cardBg = 'bg-blue-50/55 border-blue-100 text-blue-800';
+                          iconBg = 'bg-blue-100 text-blue-600';
+                          iconClass = 'fa-route';
+                        }
+
+                        return (
+                          <div 
+                            key={alerta.id || index} 
+                            className={`p-3.5 border rounded-xl flex gap-3.5 items-start ${cardBg} transition-all hover:scale-[1.01] ${index < alertas.length - 1 ? 'mb-1' : ''}`}
+                          >
+                            <div className={`${iconBg} p-2.5 rounded-xl flex-shrink-0 flex items-center justify-center`}>
+                              <i className={`fa-solid ${iconClass} text-sm`}></i>
+                            </div>
+                            <div className="flex-grow">
+                              <h4 className="font-bold text-xs text-gray-900 leading-snug">{alerta.rua_bairro}</h4>
+                              <p className="text-[11px] text-gray-600 mt-1 leading-relaxed">{alerta.descricao}</p>
+                              {alerta.data_inicio && (
+                                <span className="text-[9px] text-gray-400 font-bold block mt-2">
+                                  <i className="fa-regular fa-clock mr-1"></i> Publicado em: {alerta.data_inicio}h
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-sm text-gray-900">{alerta.rua_bairro}</h4>
-                            <p className="text-xs text-gray-500 mt-1">{alerta.descricao}</p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -272,13 +339,7 @@ function Home() {
                 <h3 className="font-semibold text-gray-800 text-sm">Consulta de Multas</h3>
               </button>
 
-              {/* Service Card 2 */}
-              <button onClick={() => handleServicoBreve('Horários de Ônibus')} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all group focus:outline-none focus:ring-2 focus:ring-primary-500 w-full">
-                <div className="w-14 h-14 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
-                  <i className="fa-solid fa-bus text-2xl"></i>
-                </div>
-                <h3 className="font-semibold text-gray-800 text-sm">Horários de Ônibus</h3>
-              </button>
+           
 
               {/* Service Card 3 */}
               <button onClick={() => navigate('/solicitacao-evento')} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all group focus:outline-none focus:ring-2 focus:ring-primary-500 w-full">
@@ -510,22 +571,24 @@ function Home() {
         <section className="py-12 bg-primary-900 text-white border-b-8 border-secondary-500">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="text-4xl font-bold text-secondary-500 mb-2">150k+</div>
-                <div className="text-sm text-primary-100">Veículos Fiscalizados/Mês</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-secondary-500 mb-2">45</div>
-                <div className="text-sm text-primary-100">Linhas de Ônibus</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-secondary-500 mb-2">12k</div>
-                <div className="text-sm text-primary-100">Atendimentos Online</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-secondary-500 mb-2">-15%</div>
-                <div className="text-sm text-primary-100">Acidentes neste ano</div>
-              </div>
+              {estatisticas.length === 0 ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="flex flex-col justify-center items-center animate-pulse py-2">
+                    <div className="h-10 w-24 bg-white/10 rounded-xl mb-3"></div>
+                    <div className="h-4 w-32 bg-white/5 rounded-lg"></div>
+                  </div>
+                ))
+              ) : (
+                estatisticas.slice(0, 4).map((item) => (
+                  <div key={item.id} className="flex flex-col justify-center items-center">
+                    <div className="text-4xl font-bold text-secondary-500 mb-2 flex items-center justify-center gap-2.5">
+                      {item.icone && <i className={`fa-solid ${item.icone} text-2xl text-secondary-500/30 shrink-0`}></i>}
+                      <span>{item.valor}</span>
+                    </div>
+                    <div className="text-sm text-primary-100">{item.titulo}</div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>
@@ -572,8 +635,9 @@ function Home() {
                 <li><button onClick={() => navigate('/login')} className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Painel do Cidadão</button></li>
                 <li><button onClick={() => navigate('/consultar')} className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Consultar Protocolo</button></li>
                 <li><button onClick={() => navigate('/admin/login')} className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Acesso Servidor / Administrativo</button></li>
-                <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Portal de Licitações da Prefeitura em breve."); }} className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Licitações e Contratos</a></li>
-                <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Ouvidoria do Município de Propriá."); }} className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Ouvidoria SMTT</a></li>
+                <li><button onClick={() => setModalConteudo('ouvidoria')} className="hover:text-white transition-colors flex items-center gap-2 flex-row text-left"><i className="fa-solid fa-angle-right text-[10px] shrink-0 mt-1"></i> Ouvidoria SMTT</button></li>
+                
+                <li><a href="https://www.propria.se.gov.br/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Portal da Transparência</a></li>
               </ul>
             </div>
 
@@ -620,6 +684,158 @@ function Home() {
       >
         <i className="fa-solid fa-arrow-up"></i>
       </button>
+
+      {/* Modal Institucional / Acessos */}
+      {modalConteudo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden border border-gray-150 shadow-2xl relative transition-transform duration-300 transform scale-100">
+            {/* Modal header border */}
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
+            
+            <div className="p-6 md:p-8">
+              {/* Modal Close Button */}
+              <button 
+                onClick={() => setModalConteudo(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full w-8 h-8 flex items-center justify-center bg-gray-100 transition-colors"
+                title="Fechar"
+              >
+                <i className="fa-solid fa-xmark text-sm"></i>
+              </button>
+
+              {modalConteudo === 'sobre' && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i className="fa-solid fa-circle-info text-primary-600"></i> Sobre a SMTT
+                  </h3>
+                  <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
+                    <p>
+                      A <strong>Superintendência Municipal de Transportes e Trânsito (SMTT)</strong> de Propriá/SE é o órgão executivo de trânsito e rodoviário do município.
+                    </p>
+                    <p>
+                      Nossa missão é planejar, projetar, regulamentar e fiscalizar o trânsito de Propriá, garantindo a segurança viária de motoristas e pedestres, além de gerenciar a fluidez e a mobilidade urbana da cidade.
+                    </p>
+                    <p>
+                      Atuamos ativamente na educação para o trânsito, engenharia de tráfego, sinalização viária e atendimento a ocorrências e eventos nas vias públicas municipais.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {modalConteudo === 'legislacao' && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i className="fa-solid fa-gavel text-primary-600"></i> Legislação e Resoluções
+                  </h3>
+                  <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
+                    <p>
+                      A SMTT atua sob as diretrizes do <strong>Código de Trânsito Brasileiro (CTB)</strong>, das resoluções do CONTRAN, CONTRAND e das regulamentações e decretos municipais de Propriá/SE.
+                    </p>
+                    <p>
+                      Esta seção servirá em breve como repositório online das resoluções internas da SMTT, decretos de interdições regulares, portarias de nomeação de agentes e editais de trânsito.
+                    </p>
+                    <p className="bg-amber-50 text-amber-800 p-3 rounded-lg border border-amber-100 font-medium text-xs">
+                      <i className="fa-solid fa-clock mr-1"></i> A base digital de leis e portarias municipais de trânsito está em fase de catalogação e estará disponível em breve no portal público.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {modalConteudo === 'equipe' && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i className="fa-solid fa-users text-primary-600"></i> Equipe Diretiva
+                  </h3>
+                  <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
+                    <p>
+                      A gestão administrativa e operacional da Superintendência Municipal de Transportes e Trânsito é composta pela seguinte estrutura de liderança:
+                    </p>
+                    <ul className="space-y-3 pt-2">
+                      <li className="flex items-center gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-150">
+                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-950 flex items-center justify-center font-extrabold shrink-0">
+                          SP
+                        </div>
+                        <div>
+                          <strong className="text-gray-900 block text-xs">Superintendente Geral</strong>
+                          <span className="text-[11px] text-gray-500">Direção Geral de Operações e Planejamento</span>
+                        </div>
+                      </li>
+                      <li className="flex items-center gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-150">
+                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-950 flex items-center justify-center font-extrabold shrink-0">
+                          CO
+                        </div>
+                        <div>
+                          <strong className="text-gray-900 block text-xs">Coordenação Operacional</strong>
+                          <span className="text-[11px] text-gray-500">Liderança de Agentes e Fiscalização de Campo</span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {modalConteudo === 'ouvidoria' && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i className="fa-solid fa-comments text-primary-600"></i> Ouvidoria SMTT
+                  </h3>
+                  <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
+                    <p>
+                      A Ouvidoria é o canal direto de comunicação entre o cidadão e a SMTT de Propriá/SE para sugestões, reclamações, elogios ou denúncias.
+                    </p>
+                    <p>
+                      Você pode entrar em contato conosco das seguintes maneiras:
+                    </p>
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-150 space-y-2.5 text-xs">
+                      <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-phone text-secondary-500 w-5"></i>
+                        <span>Telefone: <strong>(79) 99665-4115</strong> (Segunda a Sexta, das 08h às 14h)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-envelope text-secondary-500 w-5"></i>
+                        <span>E-mail: <strong>smtt@propria.se.gov.br</strong></span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <i className="fa-solid fa-location-dot text-secondary-500 w-5 mt-0.5"></i>
+                        <span>Presencialmente: Avenida João Barbosa Pôrto, 1829, Propriá/SE.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {modalConteudo === 'servico-breve' && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i className="fa-solid fa-laptop text-primary-600"></i> Serviço em Breve
+                  </h3>
+                  <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
+                    <p>
+                      O serviço online de <strong>{servicoIndisponivel}</strong> está sendo integrado ao nosso portal de serviços da SMTT de Propriá.
+                    </p>
+                    <p>
+                      Para realizar este atendimento imediatamente, dirija-se presencialmente à sede da SMTT Propriá (Avenida João Barbosa Pôrto, 1829) munido dos seguintes documentos:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 text-xs">
+                      <li>Documento de Identidade oficial com foto (RG/CNH);</li>
+                      <li>Comprovante de residência atualizado no município;</li>
+                      <li>Laudo médico ou credenciais de comprovação (para PCD/Idoso se aplicável).</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
+                <button 
+                  onClick={() => setModalConteudo(null)}
+                  className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-6 rounded-xl shadow transition-colors text-sm"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

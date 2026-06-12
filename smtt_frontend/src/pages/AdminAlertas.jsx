@@ -46,12 +46,27 @@ function AdminAlertas() {
     }
   };
 
-  const handleRemoverAlerta = async (id) => {
+  const handleResolverAlerta = async (id) => {
+    if (!window.confirm("Deseja realmente marcar este alerta de trânsito como resolvido? Ele será retirado da página inicial pública.")) return;
     try {
       await api.put(`/admin/alertas/${id}/resolver`);
+      setMensagem('Alerta marcado como resolvido com sucesso!');
       carregarAlertas();
     } catch (error) {
-      alert('Erro ao remover alerta.');
+      console.error("Erro ao resolver alerta:", error);
+      alert('Erro ao resolver alerta.');
+    }
+  };
+
+  const handleExcluirAlerta = async (id) => {
+    if (!window.confirm("Deseja realmente EXCLUIR PERMANENTEMENTE este alerta do banco de dados? Esta ação não pode ser desfeita.")) return;
+    try {
+      await api.delete(`/admin/alertas/${id}`);
+      setMensagem('Alerta excluído permanentemente com sucesso!');
+      carregarAlertas();
+    } catch (error) {
+      console.error("Erro ao excluir alerta:", error);
+      alert('Erro ao excluir alerta permanentemente.');
     }
   };
 
@@ -110,6 +125,15 @@ function AdminAlertas() {
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
           >
             <i className="fa-solid fa-newspaper w-5 text-center text-gray-400"></i> Notícias
+          </button>
+          <button 
+            onClick={() => {
+              localStorage.setItem('adminMenuAtivo', 'estatisticas');
+              navigate('/admin/painel');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
+          >
+            <i className="fa-solid fa-chart-line w-5 text-center text-gray-400"></i> Estatísticas
           </button>
           <button 
             onClick={() => navigate('/admin/infracoes')} 
@@ -178,32 +202,73 @@ function AdminAlertas() {
             </form>
           </div>
 
-          {/* Lista de Alertas Ativos */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
-            <h3 className="font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
-              <AlertTriangle className="text-red-500" /> Alertas Ativos
-            </h3>
+          {/* Lista de Alertas */}
+          <div className="space-y-8">
+            
+            {/* Alertas Ativos */}
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
+              <h3 className="font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
+                <AlertTriangle className="text-red-500" /> Alertas Ativos
+              </h3>
 
-            {alertas.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                Trânsito livre. Nenhum alerta pendente.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {alertas.map(alerta => (
-                  <div key={alerta.id} className="p-4 border border-red-200 bg-red-50 rounded-xl flex justify-between items-start gap-4">
-                    <div>
-                      <h4 className="font-bold text-red-800 text-sm mb-1">{alerta.rua_bairro}</h4>
-                      <p className="text-xs text-red-700 leading-relaxed">{alerta.descricao}</p>
-                      <span className="text-[10px] uppercase font-bold text-red-400 mt-2 block">Status: {alerta.status}</span>
+              {alertas.filter(a => a.status === 'Ativo').length === 0 ? (
+                <div className="text-center py-10 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  Trânsito livre. Nenhum alerta ativo no momento.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {alertas.filter(a => a.status === 'Ativo').map(alerta => (
+                    <div key={alerta.id} className="p-4 border border-red-200 bg-red-50 rounded-xl flex justify-between items-start gap-4">
+                      <div>
+                        <h4 className="font-bold text-red-800 text-sm mb-1">{alerta.rua_bairro}</h4>
+                        <p className="text-xs text-red-700 leading-relaxed">{alerta.descricao}</p>
+                        <span className="text-[10px] uppercase font-bold text-red-400 mt-2 block">Status: {alerta.status}</span>
+                      </div>
+                      <button 
+                        onClick={() => handleResolverAlerta(alerta.id)} 
+                        className="bg-green-100 hover:bg-green-200 text-green-700 p-2.5 rounded-lg transition-colors flex items-center justify-center shrink-0" 
+                        title="Marcar como Resolvido"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button onClick={() => handleRemoverAlerta(alerta.id)} className="bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-lg transition-colors" title="Marcar como Resolvido / Excluir">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Histórico de Alertas Resolvidos */}
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
+              <h3 className="font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
+                <CheckCircle className="text-green-600" /> Histórico de Alertas Resolvidos
+              </h3>
+
+              {alertas.filter(a => a.status === 'Resolvido').length === 0 ? (
+                <div className="text-center py-10 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  Nenhum alerta arquivado no histórico.
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                  {alertas.filter(a => a.status === 'Resolvido').map(alerta => (
+                    <div key={alerta.id} className="p-4 border border-gray-200 bg-gray-50/70 rounded-xl flex justify-between items-start gap-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-750 text-sm mb-1">{alerta.rua_bairro}</h4>
+                        <p className="text-xs text-gray-500 leading-relaxed">{alerta.descricao}</p>
+                        <span className="text-[10px] uppercase font-bold text-gray-450 mt-2 block">Status: {alerta.status}</span>
+                      </div>
+                      <button 
+                        onClick={() => handleExcluirAlerta(alerta.id)} 
+                        className="bg-red-50 hover:bg-red-100 text-red-600 p-2.5 rounded-lg transition-colors shrink-0" 
+                        title="Excluir Permanentemente"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
 
         </div>
