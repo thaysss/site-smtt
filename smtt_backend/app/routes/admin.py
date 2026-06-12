@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, current_app
 from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento
-from app.models.portal import AlertaTransito, Noticia
+from app.models.portal import AlertaTransito, Noticia, Estatistica
 from datetime import datetime
 import random
 
@@ -233,6 +233,16 @@ def resolver_alerta(alerta_id):
     db.session.commit()
     return jsonify({"mensagem": "Alerta resolvido e removido do site."}), 200
 
+@admin_bp.route('/alertas/<int:alerta_id>', methods=['DELETE'])
+def excluir_alerta(alerta_id):
+    alerta = AlertaTransito.query.get(alerta_id)
+    if not alerta:
+        return jsonify({"erro": "Alerta não encontrado"}), 404
+        
+    db.session.delete(alerta)
+    db.session.commit()
+    return jsonify({"mensagem": "Alerta excluído permanentemente do banco."}), 200
+
 # ==========================================
 # 5. CONSULTA DE PLACA EXTERNA (APIPlacas / Mock)
 # ==========================================
@@ -455,3 +465,67 @@ def excluir_noticia_admin(id):
     db.session.delete(noticia)
     db.session.commit()
     return jsonify({"mensagem": "Notícia excluída com sucesso!"}), 200
+
+# ==========================================
+# 6. GESTÃO DE ESTATÍSTICAS (Painel Admin)
+# ==========================================
+@admin_bp.route('/estatisticas', methods=['GET'])
+def listar_estatisticas_admin():
+    estatisticas = Estatistica.query.order_by(Estatistica.ordem.asc(), Estatistica.id.asc()).all()
+    return jsonify([e.to_dict() for e in estatisticas]), 200
+
+@admin_bp.route('/estatisticas', methods=['POST'])
+def criar_estatistica_admin():
+    dados = request.get_json()
+    titulo = dados.get('titulo')
+    valor = dados.get('valor')
+    icone = dados.get('icone', 'fa-chart-simple')
+    try:
+        ordem = int(dados.get('ordem', 0))
+    except (TypeError, ValueError):
+        ordem = 0
+        
+    if not titulo or not valor:
+        return jsonify({"erro": "Título e Valor são obrigatórios."}), 400
+        
+    nova_estatistica = Estatistica(
+        titulo=titulo,
+        valor=valor,
+        icone=icone,
+        ordem=ordem
+    )
+    db.session.add(nova_estatistica)
+    db.session.commit()
+    return jsonify({"mensagem": "Estatística cadastrada com sucesso!", "estatistica": nova_estatistica.to_dict()}), 201
+
+@admin_bp.route('/estatisticas/<int:id>', methods=['PUT'])
+def editar_estatistica_admin(id):
+    estatistica = Estatistica.query.get_or_404(id)
+    dados = request.get_json()
+    
+    titulo = dados.get('titulo')
+    valor = dados.get('valor')
+    icone = dados.get('icone')
+    ordem = dados.get('ordem')
+    
+    if titulo:
+        estatistica.titulo = titulo
+    if valor:
+        estatistica.valor = valor
+    if icone:
+        estatistica.icone = icone
+    if ordem is not None:
+        try:
+            estatistica.ordem = int(ordem)
+        except (TypeError, ValueError):
+            pass
+            
+    db.session.commit()
+    return jsonify({"mensagem": "Estatística atualizada com sucesso!", "estatistica": estatistica.to_dict()}), 200
+
+@admin_bp.route('/estatisticas/<int:id>', methods=['DELETE'])
+def excluir_estatistica_admin(id):
+    estatistica = Estatistica.query.get_or_404(id)
+    db.session.delete(estatistica)
+    db.session.commit()
+    return jsonify({"mensagem": "Estatística excluída com sucesso!"}), 200

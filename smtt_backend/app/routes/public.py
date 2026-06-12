@@ -1,6 +1,6 @@
 # app/routes/public.py
 from flask import Blueprint, jsonify
-from app.models.portal import AlertaTransito, Noticia
+from app.models.portal import AlertaTransito, Noticia, Estatistica
 
 # Cria o Blueprint chamado 'public'
 public_bp = Blueprint('public', __name__, url_prefix='/api/public')
@@ -152,3 +152,12 @@ def get_noticias():
 def get_noticia(id):
     noticia = Noticia.query.get_or_404(id)
     return jsonify(noticia.to_dict()), 200
+
+@public_bp.route('/estatisticas', methods=['GET'])
+def get_estatisticas():
+    try:
+        estatisticas = Estatistica.query.order_by(Estatistica.ordem.asc(), Estatistica.id.asc()).all()
+        return jsonify([e.to_dict() for e in estatisticas]), 200
+    except Exception as e:
+        print(f"Erro ao obter estatísticas: {e}")
+        return jsonify([]), 200
