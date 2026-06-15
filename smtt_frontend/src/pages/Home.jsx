@@ -158,6 +158,7 @@ function Home() {
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-100 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <a href="/login"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Multas</a>
+                  <a href="/solicitacao-alvara"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Alvará & Permissionário</a>
                   <a href="/solicitacao-evento"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Solicitação de Evento</a>
                   <a href="/consultar"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Protocolo</a>
                 </div>
@@ -339,9 +340,13 @@ function Home() {
                 <h3 className="font-semibold text-gray-800 text-sm">Consulta de Multas</h3>
               </button>
 
-           
-
-              {/* Service Card 3 */}
+              {/* Service Card 2 */}
+              <button onClick={() => navigate('/solicitacao-alvara')} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all group focus:outline-none focus:ring-2 focus:ring-primary-500 w-full">
+                <div className="w-14 h-14 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
+                  <i className="fa-solid fa-id-card-clip text-2xl"></i>
+                </div>
+                <h3 className="font-semibold text-gray-800 text-sm">Alvará & Permissionário</h3>
+              </button>              {/* Service Card 3 */}
               <button onClick={() => navigate('/solicitacao-evento')} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all group focus:outline-none focus:ring-2 focus:ring-primary-500 w-full">
                 <div className="w-14 h-14 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
                   <i className="fa-solid fa-calendar-check text-2xl"></i>
