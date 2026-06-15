@@ -3,7 +3,7 @@ import os
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, current_app
 from app.extensions import db
-from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento
+from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento, SolicitacaoAlvara
 from app.models.portal import AlertaTransito, Noticia, Estatistica
 from datetime import datetime
 import random
@@ -370,6 +370,51 @@ def julgar_evento(id):
         
     db.session.commit()
     return jsonify({"mensagem": "Solicitação de evento julgada com sucesso!"}), 200
+
+
+@admin_bp.route('/alvaras', methods=['GET'])
+def listar_alvaras_admin():
+    alvaras = SolicitacaoAlvara.query.order_by(SolicitacaoAlvara.id.desc()).all()
+    resultado = [a.to_dict() for a in alvaras]
+    return jsonify(resultado), 200
+
+
+@admin_bp.route('/alvaras/<int:id>/julgar', methods=['PUT'])
+def julgar_alvara(id):
+    alvara = SolicitacaoAlvara.query.get_or_404(id)
+    
+    # Se vier multipart/form-data
+    decisao = request.form.get('decisao')
+    parecer = request.form.get('justificativa_jari')
+    
+    # Se vier JSON
+    if not decisao and request.is_json:
+        dados = request.get_json()
+        decisao = dados.get('decisao')
+        parecer = dados.get('justificativa_jari')
+        
+    if not decisao:
+        return jsonify({"erro": "A decisão é obrigatória."}), 400
+        
+    alvara.resposta_analise = parecer or f"Solicitação avaliada pela equipe e classificada como: {decisao}."
+    
+    # Salvar arquivo do alvará emitido se aprovado e enviado
+    if decisao == 'Aprovado' and 'arquivo_alvara' in request.files:
+        file = request.files['arquivo_alvara']
+        if file and file.filename != '':
+            numero_proto = alvara.protocolo.numero_protocolo if alvara.protocolo else f"ALV{id}"
+            nome_seguro = secure_filename(f"emitido_{numero_proto}_{file.filename}")
+            pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'emitidos')
+            os.makedirs(pasta_destino, exist_ok=True)
+            caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
+            file.save(caminho_arquivo)
+            alvara.caminho_alvara_emitido = f"/static/uploads/emitidos/{nome_seguro}"
+            
+    if alvara.protocolo:
+        alvara.protocolo.status = decisao
+        
+    db.session.commit()
+    return jsonify({"mensagem": "Solicitação de alvará/permissionário julgada com sucesso!"}), 200
 
 
 @admin_bp.route('/noticias', methods=['GET'])

@@ -64,6 +64,9 @@ with app.app_context():
                 ('Acidentes neste ano', '-15%', 'fa-car-burst', 3),
                 ('Acidentes com vítimas fatais', '45', 'fa-heart-crack', 4);
             """))
+        # 6. Coluna caminho_alvara_emitido na tabela solicitacoes_alvara
+        print("Adicionando coluna caminho_alvara_emitido na tabela solicitacoes_alvara...")
+        db.session.execute(text("ALTER TABLE solicitacoes_alvara ADD COLUMN IF NOT EXISTS caminho_alvara_emitido VARCHAR(255);"))
         
         db.session.commit()
         print("[SUCCESS] Migração concluída com sucesso no Supabase!")

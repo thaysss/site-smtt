@@ -10,6 +10,7 @@ import AdminInfracoes from './pages/AdminInfracoes';
 import AdminVeiculos from './pages/AdminVeiculos';
 import ConsultaProtocolo from './pages/ConsultaProtocolo'; // <-- 1. Importe aqui
 import SolicitacaoEvento from './pages/SolicitacaoEvento';
+import SolicitacaoAlvara from './pages/SolicitacaoAlvara';
 import PortalNoticias from './pages/PortalNoticias';
 import NoticiaDetalhe from './pages/NoticiaDetalhe';
 
@@ -28,6 +29,7 @@ function App() {
         <Route path="/admin/veiculos" element={<AdminVeiculos />} />
         <Route path="/consultar" element={<ConsultaProtocolo />} /> {/* <-- 2. Adicione a rota */}
         <Route path="/solicitacao-evento" element={<SolicitacaoEvento />} />
+        <Route path="/solicitacao-alvara" element={<SolicitacaoAlvara />} />
         <Route path="/noticias" element={<PortalNoticias />} />
         <Route path="/noticias/:id" element={<NoticiaDetalhe />} />
       </Routes>

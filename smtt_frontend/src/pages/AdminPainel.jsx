@@ -35,6 +35,10 @@ function AdminPainel() {
   const [infracoes, setInfracoes] = useState([]);
   const [filtroInfracao, setFiltroInfracao] = useState('');
   const [infracaoAberta, setInfracaoAberta] = useState(null);
+  const [alvaras, setAlvaras] = useState([]);
+  const [justificativaAlvara, setJustificativaAlvara] = useState('');
+  const [alvaraFoco, setAlvaraFoco] = useState(null);
+  const [alvaraArquivoEmitido, setAlvaraArquivoEmitido] = useState(null);
 
   // ESTADOS DO SISTEMA DE NOTÍCIAS
   const [noticias, setNoticias] = useState([]);
@@ -109,6 +113,7 @@ function AdminPainel() {
     api.defaults.headers.Authorization = `Bearer ${adminToken}`;
     carregarRecursos();
     carregarEventos();
+    carregarAlvaras();
     carregarInfracoes();
     carregarNoticias();
     carregarEstatisticas();
@@ -129,6 +134,15 @@ function AdminPainel() {
       setEventos(response.data);
     } catch (error) {
       console.error("Erro ao carregar eventos", error);
+    }
+  };
+
+  const carregarAlvaras = async () => {
+    try {
+      const response = await api.get('/admin/alvaras');
+      setAlvaras(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar alvarás", error);
     }
   };
 
@@ -271,6 +285,41 @@ function AdminPainel() {
     }
   };
 
+  const julgarAlvara = async (id, decisao) => {
+    if (!justificativaAlvara) {
+      alert("Digite o parecer técnico antes de decidir.");
+      return;
+    }
+
+    if (decisao === 'Aprovado' && !alvaraArquivoEmitido) {
+      alert("Por favor, anexe o documento do Alvará Emitido antes de aprovar.");
+      return;
+    }
+    
+    try {
+      const formData = new FormData();
+      formData.append('decisao', decisao);
+      formData.append('justificativa_jari', justificativaAlvara);
+      if (alvaraArquivoEmitido) {
+        formData.append('arquivo_alvara', alvaraArquivoEmitido);
+      }
+
+      await api.put(`/admin/alvaras/${id}/julgar`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      setMensagem(`Solicitação de alvará/permissionário ${decisao === 'Aprovado' ? 'aprovada' : 'negada'} com sucesso!`);
+      setJustificativaAlvara('');
+      setAlvaraArquivoEmitido(null);
+      setAlvaraFoco(null);
+      carregarAlvaras();
+    } catch {
+      alert("Erro ao julgar solicitação de alvará.");
+    }
+  };
+
   const limparFormNoticia = () => {
     setNoticiaFoco(null);
     setTituloNews('');
@@ -378,6 +427,16 @@ function AdminPainel() {
             }`}
           >
             <i className={`fa-solid fa-calendar-days w-5 text-center ${menuAtivo === 'eventos' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Eventos
+          </button>
+          <button 
+            onClick={() => handleMenuClick('alvaras')}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors border text-left ${
+              menuAtivo === 'alvaras' 
+                ? 'bg-primary-600 text-white shadow-md border-primary-700' 
+                : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
+            }`}
+          >
+            <i className={`fa-solid fa-id-card-clip w-5 text-center ${menuAtivo === 'alvaras' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Alvarás
           </button>
           <button 
             onClick={() => handleMenuClick('infracoes')}
@@ -672,6 +731,235 @@ function AdminPainel() {
                       ) : (
                         <div className="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-600 bg-gray-100/50 p-4 rounded-xl">
                           <strong>Parecer Técnico:</strong> <span className="italic">"{eve.resposta_analise}"</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : menuAtivo === 'alvaras' ? (
+          <>
+            <header className="mb-10">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Solicitações de Alvarás e Permissionários</h1>
+              <p className="text-gray-500">Analise os requerimentos de emissão/renovação de alvará e inclusão de permissionários.</p>
+            </header>
+
+            {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
+
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
+              {alvaras.length === 0 ? (
+                <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
+                  <FileText className="w-12 h-12 mb-3 text-gray-300 stroke-[1.5]" />
+                  <p className="font-bold text-base text-gray-600 mb-1">Nenhuma solicitação pendente</p>
+                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos de alvará/permissionário cadastrados.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {alvaras.map((alv) => (
+                    <div key={alv.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
+                      <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+                        <div>
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <h3 className="font-bold text-lg text-primary-900">Protocolo: <span className="text-primary-600">{alv.numero_protocolo}</span></h3>
+                            <span className={`text-[10px] border font-extrabold px-2.5 py-0.5 rounded-lg uppercase tracking-wide ${
+                              alv.tipo_servico === 'Renovação de Alvará'
+                                ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                : 'bg-teal-50 text-teal-700 border-teal-100'
+                            }`}>
+                              {alv.tipo_servico}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">Requerente: <strong>{alv.nome_solicitante}</strong> | CPF: <strong>{alv.cpf}</strong> | Tel: <strong>{alv.telefone}</strong></p>
+                          <p className="text-sm text-gray-600">E-mail: <strong>{alv.email}</strong> | Placa: <strong>{alv.placa_veiculo || 'Não informada'}</strong> | Fator RH: <strong>{alv.fator_rh || 'Não informado'}</strong></p>
+                        </div>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                          alv.status === 'Aprovado' 
+                            ? 'bg-green-100 text-green-800 border-green-200' 
+                            : alv.status === 'Negado'
+                            ? 'bg-red-100 text-red-800 border-red-200'
+                            : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                        }`}>
+                          {alv.status}
+                        </span>
+                      </div>
+
+                      {alv.tem_auxiliar && (
+                        <div className="bg-blue-50/40 p-4 rounded-xl border border-blue-100 mb-4">
+                          <p className="text-xs uppercase tracking-wider text-blue-600 font-bold mb-1.5"><i className="fa-solid fa-user-shield"></i> Condutor Auxiliar (Defensor)</p>
+                          <p className="text-sm text-gray-800">Nome: <strong>{alv.nome_auxiliar}</strong> | CPF: <strong>{alv.cpf_auxiliar}</strong></p>
+                        </div>
+                      )}
+
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 mb-4 space-y-4">
+                        <div>
+                          <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-2">Documentos do Permissionário</p>
+                          <div className="flex flex-wrap gap-2">
+                            {alv.caminho_cnh && (
+                              <a href={montarUrlArquivo(alv.caminho_cnh)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> CNH
+                              </a>
+                            )}
+                            {alv.caminho_crlv && (
+                              <a href={montarUrlArquivo(alv.caminho_crlv)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> CRLV
+                              </a>
+                            )}
+                            {alv.caminho_titulo_eleitoral && (
+                              <a href={montarUrlArquivo(alv.caminho_titulo_eleitoral)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Título Eleitoral
+                              </a>
+                            )}
+                            {alv.caminho_certidao_eleitoral && (
+                              <a href={montarUrlArquivo(alv.caminho_certidao_eleitoral)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Certidão Eleitoral
+                              </a>
+                            )}
+                            {alv.caminho_antecedentes_criminais && (
+                              <a href={montarUrlArquivo(alv.caminho_antecedentes_criminais)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Antecedentes Criminais
+                              </a>
+                            )}
+                            {alv.caminho_comprovante_endereco && (
+                              <a href={montarUrlArquivo(alv.caminho_comprovante_endereco)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Comprovante Endereço
+                              </a>
+                            )}
+                            {alv.caminho_certificado_curso && (
+                              <a href={montarUrlArquivo(alv.caminho_certificado_curso)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Certificado Curso
+                              </a>
+                            )}
+                            {alv.caminho_cadastro_cnis && (
+                              <a href={montarUrlArquivo(alv.caminho_cadastro_cnis)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Cadastro CNIS
+                              </a>
+                            )}
+                            {alv.caminho_regularidade_cnis && (
+                              <a href={montarUrlArquivo(alv.caminho_regularidade_cnis)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Regularidade CNIS
+                              </a>
+                            )}
+                            {alv.caminho_foto && (
+                              <a href={montarUrlArquivo(alv.caminho_foto)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Foto 3/4
+                              </a>
+                            )}
+                            {alv.caminho_fator_rh && (
+                              <a href={montarUrlArquivo(alv.caminho_fator_rh)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Comprovante Sangue/RH
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {alv.tem_auxiliar && (
+                          <div>
+                            <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-2">Documentos do Auxiliar</p>
+                            <div className="flex flex-wrap gap-2">
+                              {alv.caminho_cnh_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_cnh_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> CNH Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_crlv_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_crlv_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> CRLV Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_titulo_eleitoral_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_titulo_eleitoral_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Título Eleitoral Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_certidao_eleitoral_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_certidao_eleitoral_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Certidão Eleitoral Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_antecedentes_criminais_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_antecedentes_criminais_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Antecedentes Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_comprovante_endereco_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_comprovante_endereco_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Endereço Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_certificado_curso_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_certificado_curso_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Certificado Curso Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_cadastro_cnis_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_cadastro_cnis_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Cadastro CNIS Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_regularidade_cnis_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_regularidade_cnis_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Regularidade CNIS Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_foto_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_foto_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Foto Auxiliar
+                                </a>
+                              )}
+                              {alv.caminho_fator_rh_auxiliar && (
+                                <a href={montarUrlArquivo(alv.caminho_fator_rh_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
+                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Fator RH Auxiliar
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {alv.status === 'Em Análise' ? (
+                        <div className="border-t border-gray-200 pt-5 mt-4">
+                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Parecer Técnico SMTT *</label>
+                          <textarea 
+                            rows="3" 
+                            placeholder="Escreva o parecer técnico sobre a autorização de alvará/permissionário..."
+                            value={alvaraFoco === alv.id ? justificativaAlvara : ''}
+                            onChange={(e) => { setJustificativaAlvara(e.target.value); setAlvaraFoco(alv.id); }}
+                            className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all mb-4 resize-none text-sm"
+                          />
+
+                          <div className="mb-5">
+                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-2">
+                              <Upload className="w-4 h-4 text-gray-500" /> Anexar Alvará Digital Emitido (Obrigatório para Aprovação)
+                            </label>
+                            <input 
+                              type="file" 
+                              accept=".pdf,image/*"
+                              onChange={(e) => { setAlvaraArquivoEmitido(e.target.files[0]); setAlvaraFoco(alv.id); }}
+                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 border border-gray-200 rounded-xl p-2 bg-white transition-all cursor-pointer"
+                            />
+                          </div>
+
+                          <div className="flex gap-3">
+                            <button onClick={() => julgarAlvara(alv.id, 'Aprovado')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                              <CheckCircle className="w-5 h-5" /> Emitir / Aprovar Pedido
+                            </button>
+                            <button onClick={() => julgarAlvara(alv.id, 'Negado')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                              <XCircle className="w-5 h-5" /> Negar Pedido
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-600 bg-gray-100/50 p-4 rounded-xl space-y-2">
+                          <div><strong>Parecer Técnico:</strong> <span className="italic">"{alv.resposta_analise}"</span></div>
+                          {alv.caminho_alvara_emitido && (
+                            <div className="pt-2">
+                              <a href={montarUrlArquivo(alv.caminho_alvara_emitido)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 rounded-lg border border-green-200 transition-all">
+                                <FileText className="w-3.5 h-3.5" /> Visualizar Alvará Emitido
+                              </a>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

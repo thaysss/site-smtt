@@ -182,3 +182,105 @@ class SolicitacaoEvento(db.Model):
         }
 
 
+class SolicitacaoAlvara(db.Model):
+    __tablename__ = 'solicitacoes_alvara'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    protocolo_id = db.Column(db.Integer, db.ForeignKey('protocolos.id'), nullable=False)
+    tipo_servico = db.Column(db.String(100), nullable=False) # 'Renovação de Alvará' ou 'Inclusão de Permissionário'
+    
+    # Permissionário / Requerente
+    nome_solicitante = db.Column(db.String(150), nullable=False)
+    cpf = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    telefone = db.Column(db.String(20), nullable=False)
+    placa_veiculo = db.Column(db.String(10), nullable=True)
+    fator_rh = db.Column(db.String(10), nullable=True) # Ex: A+, O-, etc.
+    
+    # Auxiliar / Defensor
+    tem_auxiliar = db.Column(db.Boolean, default=False)
+    nome_auxiliar = db.Column(db.String(150), nullable=True)
+    cpf_auxiliar = db.Column(db.String(20), nullable=True)
+    
+    # Caminhos dos Arquivos do Permissionário
+    caminho_cnh = db.Column(db.String(255), nullable=True)
+    caminho_crlv = db.Column(db.String(255), nullable=True)
+    caminho_titulo_eleitoral = db.Column(db.String(255), nullable=True)
+    caminho_certidao_eleitoral = db.Column(db.String(255), nullable=True)
+    caminho_antecedentes_criminais = db.Column(db.String(255), nullable=True)
+    caminho_comprovante_endereco = db.Column(db.String(255), nullable=True)
+    caminho_certificado_curso = db.Column(db.String(255), nullable=True)
+    caminho_cadastro_cnis = db.Column(db.String(255), nullable=True)
+    caminho_regularidade_cnis = db.Column(db.String(255), nullable=True)
+    caminho_foto = db.Column(db.String(255), nullable=True)
+    caminho_fator_rh = db.Column(db.String(255), nullable=True)
+    
+    # Caminhos dos Arquivos do Auxiliar
+    caminho_cnh_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_crlv_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_titulo_eleitoral_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_certidao_eleitoral_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_antecedentes_criminais_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_comprovante_endereco_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_certificado_curso_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_cadastro_cnis_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_regularidade_cnis_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_foto_auxiliar = db.Column(db.String(255), nullable=True)
+    caminho_fator_rh_auxiliar = db.Column(db.String(255), nullable=True)
+    
+    resposta_analise = db.Column(db.Text, default='Sua solicitação de alvará/permissionário está em análise pela equipe técnica da SMTT.')
+    caminho_alvara_emitido = db.Column(db.String(255), nullable=True)
+    
+    protocolo = db.relationship('Protocolo', backref=db.backref('alvara', uselist=False), lazy=True)
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "protocolo_id": self.protocolo_id,
+            "tipo_servico": self.tipo_servico,
+            "nome_solicitante": self.nome_solicitante,
+            "cpf": self.cpf,
+            "email": self.email,
+            "telefone": self.telefone,
+            "placa_veiculo": self.placa_veiculo,
+            "fator_rh": self.fator_rh,
+            
+            "tem_auxiliar": self.tem_auxiliar,
+            "nome_auxiliar": self.nome_auxiliar,
+            "cpf_auxiliar": self.cpf_auxiliar,
+            
+            # Arquivos Permissionário
+            "caminho_cnh": self.caminho_cnh,
+            "caminho_crlv": self.caminho_crlv,
+            "caminho_titulo_eleitoral": self.caminho_titulo_eleitoral,
+            "caminho_certidao_eleitoral": self.caminho_certidao_eleitoral,
+            "caminho_antecedentes_criminais": self.caminho_antecedentes_criminais,
+            "caminho_comprovante_endereco": self.caminho_comprovante_endereco,
+            "caminho_certificado_curso": self.caminho_certificado_curso,
+            "caminho_cadastro_cnis": self.caminho_cadastro_cnis,
+            "caminho_regularidade_cnis": self.caminho_regularidade_cnis,
+            "caminho_foto": self.caminho_foto,
+            "caminho_fator_rh": self.caminho_fator_rh,
+            
+            # Arquivos Auxiliar
+            "caminho_cnh_auxiliar": self.caminho_cnh_auxiliar,
+            "caminho_crlv_auxiliar": self.caminho_crlv_auxiliar,
+            "caminho_titulo_eleitoral_auxiliar": self.caminho_titulo_eleitoral_auxiliar,
+            "caminho_certidao_eleitoral_auxiliar": self.caminho_certidao_eleitoral_auxiliar,
+            "caminho_antecedentes_criminais_auxiliar": self.caminho_antecedentes_criminais_auxiliar,
+            "caminho_comprovante_endereco_auxiliar": self.caminho_comprovante_endereco_auxiliar,
+            "caminho_certificado_curso_auxiliar": self.caminho_certificado_curso_auxiliar,
+            "caminho_cadastro_cnis_auxiliar": self.caminho_cadastro_cnis_auxiliar,
+            "caminho_regularidade_cnis_auxiliar": self.caminho_regularidade_cnis_auxiliar,
+            "caminho_foto_auxiliar": self.caminho_foto_auxiliar,
+            "caminho_fator_rh_auxiliar": self.caminho_fator_rh_auxiliar,
+            
+            "resposta_analise": self.resposta_analise,
+            "caminho_alvara_emitido": self.caminho_alvara_emitido,
+            "numero_protocolo": self.protocolo.numero_protocolo if self.protocolo else None,
+            "status": self.protocolo.status if self.protocolo else None,
+            "criado_em": self.protocolo.criado_em.strftime("%d/%m/%Y") if self.protocolo else None
+        }
+
+
+
