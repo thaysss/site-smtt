@@ -145,7 +145,7 @@ function Home() {
                   Institucional <i className="fa-solid fa-chevron-down text-xs"></i>
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-100 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('sobre'); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Sobre a SMTT</a>
+                  <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Sobre a SMTT</a>
                   <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('legislacao'); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Legislação</a>
                   <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('equipe'); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Equipe Diretiva</a>
                 </div>
@@ -159,7 +159,7 @@ function Home() {
                 <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-100 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <a href="/login"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Multas</a>
                   <a href="/solicitacao-alvara"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Alvará & Permissionário</a>
-                  <a href="/solicitacao-evento"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Solicitação de Evento</a>
+                  <a href="/solicitacao-evento"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Solicitação para Eventos</a>
                   <a href="/consultar"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Protocolo</a>
                 </div>
               </div>

@@ -203,6 +203,7 @@ class SolicitacaoAlvara(db.Model):
     cpf_auxiliar = db.Column(db.String(20), nullable=True)
     
     # Caminhos dos Arquivos do Permissionário
+    caminho_requerimento = db.Column(db.String(255), nullable=True)
     caminho_cnh = db.Column(db.String(255), nullable=True)
     caminho_crlv = db.Column(db.String(255), nullable=True)
     caminho_titulo_eleitoral = db.Column(db.String(255), nullable=True)
@@ -250,6 +251,7 @@ class SolicitacaoAlvara(db.Model):
             "cpf_auxiliar": self.cpf_auxiliar,
             
             # Arquivos Permissionário
+            "caminho_requerimento": self.caminho_requerimento,
             "caminho_cnh": self.caminho_cnh,
             "caminho_crlv": self.caminho_crlv,
             "caminho_titulo_eleitoral": self.caminho_titulo_eleitoral,
