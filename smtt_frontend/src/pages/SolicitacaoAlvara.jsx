@@ -21,6 +21,7 @@ function SolicitacaoAlvara() {
 
   // Arquivos do Permissionário
   const [arquivos, setArquivos] = useState({
+    requerimento: null,
     cnh: null,
     crlv: null,
     titulo_eleitoral: null,
@@ -57,6 +58,7 @@ function SolicitacaoAlvara() {
   // Documentos necessários por tipo de serviço
   const docsTitularNecessarios = tipoServico === 'Renovação de Alvará' 
     ? [
+        { key: 'requerimento', label: 'Requerimento Preenchido e Assinado *' },
         { key: 'cnh', label: 'Cópia da CNH *' },
         { key: 'crlv', label: 'Cópia do CRLV *' },
         { key: 'certidao_eleitoral', label: 'Certidão Eleitoral *' },
@@ -67,6 +69,7 @@ function SolicitacaoAlvara() {
         { key: 'foto', label: 'Foto 3/4 *' }
       ]
     : [
+        { key: 'requerimento', label: 'Requerimento Preenchido e Assinado *' },
         { key: 'cnh', label: 'Cópia da CNH *' },
         { key: 'crlv', label: 'Cópia do CRLV *' },
         { key: 'titulo_eleitoral', label: 'Título Eleitoral *' },
@@ -200,7 +203,7 @@ function SolicitacaoAlvara() {
     setCpfAuxiliar('');
     setProtocoloGerado('');
     setArquivos({
-      cnh: null, crlv: null, titulo_eleitoral: null, certidao_eleitoral: null,
+      requerimento: null, cnh: null, crlv: null, titulo_eleitoral: null, certidao_eleitoral: null,
       antecedentes_criminais: null, comprovante_endereco: null, certificado_curso: null,
       cadastro_cnis: null, regularidade_cnis: null, foto: null, fator_rh: null
     });
@@ -254,8 +257,25 @@ function SolicitacaoAlvara() {
                 </div>
               </div>
 
-              <div className="flex gap-4 items-start">
+               <div className="flex gap-4 items-start">
                 <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0">2</div>
+                <div>
+                  <h3 className="font-bold text-sm">Preencha o Formulário</h3>
+                  <p className="text-xs text-primary-100 mt-1">Preencha todos os campos solicitados no formulário de requisição e anexe junto aos documentos. (Clique no link abaixo para fazer o download do modelo  de requerimento.)</p>
+                  
+                  <a
+                    href="/formulario-alvara.pdf"
+                    download
+                    className="inline-flex items-center gap-2 mt-3 bg-white text-primary-950 font-bold text-xs px-4 py-2 rounded-lg hover:bg-secondary-500 hover:text-primary-950 transition-colors shadow"
+                  >
+                    <i className="fa-solid fa-file-pdf text-red-600"></i> Download Requerimento (PDF)
+                  </a>
+                
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0">3</div>
                 <div>
                   <h3 className="font-bold text-sm">Organize a Documentação</h3>
                   <p className="text-xs text-primary-100 mt-1">Digitalize todos os documentos exigidos. Formatos aceitos: PDF ou Imagem.</p>
@@ -263,12 +283,14 @@ function SolicitacaoAlvara() {
               </div>
 
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0">3</div>
+                <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0">4</div>
                 <div>
                   <h3 className="font-bold text-sm">Condutor Auxiliar (Defensor)</h3>
                   <p className="text-xs text-primary-100 mt-1">Se houver condutor auxiliar, marque a opção correspondente e anexe também todos os documentos do auxiliar.</p>
                 </div>
               </div>
+
+             
             </div>
 
             <div className="border-t border-primary-800 pt-6 mt-8 space-y-4">
@@ -276,6 +298,15 @@ function SolicitacaoAlvara() {
                 <h4 className="font-bold text-sm text-secondary-500 mb-1">Aviso Importante:</h4>
                 <p className="text-xs text-primary-100 leading-relaxed">
                   Para condutores Auxiliares (Defensores), será exigido exatamente o mesmo checklist de documentação do permissionário titular.
+                </p>
+              </div>
+            </div>
+            <div className="border-t border-primary-800 pt-6 mt-8 space-y-4">
+              <div>
+                <h4 className="font-bold text-sm text-secondary-500 mb-1">INSTRUÇÕES PARA ENVIO DE FOTO:</h4>
+                <p className="text-xs text-primary-100 leading-relaxed">
+                  Selecionar a opção "Foto 3/4" no formulário e anexe a imagem. A foto deve ser nítida, sem óculos escuros ou chapéus, para garantir a identificação correta.;<br /> 
+                  Tire uma foto recente, de rosto inteiro, com fundo neutro e boa iluminação. 
                 </p>
               </div>
             </div>

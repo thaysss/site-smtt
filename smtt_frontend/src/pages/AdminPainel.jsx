@@ -796,6 +796,11 @@ function AdminPainel() {
                         <div>
                           <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-2">Documentos do Permissionário</p>
                           <div className="flex flex-wrap gap-2">
+                            {alv.caminho_requerimento && (
+                              <a href={montarUrlArquivo(alv.caminho_requerimento)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
+                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Requerimento
+                              </a>
+                            )}
                             {alv.caminho_cnh && (
                               <a href={montarUrlArquivo(alv.caminho_cnh)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
                                 <FileText className="w-3.5 h-3.5 text-primary-600" /> CNH

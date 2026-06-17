@@ -219,6 +219,7 @@ def enviar_solicitacao_alvara():
         return None
 
     # Salva arquivos do permissionário
+    caminho_requerimento = salvar_arquivo('requerimento')
     caminho_cnh = salvar_arquivo('cnh')
     caminho_crlv = salvar_arquivo('crlv')
     caminho_titulo_eleitoral = salvar_arquivo('titulo_eleitoral')
@@ -232,8 +233,8 @@ def enviar_solicitacao_alvara():
     caminho_fator_rh = salvar_arquivo('fator_rh')
     
     # Validações de arquivos obrigatórios do titular
-    if not (caminho_cnh and caminho_crlv and caminho_certidao_eleitoral and caminho_antecedentes_criminais and caminho_comprovante_endereco and caminho_certificado_curso and caminho_regularidade_cnis and caminho_foto):
-        return jsonify({"erro": "Algum documento obrigatório do permissionário não foi enviado (incluindo a Foto 3/4)."}), 400
+    if not (caminho_requerimento and caminho_cnh and caminho_crlv and caminho_certidao_eleitoral and caminho_antecedentes_criminais and caminho_comprovante_endereco and caminho_certificado_curso and caminho_regularidade_cnis and caminho_foto):
+        return jsonify({"erro": "Algum documento obrigatório do permissionário não foi enviado (incluindo o Requerimento Preenchido e a Foto 3/4)."}), 400
         
     # Se for Inclusão, valida Título Eleitoral, Cadastro CNIS
     if tipo_servico == 'Inclusão de Permissionário':
@@ -301,6 +302,7 @@ def enviar_solicitacao_alvara():
         nome_auxiliar=nome_auxiliar,
         cpf_auxiliar=cpf_auxiliar,
         
+        caminho_requerimento=caminho_requerimento,
         caminho_cnh=caminho_cnh,
         caminho_crlv=caminho_crlv,
         caminho_titulo_eleitoral=caminho_titulo_eleitoral,
