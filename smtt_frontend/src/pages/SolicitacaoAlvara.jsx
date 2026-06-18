@@ -219,12 +219,8 @@ function SolicitacaoAlvara() {
       {/* Header */}
       <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
-            <div>
-              <h1 className="font-bold text-lg text-gray-900 leading-tight">SMTT Propriá</h1>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Transportes e Trânsito</p>
-            </div>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+            <img src="/logo-horizontal.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
           </div>
           <button
             onClick={() => navigate('/')}
@@ -609,7 +605,7 @@ function SolicitacaoAlvara() {
               </div>
 
               <div className="text-xs text-gray-500 leading-relaxed max-w-md mx-auto">
-                Guarde este número de protocolo. Você poderá utilizá-lo na página de <strong>Consulta de Protocolo</strong> da SMTT para acompanhar a análise de trânsito e o parecer técnico final.
+                Guarde este número de protocolo. Você poderá utilizá-lo na página de <strong>Consulta de Protocolo</strong> da SMTT para acompanhar a análise da solicitação do seu requerimento.
               </div>
 
               <div className="pt-4 flex flex-col sm:flex-row gap-3">

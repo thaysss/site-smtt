@@ -108,8 +108,8 @@ function Home() {
         <div className="flex space-x-4">
           <a href="#main-content" className="hover:underline focus:outline-none focus:ring-2 focus:ring-white">Ir para o conteúdo</a>
           <span>|</span>
-          <button 
-            onClick={() => setAltoContraste(!altoContraste)} 
+          <button
+            onClick={() => setAltoContraste(!altoContraste)}
             className="hover:underline focus:outline-none focus:ring-2 focus:ring-white flex items-center gap-1"
           >
             <i className="fa-solid fa-circle-half-stroke"></i> Alto Contraste
@@ -122,18 +122,21 @@ function Home() {
 
       {/* Main Navigation */}
       <header className="bg-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
+
             <div className="flex-shrink-0 flex items-center">
-              <a href="#top" className="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-primary-600 rounded">
-                <img src="/logo.png" alt="Logo SMTT" className="w-12 h-12 object-contain" />
-                <div>
-                  <h1 className="font-bold text-xl leading-tight text-gray-900">SMTT</h1>
-                  <p className="text-xs text-gray-500 hidden sm:block">Transportes e Trânsito / Propriá - SE</p>
-                </div>
+              <a href="#top" className="flex items-center focus:outline-none focus:ring-2 focus:ring-primary-600 rounded">
+                <img
+                  src="/logo.png"
+                  alt="Segunda Logo"
+                  className="h-14 w-auto object-contain mr-2"
+                />
+                <img src="/logo_s.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
               </a>
             </div>
+
 
             {/* Desktop Menu */}
             <nav className="hidden md:flex space-x-8 items-center">
@@ -157,14 +160,15 @@ function Home() {
                   Serviços <i className="fa-solid fa-chevron-down text-xs"></i>
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-100 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <a href="/login"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Multas</a>
-                  <a href="/solicitacao-alvara"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Alvará & Permissionário</a>
-                  <a href="/solicitacao-evento"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Solicitação para Eventos</a>
-                  <a href="/consultar"  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Protocolo</a>
+                  <a href="/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Multas</a>
+                  <a href="/contestacao-multa" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Defesa de Autuação</a>
+                  <a href="/solicitacao-alvara" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Alvará & Permissionário</a>
+                  <a href="/solicitacao-evento" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Solicitação para Eventos</a>
+                  <a href="/consultar" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Consulta de Protocolo</a>
                 </div>
               </div>
 
-              
+
               <a href="#noticias" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Notícias</a>
               <a href="#contato" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contato</a>
             </nav>
@@ -276,11 +280,11 @@ function Home() {
                       {alertas.map((alerta, index) => {
                         const descLow = (alerta.descricao || '').toLowerCase();
                         const ruaLow = (alerta.rua_bairro || '').toLowerCase();
-                        
+
                         let cardBg = 'bg-red-50/55 border-red-100 text-red-800';
                         let iconBg = 'bg-red-100 text-red-600';
                         let iconClass = 'fa-road-barrier';
-                        
+
                         if (descLow.includes('acidente') || descLow.includes('perigo') || descLow.includes('colisão') || ruaLow.includes('perigo')) {
                           cardBg = 'bg-amber-50/55 border-amber-100 text-amber-800';
                           iconBg = 'bg-amber-100 text-amber-600';
@@ -292,8 +296,8 @@ function Home() {
                         }
 
                         return (
-                          <div 
-                            key={alerta.id || index} 
+                          <div
+                            key={alerta.id || index}
                             className={`p-3.5 border rounded-xl flex gap-3.5 items-start ${cardBg} transition-all hover:scale-[1.01] ${index < alertas.length - 1 ? 'mb-1' : ''}`}
                           >
                             <div className={`${iconBg} p-2.5 rounded-xl flex-shrink-0 flex items-center justify-center`}>
@@ -371,7 +375,7 @@ function Home() {
               </button>
 
               {/* Service Card 6 */}
-              <button onClick={() => navigate('/login')} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all group focus:outline-none focus:ring-2 focus:ring-primary-500 w-full">
+              <button onClick={() => navigate('/contestacao-multa')} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all group focus:outline-none focus:ring-2 focus:ring-primary-500 w-full">
                 <div className="w-14 h-14 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
                   <i className="fa-solid fa-scale-balanced text-2xl"></i>
                 </div>
@@ -464,9 +468,9 @@ function Home() {
                 <h2 className="text-3xl font-bold text-gray-900">Últimas Notícias</h2>
                 <div className="h-1 w-20 bg-secondary-500 mt-2 rounded"></div>
               </div>
-              <a 
-                href="/noticias" 
-                onClick={(e) => { e.preventDefault(); navigate('/noticias'); }} 
+              <a
+                href="/noticias"
+                onClick={(e) => { e.preventDefault(); navigate('/noticias'); }}
                 className="hidden sm:block text-primary-600 hover:underline font-medium"
               >
                 Ver mais notícias
@@ -481,7 +485,7 @@ function Home() {
               <div className="grid md:grid-cols-3 gap-8">
                 {noticias.map((item) => {
                   const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
-                  const imageSrc = item.imagem_url 
+                  const imageSrc = item.imagem_url
                     ? (item.imagem_url.startsWith('http') ? item.imagem_url : `${apiBaseUrl}${item.imagem_url}`)
                     : '';
 
@@ -516,16 +520,16 @@ function Home() {
                   };
 
                   return (
-                    <article 
-                      key={item.id} 
+                    <article
+                      key={item.id}
                       onClick={() => navigate(`/noticias/${item.id}`)}
                       className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow group flex flex-col h-full cursor-pointer"
                     >
                       <div className="h-48 overflow-hidden relative shrink-0">
                         {imageSrc ? (
-                          <img 
-                            src={imageSrc} 
-                            alt={item.titulo} 
+                          <img
+                            src={imageSrc}
+                            alt={item.titulo}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
@@ -561,9 +565,9 @@ function Home() {
               </div>
             )}
             <div className="mt-6 text-center sm:hidden">
-              <a 
-                href="/noticias" 
-                onClick={(e) => { e.preventDefault(); navigate('/noticias'); }} 
+              <a
+                href="/noticias"
+                onClick={(e) => { e.preventDefault(); navigate('/noticias'); }}
                 className="text-primary-600 font-medium hover:underline"
               >
                 Ver mais notícias
@@ -641,7 +645,7 @@ function Home() {
                 <li><button onClick={() => navigate('/consultar')} className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Consultar Protocolo</button></li>
                 <li><button onClick={() => navigate('/admin/login')} className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Acesso Servidor / Administrativo</button></li>
                 <li><button onClick={() => setModalConteudo('ouvidoria')} className="hover:text-white transition-colors flex items-center gap-2 flex-row text-left"><i className="fa-solid fa-angle-right text-[10px] shrink-0 mt-1"></i> Ouvidoria SMTT</button></li>
-                
+
                 <li><a href="https://www.propria.se.gov.br/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2"><i className="fa-solid fa-angle-right text-[10px]"></i> Portal da Transparência</a></li>
               </ul>
             </div>
@@ -696,10 +700,10 @@ function Home() {
           <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden border border-gray-150 shadow-2xl relative transition-transform duration-300 transform scale-100">
             {/* Modal header border */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
-            
+
             <div className="p-6 md:p-8">
               {/* Modal Close Button */}
-              <button 
+              <button
                 onClick={() => setModalConteudo(null)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full w-8 h-8 flex items-center justify-center bg-gray-100 transition-colors"
                 title="Fechar"
@@ -830,7 +834,7 @@ function Home() {
               )}
 
               <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
-                <button 
+                <button
                   onClick={() => setModalConteudo(null)}
                   className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-6 rounded-xl shadow transition-colors text-sm"
                 >

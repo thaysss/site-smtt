@@ -13,6 +13,7 @@ import SolicitacaoEvento from './pages/SolicitacaoEvento';
 import SolicitacaoAlvara from './pages/SolicitacaoAlvara';
 import PortalNoticias from './pages/PortalNoticias';
 import NoticiaDetalhe from './pages/NoticiaDetalhe';
+import ContestacaoMulta from './pages/ContestacaoMulta';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/consultar" element={<ConsultaProtocolo />} /> {/* <-- 2. Adicione a rota */}
         <Route path="/solicitacao-evento" element={<SolicitacaoEvento />} />
         <Route path="/solicitacao-alvara" element={<SolicitacaoAlvara />} />
+        <Route path="/contestacao-multa" element={<ContestacaoMulta />} />
         <Route path="/noticias" element={<PortalNoticias />} />
         <Route path="/noticias/:id" element={<NoticiaDetalhe />} />
       </Routes>
