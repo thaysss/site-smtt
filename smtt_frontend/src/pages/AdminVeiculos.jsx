@@ -6,6 +6,7 @@ import {
   Building2, LogOut, FileEdit, LayoutDashboard, 
   Car, AlertTriangle, ShieldAlert, CheckCircle, FileDigit, CarFront
 } from 'lucide-react';
+import AdminSidebar from '../components/AdminSidebar';
 
 function AdminVeiculos() {
   const [placa, setPlaca] = useState('');
@@ -43,84 +44,7 @@ function AdminVeiculos() {
     <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
       
       {/* Sidebar */}
-      <aside className="w-64 bg-primary-900 text-white flex flex-col shadow-2xl z-20 hidden md:flex">
-        <div className="p-6 border-b border-white/10 flex items-center gap-3">
-          <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain shrink-0" />
-          <div>
-            <h2 className="font-bold text-lg leading-tight">SMTT Admin</h2>
-            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Portal do Servidor</span>
-          </div>
-        </div>
-
-        <nav className="flex-1 py-6 px-4 space-y-2">
-          <button 
-            onClick={() => {
-              localStorage.setItem('adminMenuAtivo', 'recursos');
-              navigate('/admin/painel');
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
-          >
-            <i className="fa-solid fa-folder-open w-5 text-center text-gray-400"></i> Recursos 
-          </button>
-          <button 
-            onClick={() => {
-              localStorage.setItem('adminMenuAtivo', 'eventos');
-              navigate('/admin/painel');
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
-          >
-            <i className="fa-solid fa-calendar-days w-5 text-center text-gray-400"></i> Eventos
-          </button>
-          <button 
-            onClick={() => {
-              localStorage.setItem('adminMenuAtivo', 'infracoes');
-              navigate('/admin/painel');
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
-          >
-            <i className="fa-solid fa-list-check w-5 text-center text-gray-400"></i> Infrações Lançadas
-          </button>
-          <button 
-            onClick={() => {
-              localStorage.setItem('adminMenuAtivo', 'noticias');
-              navigate('/admin/painel');
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
-          >
-            <i className="fa-solid fa-newspaper w-5 text-center text-gray-400"></i> Notícias
-          </button>
-          <button 
-            onClick={() => {
-              localStorage.setItem('adminMenuAtivo', 'estatisticas');
-              navigate('/admin/painel');
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
-          >
-            <i className="fa-solid fa-chart-line w-5 text-center text-gray-400"></i> Estatísticas
-          </button>
-          <button 
-            onClick={() => navigate('/admin/infracoes')} 
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent"
-          >
-            <i className="fa-solid fa-file-signature w-5 text-center text-gray-400"></i> Lançar Infração
-          </button>
-          <button 
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold bg-primary-600 text-white rounded-xl shadow-md transition-colors border border-primary-700 text-left"
-          >
-            <i className="fa-solid fa-car w-5 text-center text-secondary-500"></i> Base de Veículos
-          </button>
-          <button onClick={() => navigate('/admin/alertas')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent">
-            <i className="fa-solid fa-triangle-exclamation w-5 text-center text-gray-400"></i> Avisos de Interdição
-          </button>
-        </nav>
-
-        <div className="p-6 border-t border-white/10 bg-black/20">
-          <div className="text-xs text-gray-400 mb-3">Agente:<br/><strong className="text-white text-sm">{adminNome}</strong></div>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-lg transition-colors text-sm border border-red-500/20">
-            Encerrar Sessão <i className="fa-solid fa-right-from-bracket text-xs"></i>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem="veiculos" />
 
       {/* ÁREA PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-6 md:p-10">

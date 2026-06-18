@@ -71,7 +71,8 @@ def consultar_protocolo(numero):
             "data_abertura": protocolo.criado_em.strftime("%d/%m/%Y"),
             "tipo_servico": protocolo.tipo_servico,
             "status_julgamento": recurso.resultado_julgamento if recurso else protocolo.status,
-            "parecer_jari": recurso.justificativa_julgamento if recurso else "Sua defesa está em análise pela equipe técnica."
+            "parecer_jari": recurso.justificativa_julgamento if recurso else "Sua defesa está em análise pela equipe técnica.",
+            "anexo_resposta_jari": recurso.anexo_resposta_jari if recurso else None
         }), 200
 
 
@@ -335,3 +336,138 @@ def enviar_solicitacao_alvara():
         "mensagem": "Solicitação enviada com sucesso!",
         "protocolo": numero_protocolo
     }), 201
+
+
+@public_bp.route('/recurso-multa', methods=['POST'])
+def enviar_recurso_multa_publico():
+    placa = request.form.get('placa', '').upper().replace('-', '').replace(' ', '').strip()
+    numero_ait = request.form.get('numero_ait', '').upper().strip()
+    tipo_recurso = request.form.get('tipo_recurso', 'Defesa Prévia')
+    nome_solicitante = request.form.get('nome_solicitante')
+    cpf_solicitante = request.form.get('cpf_solicitante')
+    email_solicitante = request.form.get('email_solicitante')
+    telefone_solicitante = request.form.get('telefone_solicitante')
+    
+    if not (placa and numero_ait and nome_solicitante and cpf_solicitante and email_solicitante and telefone_solicitante):
+        return jsonify({"erro": "Todos os campos obrigatórios devem ser preenchidos."}), 400
+
+    if len(placa) != 7:
+        return jsonify({"erro": "A placa do veículo deve conter exatamente 7 caracteres (letras e números)."}), 400
+
+    # Lógica para os arquivos obrigatórios e opcionais
+    requerimento_arq = request.files.get('requerimento')
+    if not requerimento_arq or requerimento_arq.filename == '':
+        return jsonify({"erro": "O Formulário de Requerimento Único preenchido é obrigatório."}), 400
+
+    documento_identificacao_arq = request.files.get('documento_identificacao')
+    if not documento_identificacao_arq or documento_identificacao_arq.filename == '':
+        return jsonify({"erro": "O Documento de Identificação (CNH ou RG) é obrigatório."}), 400
+
+    crlv_arq = request.files.get('crlv')
+    if not crlv_arq or crlv_arq.filename == '':
+        return jsonify({"erro": "O CRLV do veículo é obrigatório."}), 400
+
+    notificacao_arq = request.files.get('notificacao')
+    if not notificacao_arq or notificacao_arq.filename == '':
+        return jsonify({"erro": "A Cópia da Notificação de Autuação é obrigatória."}), 400
+
+    selfie_documento_arq = request.files.get('selfie_documento')
+    if not selfie_documento_arq or selfie_documento_arq.filename == '':
+        return jsonify({"erro": "A Foto segurando o documento oficial ao lado do rosto é obrigatória."}), 400
+
+    # 1. Encontra ou cria o Veículo
+    veiculo = Veiculo.query.filter_by(placa=placa).first()
+    if not veiculo:
+        veiculo = Veiculo(placa=placa)
+        db.session.add(veiculo)
+        db.session.flush() # Para gerar o id do veículo
+        
+    # 2. Encontra ou cria o Auto de Infração (AIT)
+    infracao = AutoInfracao.query.filter_by(numero_ait=numero_ait).first()
+    if not infracao:
+        infracao = AutoInfracao(
+            numero_ait=numero_ait,
+            veiculo_id=veiculo.id,
+            data_hora_infracao=datetime.now(),
+            local_cometimento="Não especificado (Registro via Formulário Público)",
+            fase_atual=f"Em Análise ({tipo_recurso})",
+            valor_final=0.00
+        )
+        db.session.add(infracao)
+        db.session.flush() # Para gerar o id da infração
+    else:
+        # Se a infração existe mas está vinculada a outro carro, avisar
+        if infracao.veiculo_id != veiculo.id:
+            return jsonify({"erro": f"O Auto de Infração {numero_ait} está registrado para outra placa."}), 400
+        infracao.fase_atual = f"Em Análise ({tipo_recurso})"
+
+    # Gera um número de protocolo único
+    numero_protocolo = f"CON{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
+
+    # Salva arquivos
+    pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
+    os.makedirs(pasta_destino, exist_ok=True)
+    
+    def salvar_arquivo_publico(arq, tipo_nome):
+        if arq and arq.filename != '':
+            nome_seguro = secure_filename(f"{numero_protocolo}_{tipo_nome}_{arq.filename}")
+            caminho_completo = os.path.join(pasta_destino, nome_seguro)
+            arq.save(caminho_completo)
+            return f"/static/uploads/cidadao/{nome_seguro}"
+        return None
+
+    # Salva o arquivo principal (Requerimento)
+    caminho_requerimento = salvar_arquivo_publico(requerimento_arq, 'requerimento')
+
+    # Cria o protocolo geral
+    novo_protocolo = Protocolo(
+        numero_protocolo=numero_protocolo,
+        cidadao_id=None,
+        tipo_servico=f"Recurso - {tipo_recurso}",
+        status='Em Análise'
+    )
+    db.session.add(novo_protocolo)
+    db.session.flush()
+
+    # Cria o recurso de multa
+    novo_recurso = RecursoMulta(
+        auto_infracao_id=infracao.id,
+        protocolo_id=novo_protocolo.id,
+        tipo_recurso=tipo_recurso,
+        resultado_julgamento='Em Análise',
+        arquivo_recurso_cidadao=caminho_requerimento
+    )
+    db.session.add(novo_recurso)
+    db.session.flush()
+
+    # Salva os demais documentos na tabela RecursoAnexo
+    anexos_a_salvar = [
+        (documento_identificacao_arq, 'documento_identificacao'),
+        (crlv_arq, 'crlv'),
+        (notificacao_arq, 'notificacao'),
+        (selfie_documento_arq, 'selfie_documento')
+    ]
+
+    # Também suporta outros anexos opcionais
+    outros_anexos = request.files.getlist('outros_anexos')
+    for idx, arq in enumerate(outros_anexos):
+        if arq and arq.filename != '':
+            anexos_a_salvar.append((arq, f"outros_{idx}"))
+
+    from app.models.servicos import RecursoAnexo
+    for arq, tipo_nome in anexos_a_salvar:
+        caminho = salvar_arquivo_publico(arq, tipo_nome)
+        if caminho:
+            novo_anexo = RecursoAnexo(
+                recurso_id=novo_recurso.id,
+                caminho_arquivo=caminho,
+                nome_original=arq.filename
+            )
+            db.session.add(novo_anexo)
+
+    db.session.commit()
+
+    return jsonify({
+        "mensagem": "Contestação de multa enviada com sucesso!",
+        "protocolo": numero_protocolo
+    }), 201

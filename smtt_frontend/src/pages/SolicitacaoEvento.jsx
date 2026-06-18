@@ -69,12 +69,8 @@ function SolicitacaoEvento() {
       {/* Header */}
       <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
-            <div>
-              <h1 className="font-bold text-lg text-gray-900 leading-tight">SMTT Propriá</h1>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Transportes e Trânsito</p>
-            </div>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+            <img src="/logo-horizontal.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
           </div>
           <button
             onClick={() => navigate('/')}

@@ -7,6 +7,7 @@ import {
   Car, AlertTriangle, CheckCircle, XCircle, FileText, Paperclip, Upload,
   Layers, Calendar
 } from 'lucide-react';
+import AdminSidebar from '../components/AdminSidebar';
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const montarUrlArquivo = (caminho) => {
@@ -398,94 +399,7 @@ function AdminPainel() {
     <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
       
       {/* Sidebar */}
-      <aside className="w-64 bg-primary-900 text-white flex flex-col shadow-2xl z-20 hidden md:flex">
-        <div className="p-6 border-b border-white/10 flex items-center gap-3">
-          <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain shrink-0" />
-          <div>
-            <h2 className="font-bold text-lg leading-tight">SMTT Admin</h2>
-            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Portal do Servidor</span>
-          </div>
-        </div>
-
-        <nav className="flex-1 py-6 px-4 space-y-2">
-          <button 
-            onClick={() => handleMenuClick('recursos')}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors border text-left ${
-              menuAtivo === 'recursos' 
-                ? 'bg-primary-600 text-white shadow-md border-primary-700' 
-                : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-            }`}
-          >
-            <i className={`fa-solid fa-folder-open w-5 text-center ${menuAtivo === 'recursos' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Recursos 
-          </button>
-          <button 
-            onClick={() => handleMenuClick('eventos')}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors border text-left ${
-              menuAtivo === 'eventos' 
-                ? 'bg-primary-600 text-white shadow-md border-primary-700' 
-                : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-            }`}
-          >
-            <i className={`fa-solid fa-calendar-days w-5 text-center ${menuAtivo === 'eventos' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Eventos
-          </button>
-          <button 
-            onClick={() => handleMenuClick('alvaras')}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors border text-left ${
-              menuAtivo === 'alvaras' 
-                ? 'bg-primary-600 text-white shadow-md border-primary-700' 
-                : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-            }`}
-          >
-            <i className={`fa-solid fa-id-card-clip w-5 text-center ${menuAtivo === 'alvaras' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Alvarás
-          </button>
-          <button 
-            onClick={() => handleMenuClick('infracoes')}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors border text-left ${
-              menuAtivo === 'infracoes' 
-                ? 'bg-primary-600 text-white shadow-md border-primary-700' 
-                : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-            }`}
-          >
-            <i className={`fa-solid fa-list-check w-5 text-center ${menuAtivo === 'infracoes' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Infrações Lançadas
-          </button>
-          <button 
-            onClick={() => handleMenuClick('noticias')}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors border text-left ${
-              menuAtivo === 'noticias' 
-                ? 'bg-primary-600 text-white shadow-md border-primary-700' 
-                : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-            }`}
-          >
-            <i className={`fa-solid fa-newspaper w-5 text-center ${menuAtivo === 'noticias' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Notícias
-          </button>
-          <button 
-            onClick={() => handleMenuClick('estatisticas')}
-            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-colors border text-left ${
-              menuAtivo === 'estatisticas' 
-                ? 'bg-primary-600 text-white shadow-md border-primary-700' 
-                : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-            }`}
-          >
-            <i className={`fa-solid fa-chart-line w-5 text-center ${menuAtivo === 'estatisticas' ? 'text-secondary-500' : 'text-gray-400'}`}></i> Estatísticas
-          </button>
-          <button onClick={() => navigate('/admin/infracoes')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent">
-            <i className="fa-solid fa-file-signature w-5 text-center text-gray-400"></i> Lançar Infração
-          </button>
-          <button onClick={() => navigate('/admin/veiculos')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent">
-            <i className="fa-solid fa-car w-5 text-center text-gray-400"></i> Base de Veículos
-          </button>
-          <button onClick={() => navigate('/admin/alertas')} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-left border border-transparent">
-            <i className="fa-solid fa-triangle-exclamation w-5 text-center text-gray-400"></i> Avisos de Interdição
-          </button>
-        </nav>
-
-        <div className="p-6 border-t border-white/10 bg-black/20">
-          <div className="text-xs text-gray-400 mb-3">Agente Autuador:<br/><strong className="text-white text-sm">{adminNome}</strong></div>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-lg transition-colors text-sm border border-red-500/20">
-            Encerrar Sessão <i className="fa-solid fa-right-from-bracket text-xs"></i>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem={menuAtivo} onTabChange={handleMenuClick} />
 
       {/* ÁREA PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-6 md:p-10">

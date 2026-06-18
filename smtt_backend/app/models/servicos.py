@@ -86,7 +86,7 @@ class Protocolo(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     numero_protocolo = db.Column(db.String(20), unique=True, nullable=False)
-    cidadao_id = db.Column(db.Integer, db.ForeignKey('cidadaos.id'), nullable=False)
+    cidadao_id = db.Column(db.Integer, db.ForeignKey('cidadaos.id'), nullable=True)
     tipo_servico = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(50), default='Em Análise')
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)

@@ -37,12 +37,8 @@ function ConsultaProtocolo() {
       {/* Header */}
       <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50 no-print">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer animate-pulse-slow" onClick={() => navigate('/')}>
-            <img src="/logo.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
-            <div>
-              <h1 className="font-bold text-lg text-gray-900 leading-tight">SMTT Propriá</h1>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Transportes e Trânsito</p>
-            </div>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+            <img src="/logo-horizontal.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
           </div>
           <button
             onClick={() => navigate('/')}
@@ -119,10 +115,10 @@ function ConsultaProtocolo() {
                     {resultado.status_julgamento === 'Aprovado' && ['Renovação de Alvará', 'Inclusão de Permissionário'].includes(resultado.tipo_servico) && (
                       <div className="pt-4 border-t border-gray-150 flex flex-col sm:flex-row gap-3">
                         {resultado.caminho_alvara_emitido ? (
-                          <a 
+                          <a
                             href={montarUrlArquivo(resultado.caminho_alvara_emitido)}
-                            target="_blank" 
-                            rel="noopener noreferrer" 
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-all text-sm hover:-translate-y-0.5 w-full sm:w-auto"
                           >
                             <FileText className="w-5 h-5 text-white" /> Baixar Alvará Oficial Emitido (PDF)
@@ -130,6 +126,25 @@ function ConsultaProtocolo() {
                         ) : (
                           <div className="text-sm text-yellow-700 bg-yellow-50 p-4 rounded-xl border border-yellow-100 font-medium w-full">
                             Aguardando a disponibilização do arquivo PDF do Alvará pela equipe da SMTT.
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {!['Solicitação de Evento', 'Renovação de Alvará', 'Inclusão de Permissionário'].includes(resultado.tipo_servico) && (
+                      <div className="pt-4 border-t border-gray-150">
+                        {resultado.anexo_resposta_jari ? (
+                          <a
+                            href={montarUrlArquivo(resultado.anexo_resposta_jari)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-all text-sm hover:-translate-y-0.5 w-full sm:w-auto"
+                          >
+                            <FileText className="w-5 h-5 text-white" /> Baixar Parecer da Junta (PDF)
+                          </a>
+                        ) : (
+                          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            Aguardando o envio do arquivo PDF do parecer oficial pela equipe da SMTT.
                           </div>
                         )}
                       </div>
