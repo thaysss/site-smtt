@@ -9,21 +9,15 @@ function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showTopBtn, setShowTopBtn] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Estados de Acessibilidade e Modais
   const [altoContraste, setAltoContraste] = useState(() => localStorage.getItem('altoContraste') === 'true');
   const [modalConteudo, setModalConteudo] = useState(null);
   const [servicoIndisponivel, setServicoIndisponivel] = useState('');
 
-  // Novos Estados para Melhorias da Home
   const [activeHeroTab, setActiveHeroTab] = useState('placa'); // 'placa' ou 'avisos'
   const [openFaq, setOpenFaq] = useState(null);
-  const [ouvidoriaNome, setOuvidoriaNome] = useState('');
-  const [ouvidoriaEmail, setOuvidoriaEmail] = useState('');
-  const [ouvidoriaAssunto, setOuvidoriaAssunto] = useState('Sugestão');
-  const [ouvidoriaMensagem, setOuvidoriaMensagem] = useState('');
-  const [ouvidoriaLoading, setOuvidoriaLoading] = useState(false);
-  const [ouvidoriaProtocolo, setOuvidoriaProtocolo] = useState(null);
 
   // Estados de Dados (Busca, Alertas e Notícias)
   const [alertas, setAlertas] = useState([]);
@@ -114,88 +108,175 @@ function Home() {
   return (
     <div id="top" className="font-sans text-gray-800 bg-[#f8fafc] flex flex-col min-h-screen">
 
-      {/* Accessibility / Top Bar */}
-      <div className="bg-[#0b1b3d] text-white text-xs py-2 px-4 sm:px-6 lg:px-8 flex justify-between items-center border-b border-white/5">
-        <div className="flex space-x-4">
-          <a href="#main-content" className="hover:text-secondary-500 focus:outline-none focus:ring-2 focus:ring-white transition-colors">Ir para o conteúdo</a>
+      {/* Redesigned Accessibility / Top Bar */}
+      <div className="bg-[#0b1c3e] text-white text-xs py-2 px-4 sm:px-6 lg:px-8 flex justify-between items-center border-b border-white/5">
+        <div className="flex items-center space-x-4">
+          <span className="text-white/80">
+            Bem Vindo à <strong className="text-white font-semibold">Superintendência Municipal de Transportes e Trânsito de Propriá</strong>
+          </span>
+        </div>
+        <div className="flex items-center space-x-4">
+          {/* Social Icons */}
+          <a href="https://www.instagram.com/smttpropria?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="hover:text-secondary-500 transition-colors">
+            <i className="fa-brands fa-instagram text-sm"></i>
+          </a>
+          <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-secondary-500 transition-colors">
+            <i className="fa-brands fa-twitter text-sm"></i>
+          </a>
           <span className="text-white/20">|</span>
           <button
             onClick={() => setAltoContraste(!altoContraste)}
-            className="hover:text-secondary-500 focus:outline-none focus:ring-2 focus:ring-white flex items-center gap-1.5 transition-colors"
+            className="hover:text-secondary-500 focus:outline-none flex items-center gap-1.5 transition-colors"
           >
             <i className="fa-solid fa-circle-half-stroke"></i> Alto Contraste
           </button>
         </div>
-        <div className="hidden sm:block text-white/70">
-          <span>Bem-Vindo à <strong className="text-white font-semibold">Superintendência Municipal de Transportes e Trânsito de Propriá!</strong></span>
-        </div>
       </div>
 
-      {/* Main Navigation */}
+      {/* Redesigned Main Navigation */}
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 transition-all duration-300">
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-10 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
-              <a href="#top" onClick={(e) => { e.preventDefault(); navigate('/'); }} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+              <a href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
                 <img src="/logo-sem.png" alt="Logo SMTT" className="h-14 w-auto object-contain" />
               </a>
             </div>
 
             {/* Desktop Menu */}
-            <nav className="hidden md:flex space-x-8 items-center">
-              <a href="#top" className="relative text-gray-700 hover:text-primary-600 font-semibold transition-colors duration-300 group py-1.5 text-sm">
-                Início
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+            <nav className="hidden lg:flex items-center text-sm font-bold tracking-wider text-slate-800 font-sans">
+
+              {/* HOME */}
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); navigate('/'); }}
+                className="relative px-4 py-2 text-primary-900 border-b-2 border-primary-900 hover:text-primary-650 transition-colors duration-300"
+              >
+                HOME
               </a>
 
-              {/* Dropdown Institucional */}
+              <span className="text-gray-300 px-3 select-none">/</span>
+
+              {/* MENU (Dropdown) */}
               <div className="relative group">
-                <button className="relative text-gray-700 hover:text-primary-600 font-semibold transition-colors duration-300 flex items-center gap-1.5 py-1.5 focus:outline-none text-sm">
-                  Institucional <i className="fa-solid fa-chevron-down text-[10px] transition-transform duration-300 group-hover:rotate-180"></i>
-                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <button className="flex items-center gap-1 py-2 px-4 hover:text-primary-650 focus:outline-none">
+                  MENU <i className="fa-solid fa-chevron-down text-[9px] transition-transform duration-300 group-hover:rotate-180"></i>
                 </button>
-                <div className="absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-md border border-slate-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5">
-                  <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Sobre a SMTT</a>
-                  <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('legislacao'); }} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Legislação</a>
-                  <a href="#" onClick={(e) => { e.preventDefault(); setModalConteudo('equipe'); }} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Equipe Diretiva</a>
+                <div className="absolute left-0 mt-2 w-60 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
+                  <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Sobre a SMTT</a>
+                  <button onClick={() => setModalConteudo('equipe')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Equipe Diretiva</button>
                 </div>
               </div>
 
-              {/* Dropdown Serviços */}
+              <span className="text-gray-300 px-3 select-none">/</span>
+
+              {/* NOTÍCIAS (Dropdown) */}
               <div className="relative group">
-                <button className="relative text-gray-700 hover:text-primary-600 font-semibold transition-colors duration-300 flex items-center gap-1.5 py-1.5 focus:outline-none text-sm">
-                  Serviços <i className="fa-solid fa-chevron-down text-[10px] transition-transform duration-300 group-hover:rotate-180"></i>
-                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <button onClick={() => navigate('/noticias')} className="flex items-center gap-1 py-2 px-4 hover:text-primary-650 focus:outline-none">
+                  NOTÍCIAS <i className="fa-solid fa-chevron-down text-[9px] transition-transform duration-300 group-hover:rotate-180"></i>
                 </button>
-                <div className="absolute left-0 mt-2 w-64 bg-white/95 backdrop-blur-md border border-slate-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5">
-                  <a href="/login" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Consulta de Multas</a>
-                  <a href="/contestacao-multa" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Defesa de Autuação</a>
-                  <a href="/solicitacao-alvara" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Alvará & Permissionário</a>
-                  <a href="/solicitacao-evento" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Solicitação para Eventos</a>
-                  <a href="/consultar" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Consulta de Protocolo</a>
+                <div className="absolute left-0 mt-2 w-60 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
+                  <button onClick={() => navigate('/noticias')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Portal de Notícias</button>
+                  <a href="#noticias" className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Últimas Notícias</a>
                 </div>
               </div>
 
-              <a href="#noticias" className="relative text-gray-700 hover:text-primary-600 font-semibold transition-colors duration-300 group py-1.5 text-sm">
-                Notícias
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+              <span className="text-gray-300 px-3 select-none">/</span>
+
+              {/* SERVIÇOS (Dropdown) */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 py-2 px-4 hover:text-primary-650 focus:outline-none">
+                  SERVIÇOS <i className="fa-solid fa-chevron-down text-[9px] transition-transform duration-300 group-hover:rotate-180"></i>
+                </button>
+                <div className="absolute left-0 mt-2 w-68 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
+                  <button onClick={() => navigate('/login')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Consulta de Multas</button>
+                  <button onClick={() => navigate('/contestacao-multa')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Defesa de Autuação</button>
+                  <button onClick={() => navigate('/solicitacao-alvara')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Alvará & Permissionário</button>
+                  <button onClick={() => navigate('/solicitacao-evento')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Solicitação para Eventos</button>
+                  <button onClick={() => navigate('/consultar')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Consulta de Protocolo</button>
+                </div>
+              </div>
+
+              <span className="text-gray-300 px-3 select-none">/</span>
+
+              {/* LEGISLAÇÃO (Dropdown) */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 py-2 px-4 hover:text-primary-650 focus:outline-none">
+                  LEGISLAÇÃO <i className="fa-solid fa-chevron-down text-[9px] transition-transform duration-300 group-hover:rotate-180"></i>
+                </button>
+                <div className="absolute left-0 mt-2 w-60 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
+                  <button onClick={() => setModalConteudo('legislacao')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Leis & Resoluções</button>
+                </div>
+              </div>
+
+              <span className="text-gray-300 px-3 select-none">/</span>
+
+              {/* OUTROS (Dropdown) */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 py-2 px-4 hover:text-primary-650 focus:outline-none">
+                  OUTROS <i className="fa-solid fa-chevron-down text-[9px] transition-transform duration-300 group-hover:rotate-180"></i>
+                </button>
+                <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
+                  <button onClick={() => navigate('/login')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-semibold text-secondary-600">Serviços Online</button>
+                  <button onClick={() => setModalConteudo('ouvidoria')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Ouvidoria Digital</button>
+                </div>
+              </div>
+
+              <span className="text-gray-300 px-3 select-none">/</span>
+
+              {/* CONTATO */}
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); navigate('/fale-conosco'); }}
+                className="relative px-4 py-2 text-slate-700 hover:text-primary-650 transition-colors duration-300"
+              >
+                CONTATO
               </a>
-              <a href="#contato" className="relative text-gray-700 hover:text-primary-600 font-semibold transition-colors duration-300 group py-1.5 text-sm">
-                Contato
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
-              </a>
+
+              <span className="text-gray-300 px-3 select-none">/</span>
+
+              {/* BUSCAR */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  className="flex items-center gap-1.5 py-2 px-4 hover:text-primary-650 focus:outline-none uppercase"
+                >
+                  <i className="fa-solid fa-search text-sm"></i> BUSCAR
+                </button>
+                {isSearchOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-150 rounded-xl shadow-xl p-3 z-50 normal-case font-medium">
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      const query = e.target.searchQuery.value.trim();
+                      if (query) {
+                        if (/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/i.test(query)) {
+                          navigate('/login');
+                        } else {
+                          navigate(`/noticias?q=${encodeURIComponent(query)}`);
+                        }
+                        setIsSearchOpen(false);
+                      }
+                    }} className="flex gap-2">
+                      <input
+                        type="text"
+                        name="searchQuery"
+                        placeholder="Buscar placa ou notícias..."
+                        className="w-full text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        autoFocus
+                      />
+                      <button type="submit" className="bg-primary-900 text-white px-3 py-2 rounded-lg text-sm hover:bg-primary-950">
+                        Ir
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
+
             </nav>
 
-            {/* CTA Button Desktop */}
-            <div className="hidden md:flex items-center">
-              <button onClick={() => navigate('/login')} className="bg-secondary-500 hover:bg-secondary-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:shadow-secondary-500/25 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 flex items-center gap-2">
-                <i className="fa-solid fa-laptop"></i> Serviços Online
-              </button>
-            </div>
-
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center">
+            <div className="lg:hidden flex items-center">
               <button id="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-700 hover:text-primary-600 focus:outline-none focus:bg-primary-50 p-2 rounded-xl transition-colors">
                 <i className={`fa-solid ${isMobileMenuOpen ? 'fa-xmark' : 'fa-bars'} text-2xl`}></i>
               </button>
@@ -204,7 +285,7 @@ function Home() {
         </div>
 
         {/* Mobile Menu Drawer Panel */}
-        <div id="mobile-menu" className={`md:hidden fixed inset-0 z-40 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div id="mobile-menu" className={`lg:hidden fixed inset-0 z-40 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" onClick={() => setIsMobileMenuOpen(false)}></div>
           {/* Drawer Content */}
@@ -216,30 +297,44 @@ function Home() {
               </button>
             </div>
             <nav className="flex flex-col space-y-3.5 mt-8 overflow-y-auto pr-1">
-              <a href="#top" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 rounded-xl font-bold text-primary-600 bg-primary-50/70 flex items-center gap-3 transition-colors">
+              <a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); }} className="px-4 py-3 rounded-xl font-bold text-primary-600 bg-primary-50 flex items-center gap-3 transition-colors">
                 <i className="fa-solid fa-house"></i> Início
               </a>
               <div className="px-4 pt-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Institucional</div>
               <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
                 <i className="fa-solid fa-circle-info text-gray-400 w-5"></i> Sobre a SMTT
               </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); setModalConteudo('legislacao'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
-                <i className="fa-solid fa-gavel text-gray-400 w-5"></i> Legislação
-              </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); setModalConteudo('equipe'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
+              <button onClick={() => { setIsMobileMenuOpen(false); setModalConteudo('equipe'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
                 <i className="fa-solid fa-users text-gray-400 w-5"></i> Equipe Diretiva
-              </a>
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); setModalConteudo('legislacao'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
+                <i className="fa-solid fa-gavel text-gray-400 w-5"></i> Legislação
+              </button>
 
               <div className="px-4 pt-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
-              <a href="#servicos" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
-                <i className="fa-solid fa-gears text-gray-400 w-5"></i> Todos os Serviços
-              </a>
-              <a href="#noticias" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
+                <i className="fa-solid fa-magnifying-glass text-gray-400 w-5"></i> Consulta de Multas
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/contestacao-multa'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
+                <i className="fa-solid fa-file-signature text-gray-400 w-5"></i> Defesa de Autuação
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/solicitacao-alvara'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
+                <i className="fa-solid fa-id-card text-gray-400 w-5"></i> Alvará & Permissionário
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/solicitacao-evento'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
+                <i className="fa-solid fa-calendar-day text-gray-400 w-5"></i> Solicitação para Eventos
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/consultar'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
+                <i className="fa-solid fa-clipboard-list text-gray-400 w-5"></i> Consulta de Protocolo
+              </button>
+
+              <div className="px-4 pt-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Outros</div>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/noticias'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
                 <i className="fa-solid fa-newspaper text-gray-400 w-5"></i> Notícias
-              </a>
-              <a href="#contato" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
-                <i className="fa-solid fa-phone text-gray-400 w-5"></i> Contato
-              </a>
+              </button>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/fale-conosco'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
+                <i className="fa-solid fa-phone text-gray-400 w-5"></i> Contato (Fale Conosco)
+              </button>
             </nav>
             <div className="mt-auto pt-6 border-t border-gray-100">
               <button onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }} className="w-full bg-secondary-500 hover:bg-secondary-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-secondary-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
@@ -770,157 +865,7 @@ function Home() {
           </div>
         </section>
 
-        {/* Ouvidoria Section */}
-        <section id="ouvidoria-form" className="py-20 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
-              {/* Info Column */}
-              <div className="lg:col-span-5">
-                <span className="inline-block py-1 px-3 rounded-full bg-secondary-500/10 text-secondary-600 text-xs font-bold mb-3 uppercase tracking-wider">
-                  Ouvidoria Digital
-                </span>
-                <h2 className="text-3xl font-sora font-extrabold text-slate-900 leading-tight">Fale Conosco</h2>
-                <div className="h-1 w-16 bg-secondary-500 mt-3 rounded-full"></div>
-                <p className="text-sm text-slate-500 mt-4 leading-relaxed">
-                  Utilize este canal para registrar sugestões, reclamações, elogios ou solicitar informações à SMTT Propriá. Sua participação é fundamental para melhorarmos a segurança e mobilidade do nosso município.
-                </p>
-
-                <div className="mt-8 space-y-4">
-                  <div className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-                      <i className="fa-solid fa-phone"></i>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold block uppercase">Atendimento Telefônico</span>
-                      <strong className="text-xs text-slate-700">(79) 99665-4115</strong>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-                      <i className="fa-solid fa-envelope"></i>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold block uppercase">E-mail Institucional</span>
-                      <a href="mailto:smtt@propria.se.gov.br" className="text-xs text-primary-600 font-bold hover:underline">smtt@propria.se.gov.br</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Column */}
-              <div className="lg:col-span-7 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-soft">
-                {ouvidoriaProtocolo ? (
-                  <div className="text-center py-8 animate-fadeIn">
-                    <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <i className="fa-solid fa-circle-check text-3xl"></i>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 font-sora">Mensagem Enviada!</h3>
-                    <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
-                      Agradecemos o seu contato. Sua mensagem foi protocolada com sucesso e será analisada pela nossa equipe.
-                    </p>
-                    <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100 inline-block">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Número do Protocolo</span>
-                      <span className="text-lg font-mono font-black text-slate-800 tracking-wider">{ouvidoriaProtocolo}</span>
-                    </div>
-                    <button
-                      onClick={() => setOuvidoriaProtocolo(null)}
-                      className="mt-8 text-xs font-bold text-primary-600 hover:text-primary-800 flex items-center justify-center gap-1.5 mx-auto"
-                    >
-                      <i className="fa-solid fa-arrow-left text-[10px]"></i> Enviar outra mensagem
-                    </button>
-                  </div>
-                ) : (
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setOuvidoriaLoading(true);
-                      setTimeout(() => {
-                        const randomNum = Math.floor(10000 + Math.random() * 90000);
-                        setOuvidoriaProtocolo(`OUV-2026-${randomNum}`);
-                        setOuvidoriaNome('');
-                        setOuvidoriaEmail('');
-                        setOuvidoriaAssunto('Sugestão');
-                        setOuvidoriaMensagem('');
-                        setOuvidoriaLoading(false);
-                      }, 1200);
-                    }}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1.5 uppercase tracking-wide">Nome Completo</label>
-                      <input
-                        type="text"
-                        value={ouvidoriaNome}
-                        onChange={(e) => setOuvidoriaNome(e.target.value)}
-                        placeholder="Ex: João da Silva"
-                        className="w-full text-sm placeholder-slate-400 border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 shadow-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1.5 uppercase tracking-wide">E-mail para Retorno</label>
-                      <input
-                        type="email"
-                        value={ouvidoriaEmail}
-                        onChange={(e) => setOuvidoriaEmail(e.target.value)}
-                        placeholder="Ex: joao@exemplo.com"
-                        className="w-full text-sm placeholder-slate-400 border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 shadow-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1.5 uppercase tracking-wide">Assunto</label>
-                      <select
-                        value={ouvidoriaAssunto}
-                        onChange={(e) => setOuvidoriaAssunto(e.target.value)}
-                        className="w-full text-sm border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-white transition-all duration-300 shadow-sm"
-                        required
-                      >
-                        <option value="Sugestão">💡 Sugestão</option>
-                        <option value="Reclamação">⚠️ Reclamação</option>
-                        <option value="Elogio">👏 Elogio</option>
-                        <option value="Informação">ℹ️ Solicitação de Informação</option>
-                        <option value="Denúncia">🚨 Denúncia</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1.5 uppercase tracking-wide">Sua Mensagem</label>
-                      <textarea
-                        value={ouvidoriaMensagem}
-                        onChange={(e) => setOuvidoriaMensagem(e.target.value)}
-                        placeholder="Descreva detalhadamente a sua solicitação..."
-                        rows="4"
-                        className="w-full text-sm placeholder-slate-400 border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none font-sans transition-all duration-300 shadow-sm"
-                        required
-                      ></textarea>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={ouvidoriaLoading}
-                      className="w-full bg-primary-900 hover:bg-primary-950 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-primary-500/10 active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
-                    >
-                      {ouvidoriaLoading ? (
-                        <>
-                          <i className="fa-solid fa-circle-notch fa-spin"></i> Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <i className="fa-solid fa-paper-plane"></i> Enviar Mensagem
-                        </>
-                      )}
-                    </button>
-                  </form>
-                )}
-              </div>
-
-            </div>
-          </div>
-        </section>
 
       </main>
 
@@ -934,7 +879,7 @@ function Home() {
 
             {/* Col 1: Sobre a SMTT */}
             <div>
-              <h3 className="font-sora font-bold text-base mb-6 border-l-4 border-secondary-500 pl-3">Sobre a SMTT</h3>
+
               <div className="flex items-center gap-3 mb-4">
                 <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
                 <div>
@@ -968,7 +913,7 @@ function Home() {
                 <li><button onClick={() => navigate('/login')} className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Painel do Cidadão</button></li>
                 <li><button onClick={() => navigate('/consultar')} className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Consultar Protocolo</button></li>
                 <li><button onClick={() => navigate('/admin/login')} className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Acesso Administrativo</button></li>
-                <li><button onClick={() => setModalConteudo('ouvidoria')} className="hover:text-white transition-colors flex items-center gap-2.5 text-left"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500 shrink-0 mt-0.5"></i> Ouvidoria SMTT</button></li>
+                <li><button onClick={() => navigate('/fale-conosco')} className="hover:text-white transition-colors flex items-center gap-2.5 text-left"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500 shrink-0 mt-0.5"></i> Ouvidoria SMTT</button></li>
                 <li><a href="https://www.propria.se.gov.br/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Portal da Prefeitura</a></li>
               </ul>
             </div>
@@ -992,14 +937,7 @@ function Home() {
               </ul>
             </div>
 
-            {/* Col 4: Realização */}
-            <div>
-              <h3 className="font-sora font-bold text-base mb-6 border-l-4 border-secondary-500 pl-3">Realização</h3>
-              <div className="w-full max-w-[180px] bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center shadow-lg">
-                <img src="/logon.png" alt="Prefeitura de Propriá" className="h-16 w-auto object-contain opacity-80" />
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 text-center">Governo de Propriá</span>
-              </div>
-            </div>
+
 
           </div>
 
