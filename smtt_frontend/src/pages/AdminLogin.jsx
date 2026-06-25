@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { ShieldCheck, User, Lock, ArrowLeft } from 'lucide-react';
+import { User, Lock, ArrowLeft } from 'lucide-react';
 
 function AdminLogin() {
   const [usuario, setUsuario] = useState('');

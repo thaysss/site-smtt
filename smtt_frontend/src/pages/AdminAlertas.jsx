@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
-  Building2, LogOut, FileEdit, LayoutDashboard, 
-  Car, AlertTriangle, ShieldAlert, CheckCircle, MapPin, AlignLeft, Trash2, TrafficCone
+  AlertTriangle, CheckCircle, MapPin, AlignLeft, Trash2, TrafficCone
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 
@@ -13,9 +12,10 @@ function AdminAlertas() {
   const [descricao, setDescricao] = useState('');
   const [alertas, setAlertas] = useState([]);
   const [mensagem, setMensagem] = useState('');
+  const [buscaResolvidos, setBuscaResolvidos] = useState('');
+  const [pageResolvidos, setPageResolvidos] = useState(1);
+  const perPageResolvidos = 5;
   const navigate = useNavigate();
-  const adminNome = localStorage.getItem('adminNome');
-
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken');
     if (!adminToken) navigate('/admin/login');
@@ -25,14 +25,14 @@ function AdminAlertas() {
     }
   }, [navigate]);
 
-  const carregarAlertas = async () => {
+  async function carregarAlertas() {
     try {
       const response = await api.get('/admin/alertas');
       setAlertas(response.data);
     } catch (error) {
       console.error("Erro ao carregar alertas:", error);
     }
-  };
+  }
 
   const handleCriarAlerta = async (e) => {
     e.preventDefault();
@@ -42,7 +42,7 @@ function AdminAlertas() {
       setMensagem('Alerta publicado no portal público com sucesso!');
       setRuaBairro(''); setDescricao('');
       carregarAlertas();
-    } catch (error) {
+    } catch {
       alert('Erro ao criar alerta.');
     }
   };
@@ -71,11 +71,106 @@ function AdminAlertas() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminNome');
-    navigate('/admin/login');
+  const normalizeString = (str) => {
+    if (!str) return '';
+    return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
   };
+
+  const alertasResolvidosFiltrados = alertas.filter(a => {
+    if (a.status !== 'Resolvido') return false;
+    if (buscaResolvidos.trim() !== '') {
+      const query = normalizeString(buscaResolvidos);
+      const rua = normalizeString(a.rua_bairro);
+      const desc = normalizeString(a.descricao);
+      if (!rua.includes(query) && !desc.includes(query)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const alertasResolvidosPaginados = alertasResolvidosFiltrados.slice(
+    (pageResolvidos - 1) * perPageResolvidos,
+    pageResolvidos * perPageResolvidos
+  );
+
+  const renderPagination = (currentPage, totalItems, itemsPerPage, onPageChange) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    if (totalPages <= 1) return null;
+
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+    const getPageNumbers = () => {
+      const pages = [];
+      const maxVisible = 5;
+      if (totalPages <= maxVisible) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        if (currentPage <= 3) {
+          pages.push(1, 2, 3, 4, '...', totalPages);
+        } else if (currentPage >= totalPages - 2) {
+          pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        } else {
+          pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+        }
+      }
+      return pages;
+    };
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-150">
+        <div className="text-xs text-gray-500 font-semibold">
+          Exibindo <span className="text-gray-800 font-bold">{startItem}</span> a <span className="text-gray-800 font-bold">{endItem}</span> de <span className="text-gray-800 font-bold">{totalItems}</span> registros
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 text-xs font-bold text-gray-600 hover:text-primary-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <i className="fa-solid fa-chevron-left text-[10px]"></i> Anterior
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {getPageNumbers().map((page, index) => {
+              if (page === '...') {
+                return (
+                  <span key={`ellipsis-${index}`} className="px-1 text-gray-400 text-xs font-semibold">
+                    ...
+                  </span>
+                );
+              }
+              const isActive = currentPage === page;
+              return (
+                <button
+                  key={`page-${page}`}
+                  onClick={() => onPageChange(page)}
+                  className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-primary-600 text-white shadow-md border border-primary-700'
+                      : 'text-gray-600 hover:text-primary-700 bg-gray-50 hover:bg-gray-100 border border-gray-200'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1.5 text-xs font-bold text-gray-600 hover:text-primary-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+          >
+            Próximo <i className="fa-solid fa-chevron-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
@@ -160,26 +255,43 @@ function AdminAlertas() {
 
             {/* Histórico de Alertas Resolvidos */}
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
-              <h3 className="font-bold text-lg mb-6 border-b border-gray-100 pb-3 flex items-center gap-2">
+              <h3 className="font-bold text-lg mb-4 border-b border-gray-100 pb-3 flex items-center gap-2">
                 <CheckCircle className="text-green-600" /> Histórico de Alertas Resolvidos
               </h3>
 
-              {alertas.filter(a => a.status === 'Resolvido').length === 0 ? (
-                <div className="text-center py-10 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                  Nenhum alerta arquivado no histórico.
+              {/* Busca para Histórico */}
+              <div className="mb-5">
+                <div className="relative">
+                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                  <input
+                    type="text"
+                    placeholder="Filtrar histórico por rua ou ocorrência..."
+                    value={buscaResolvidos}
+                    onChange={(e) => {
+                      setBuscaResolvidos(e.target.value);
+                      setPageResolvidos(1);
+                    }}
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-xs font-medium"
+                  />
+                </div>
+              </div>
+
+              {alertasResolvidosFiltrados.length === 0 ? (
+                <div className="text-center py-10 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-sm">
+                  Nenhum alerta resolvido localizado.
                 </div>
               ) : (
-                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
-                  {alertas.filter(a => a.status === 'Resolvido').map(alerta => (
+                <div className="space-y-4 pr-1">
+                  {alertasResolvidosPaginados.map(alerta => (
                     <div key={alerta.id} className="p-4 border border-gray-200 bg-gray-50/70 rounded-xl flex justify-between items-start gap-4">
                       <div>
-                        <h4 className="font-semibold text-gray-750 text-sm mb-1">{alerta.rua_bairro}</h4>
-                        <p className="text-xs text-gray-500 leading-relaxed">{alerta.descricao}</p>
-                        <span className="text-[10px] uppercase font-bold text-gray-450 mt-2 block">Status: {alerta.status}</span>
+                        <h4 className="font-semibold text-gray-700 text-sm mb-1">{alerta.rua_bairro}</h4>
+                        <p className="text-xs text-gray-550 leading-relaxed">{alerta.descricao}</p>
+                        <span className="text-[10px] uppercase font-bold text-gray-400 mt-2 block">Status: {alerta.status}</span>
                       </div>
                       <button 
                         onClick={() => handleExcluirAlerta(alerta.id)} 
-                        className="bg-red-50 hover:bg-red-100 text-red-600 p-2.5 rounded-lg transition-colors shrink-0" 
+                        className="bg-red-50 hover:bg-red-100 text-red-600 p-2.5 rounded-lg transition-colors shrink-0 cursor-pointer" 
                         title="Excluir Permanentemente"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -188,6 +300,7 @@ function AdminAlertas() {
                   ))}
                 </div>
               )}
+              {renderPagination(pageResolvidos, alertasResolvidosFiltrados.length, perPageResolvidos, setPageResolvidos)}
             </div>
 
           </div>

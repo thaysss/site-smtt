@@ -1,6 +1,7 @@
 # app/models/portal.py
 from app.extensions import db
 from datetime import datetime
+from app.utils.timezone import get_brasilia_time
 
 class AlertaTransito(db.Model):
     __tablename__ = 'alertas_transito'
@@ -32,7 +33,7 @@ class Noticia(db.Model):
     conteudo = db.Column(db.Text, nullable=False)
     categoria = db.Column(db.String(100), default='Geral')
     imagem_url = db.Column(db.String(255))
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=get_brasilia_time)
 
     def to_dict(self):
         return {

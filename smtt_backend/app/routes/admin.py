@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento, SolicitacaoAlvara
 from app.models.portal import AlertaTransito, Noticia, Estatistica
 from datetime import datetime
+from app.utils.timezone import get_brasilia_time
 import random
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
@@ -164,7 +165,7 @@ def julgar_recurso(id):
     # Atualiza as informações normais do julgamento
     recurso.resultado_julgamento = decisao
     recurso.justificativa_julgamento = justificativa
-    recurso.data_julgamento = datetime.utcnow()
+    recurso.data_julgamento = get_brasilia_time().date()
     
     if recurso.protocolo:
         recurso.protocolo.status = 'Concluído'
@@ -215,7 +216,7 @@ def publicar_alerta():
     novo_alerta = AlertaTransito(
         rua_bairro=dados.get('rua_bairro'),
         descricao=dados.get('descricao'),
-        data_inicio=datetime.utcnow(),
+        data_inicio=get_brasilia_time(),
         status='Ativo'
     )
     db.session.add(novo_alerta)
@@ -229,7 +230,7 @@ def resolver_alerta(alerta_id):
         return jsonify({"erro": "Alerta não encontrado"}), 404
         
     alerta.status = 'Resolvido'
-    alerta.data_fim = datetime.utcnow()
+    alerta.data_fim = get_brasilia_time()
     db.session.commit()
     return jsonify({"mensagem": "Alerta resolvido e removido do site."}), 200
 

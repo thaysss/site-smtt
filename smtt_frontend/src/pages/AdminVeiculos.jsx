@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
-  Building2, LogOut, FileEdit, LayoutDashboard, 
-  Car, AlertTriangle, ShieldAlert, CheckCircle, FileDigit, CarFront
+  Car, ShieldAlert, CheckCircle, FileDigit, CarFront
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 
@@ -14,7 +13,6 @@ function AdminVeiculos() {
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
   const navigate = useNavigate();
-  const adminNome = localStorage.getItem('adminNome');
 
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken');
@@ -32,12 +30,6 @@ function AdminVeiculos() {
     } catch (error) {
       setErro(error.response?.data?.erro || 'Erro ao cadastrar veículo.');
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminNome');
-    navigate('/admin/login');
   };
 
   return (

@@ -22,6 +22,7 @@ from app.extensions import db
 import os
 import random
 from datetime import datetime
+from app.utils.timezone import get_brasilia_time
 from werkzeug.utils import secure_filename
 from flask import current_app
 
@@ -94,7 +95,7 @@ def enviar_solicitacao_evento():
         return jsonify({"erro": "O formulário de requerimento assinado é obrigatório."}), 400
         
     # Gera um número de protocolo único (Ex: EVE202606114819)
-    numero_protocolo = f"EVE{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
+    numero_protocolo = f"EVE{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
     
     # Salva o arquivo enviado
     pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'eventos')
@@ -204,7 +205,7 @@ def enviar_solicitacao_alvara():
         
     # Gera um número de protocolo único
     prefixo = "ALV" if tipo_servico == 'Renovação de Alvará' else "PER"
-    numero_protocolo = f"{prefixo}{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
+    numero_protocolo = f"{prefixo}{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
     
     # Salvar arquivos
     pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'alvaras')
@@ -388,7 +389,7 @@ def enviar_recurso_multa_publico():
         infracao = AutoInfracao(
             numero_ait=numero_ait,
             veiculo_id=veiculo.id,
-            data_hora_infracao=datetime.now(),
+            data_hora_infracao=get_brasilia_time(),
             local_cometimento="Não especificado (Registro via Formulário Público)",
             fase_atual=f"Em Análise ({tipo_recurso})",
             valor_final=0.00
@@ -402,7 +403,7 @@ def enviar_recurso_multa_publico():
         infracao.fase_atual = f"Em Análise ({tipo_recurso})"
 
     # Gera um número de protocolo único
-    numero_protocolo = f"CON{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
+    numero_protocolo = f"CON{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
 
     # Salva arquivos
     pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')

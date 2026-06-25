@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AdminSidebar = ({ activeItem, onTabChange }) => {
@@ -29,7 +29,7 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
     { id: 'noticias', label: 'Notícias', icon: 'fa-newspaper', isTab: true },
     { id: 'estatisticas', label: 'Estatísticas', icon: 'fa-chart-line', isTab: true },
     { id: 'lancar-infracao', label: 'Lançar Infração', icon: 'fa-file-signature', isTab: false },
-    { id: 'veiculos', label: 'Base de Veículos', icon: 'fa-car', isTab: false },
+
     { id: 'alertas', label: 'Avisos de Interdição', icon: 'fa-triangle-exclamation', isTab: false },
   ];
 
@@ -58,10 +58,9 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
   );
 
   return (
-    <aside 
-      className={`relative bg-primary-900 text-white flex flex-col shadow-2xl z-20 transition-all duration-300 ease-in-out hidden md:flex shrink-0 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
+    <aside
+      className={`relative bg-primary-900 text-white flex flex-col shadow-2xl z-20 transition-all duration-300 ease-in-out hidden md:flex shrink-0 ${isCollapsed ? 'w-20' : 'w-64'
+        }`}
     >
       {/* Collapse Toggle Button */}
       <button
@@ -74,7 +73,7 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
 
       {/* Header / Logo */}
       <div className={`p-4 border-b border-white/10 flex items-center gap-3 overflow-hidden h-20 shrink-0 ${isCollapsed ? 'justify-center' : 'px-6'}`}>
-        <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain shrink-0" />
+        <img src="/logo.png" alt="Logo SMTT" className="w-10 h-14 object-contain shrink-0" />
         {!isCollapsed && (
           <div className="animate-fadeIn">
             <h2 className="font-bold text-lg leading-tight whitespace-nowrap">SMTT Admin</h2>
@@ -122,12 +121,12 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
           </div>
         ) : (
           <div className="relative animate-fadeIn">
-            <input 
-              type="text" 
-              placeholder="Buscar menu..." 
+            <input
+              type="text"
+              placeholder="Buscar menu..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-black/20 border border-white/10 rounded-xl text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-white/20 transition-all" 
+              className="w-full pl-9 pr-3 py-2 bg-black/20 border border-white/10 rounded-xl text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-white/20 transition-all"
             />
             <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-500 text-xs"></i>
           </div>
@@ -138,17 +137,16 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
       <nav className="flex-1 py-2 px-3 space-y-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {filteredItems.map((item) => {
           const isActive = activeItem === item.id;
-          
+
           if (isCollapsed) {
             return (
               <div key={item.id} className="relative group">
                 <button
                   onClick={() => handleItemClick(item)}
-                  className={`w-12 h-12 mx-auto flex items-center justify-center rounded-xl transition-all border ${
-                    isActive 
-                      ? 'bg-primary-600 text-white shadow-md border-primary-700' 
+                  className={`w-12 h-12 mx-auto flex items-center justify-center rounded-xl transition-all border ${isActive
+                      ? 'bg-primary-600 text-white shadow-md border-primary-700'
                       : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-                  }`}
+                    }`}
                 >
                   <i className={`fa-solid ${item.icon} text-lg ${isActive ? 'text-secondary-500' : 'text-gray-400'}`}></i>
                 </button>
@@ -161,16 +159,15 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
           }
 
           return (
-            <button 
+            <button
               key={item.id}
               onClick={() => handleItemClick(item)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all border text-left ${
-                isActive 
-                  ? 'bg-primary-600 text-white shadow-md border-primary-700' 
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all border text-left ${isActive
+                  ? 'bg-primary-600 text-white shadow-md border-primary-700'
                   : 'text-gray-300 hover:text-white hover:bg-white/5 border-transparent'
-              }`}
+                }`}
             >
-              <i className={`fa-solid ${item.icon} w-5 text-center transition-colors ${isActive ? 'text-secondary-500' : 'text-gray-400'}`}></i> 
+              <i className={`fa-solid ${item.icon} w-5 text-center transition-colors ${isActive ? 'text-secondary-500' : 'text-gray-400'}`}></i>
               <span className="truncate">{item.label}</span>
             </button>
           );
@@ -181,8 +178,8 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
       <div className={`p-4 border-t border-white/10 bg-black/10 shrink-0 ${isCollapsed ? 'flex justify-center' : ''}`}>
         {isCollapsed ? (
           <div className="relative group">
-            <button 
-              onClick={handleLogout} 
+            <button
+              onClick={handleLogout}
               className="w-10 h-10 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl transition-all border border-red-500/20"
             >
               <i className="fa-solid fa-right-from-bracket"></i>
@@ -193,11 +190,11 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
             </div>
           </div>
         ) : (
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl transition-all text-xs border border-red-500/20"
           >
-            <span>Encerrar Sessão</span> 
+            <span>Encerrar Sessão</span>
             <i className="fa-solid fa-right-from-bracket text-xs"></i>
           </button>
         )}
