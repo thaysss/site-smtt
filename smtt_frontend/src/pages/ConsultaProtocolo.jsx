@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Building2, ArrowLeft, Search, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Search, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const montarUrlArquivo = (caminho) => {

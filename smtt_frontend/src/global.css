@@ -2,8 +2,10 @@
 
 :root {
   /* Paleta Oficial Institucional - Estilo Aracaju/Propriá */
-  --cor-primaria: #071d49; /* Azul bem escuro do topo e rodapé */
-  --cor-secundaria: #007bff; /* Azul claro do logotipo para destaques */
+  --cor-primaria: #071d49;
+  /* Azul bem escuro do topo e rodapé */
+  --cor-secundaria: #007bff;
+  /* Azul claro do logotipo para destaques */
   --cor-fundo: #f4f6f9;
   --cor-texto: #333333;
   --cor-texto-claro: #666666;
@@ -19,8 +21,19 @@ body {
   color: var(--cor-texto);
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Sora', 'Inter', sans-serif;
+  letter-spacing: -0.025em;
+}
+
 /* Padronização de Inputs */
-input, select {
+input,
+select {
   width: 100%;
   padding: 12px 15px;
   border: 1px solid #cbd5e1;
@@ -31,7 +44,8 @@ input, select {
   box-sizing: border-box;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: var(--cor-primaria);
   box-shadow: 0 0 0 3px rgba(0, 66, 130, 0.1);
@@ -132,13 +146,15 @@ body.alto-contraste label {
 body.alto-contraste a,
 body.alto-contraste button,
 body.alto-contraste .nav-link {
-  color: #ffff00 !important; /* Amarelo de alto contraste para links/botões */
+  color: #ffff00 !important;
+  /* Amarelo de alto contraste para links/botões */
   text-decoration: underline !important;
 }
 
 body.alto-contraste a:hover,
 body.alto-contraste button:hover {
-  color: #00ffff !important; /* Ciano no hover */
+  color: #00ffff !important;
+  /* Ciano no hover */
   background-color: #000000 !important;
   text-decoration: underline !important;
 }
@@ -180,9 +196,33 @@ body.alto-contraste .text-gray-900 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
+
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, RecursoAnexo
 import random
 from datetime import datetime
+from app.utils.timezone import get_brasilia_time
 
 servicos_bp = Blueprint('servicos', __name__, url_prefix='/api/servicos')
 
@@ -119,7 +120,7 @@ def abrir_recurso(id):
     print("request.form:", request.form)
     
     # Gera um número de protocolo único (Ex: REC202605271234)
-    numero_protocolo = f"REC{datetime.now().strftime('%Y%m%d')}{random.randint(1000,9999)}"
+    numero_protocolo = f"REC{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
     
     # Cria o Protocolo Base
     novo_protocolo = Protocolo(

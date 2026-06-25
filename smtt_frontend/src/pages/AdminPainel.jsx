@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
-  Building2, LogOut, FileEdit, LayoutDashboard, 
-  Car, AlertTriangle, CheckCircle, XCircle, FileText, Paperclip, Upload,
+  CheckCircle, XCircle, FileText, Paperclip, Upload,
   Layers, Calendar
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
@@ -27,6 +26,33 @@ function AdminPainel() {
   
   // Estado para filtragem por tipo de recurso (Padrão: Todos)
   const [filtroTipo, setFiltroTipo] = useState('Todos');
+
+  // FILTERS AND PAGINATION STATES
+  const [recursoBusca, setRecursoBusca] = useState('');
+  const [recursoStatus, setRecursoStatus] = useState('Todos');
+  const [recursoPage, setRecursoPage] = useState(1);
+  const recursoPerPage = 5;
+
+  const [eventoBusca, setEventoBusca] = useState('');
+  const [eventoStatus, setEventoStatus] = useState('Todos');
+  const [eventoPage, setEventoPage] = useState(1);
+  const eventoPerPage = 5;
+
+  const [alvaraBusca, setAlvaraBusca] = useState('');
+  const [alvaraStatus, setAlvaraStatus] = useState('Todos');
+  const [alvaraTipo, setAlvaraTipo] = useState('Todos');
+  const [alvaraPage, setAlvaraPage] = useState(1);
+  const alvaraPerPage = 5;
+
+  const [infracaoGravidade, setInfracaoGravidade] = useState('Todos');
+  const [infracaoFase, setInfracaoFase] = useState('Todos');
+  const [infracaoPage, setInfracaoPage] = useState(1);
+  const infracaoPerPage = 5;
+
+  const [noticiaBusca, setNoticiaBusca] = useState('');
+  const [noticiaFiltroCategoria, setNoticiaFiltroCategoria] = useState('Todos');
+  const [noticiaPage, setNoticiaPage] = useState(1);
+  const noticiaPerPage = 5;
 
   // NOVOS ESTADOS PARA EVENTOS E INFRAÇÕES
   const [menuAtivo, setMenuAtivo] = useState(() => localStorage.getItem('adminMenuAtivo') || 'recursos'); // 'recursos', 'eventos' ou 'infracoes'
@@ -63,7 +89,6 @@ function AdminPainel() {
   const [exibindoFormEst, setExibindoFormEst] = useState(false);
   
   const navigate = useNavigate();
-  const adminNome = localStorage.getItem('adminNome');
 
   const handleMenuClick = (aba) => {
     setMenuAtivo(aba);
@@ -88,9 +113,82 @@ function AdminPainel() {
   };
 
   const recursosFiltrados = recursos.filter((rec) => {
-    if (filtroTipo === 'Todos') return true;
-    return normalizeString(rec.tipo_recurso || 'Defesa Prévia') === normalizeString(filtroTipo);
+    if (filtroTipo !== 'Todos' && normalizeString(rec.tipo_recurso || 'Defesa Prévia') !== normalizeString(filtroTipo)) {
+      return false;
+    }
+    if (recursoStatus !== 'Todos' && rec.resultado_julgamento !== recursoStatus) {
+      return false;
+    }
+    if (recursoBusca.trim() !== '') {
+      const query = normalizePlacaOuAit(recursoBusca);
+      const protocolo = rec.protocolo?.numero_protocolo ? normalizePlacaOuAit(rec.protocolo.numero_protocolo) : '';
+      const ait = rec.infracao?.numero_ait ? normalizePlacaOuAit(rec.infracao.numero_ait) : '';
+      const placa = rec.infracao?.placa_veiculo ? normalizePlacaOuAit(rec.infracao.placa_veiculo) : '';
+      if (!protocolo.includes(query) && !ait.includes(query) && !placa.includes(query)) {
+        return false;
+      }
+    }
+    return true;
   });
+
+  const recursosPaginados = recursosFiltrados.slice(
+    (recursoPage - 1) * recursoPerPage,
+    recursoPage * recursoPerPage
+  );
+
+  const eventosFiltrados = eventos.filter((eve) => {
+    if (eventoStatus !== 'Todos' && eve.status !== eventoStatus) {
+      return false;
+    }
+    if (eventoBusca.trim() !== '') {
+      const query = normalizeString(eventoBusca);
+      const protocolo = normalizeString(eve.numero_protocolo || '');
+      const solicitante = normalizeString(eve.nome_solicitante || '');
+      const local = normalizeString(eve.local_evento || '');
+      if (!protocolo.includes(query) && !solicitante.includes(query) && !local.includes(query)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const eventosPaginados = eventosFiltrados.slice(
+    (eventoPage - 1) * eventoPerPage,
+    eventoPage * eventoPerPage
+  );
+
+  const alvarasFiltrados = alvaras.filter((alv) => {
+    if (alvaraStatus !== 'Todos' && alv.status !== alvaraStatus) {
+      return false;
+    }
+    if (alvaraTipo !== 'Todos' && alv.tipo_servico !== alvaraTipo) {
+      return false;
+    }
+    if (alvaraBusca.trim() !== '') {
+      const query = normalizeString(alvaraBusca);
+      const protocolo = normalizeString(alv.numero_protocolo || '');
+      const solicitante = normalizeString(alv.nome_solicitante || '');
+      
+      const cpf = alv.cpf ? alv.cpf.replace(/\D/g, '') : '';
+      const queryCpf = alvaraBusca.replace(/\D/g, '');
+      const placa = alv.placa_veiculo ? normalizePlacaOuAit(alv.placa_veiculo) : '';
+      const queryPlaca = normalizePlacaOuAit(alvaraBusca);
+
+      const matchesProtocoloOrSolicitante = protocolo.includes(query) || solicitante.includes(query);
+      const matchesCpf = queryCpf !== '' && cpf.includes(queryCpf);
+      const matchesPlaca = queryPlaca !== '' && placa.includes(queryPlaca);
+
+      if (!matchesProtocoloOrSolicitante && !matchesCpf && !matchesPlaca) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const alvarasPaginados = alvarasFiltrados.slice(
+    (alvaraPage - 1) * alvaraPerPage,
+    alvaraPage * alvaraPerPage
+  );
 
   const normalizePlacaOuAit = (str) => {
     if (!str) return '';
@@ -98,12 +196,124 @@ function AdminPainel() {
   };
 
   const infracoesFiltradas = infracoes.filter((inf) => {
-    if (!filtroInfracao) return true;
-    const busca = normalizePlacaOuAit(filtroInfracao);
-    const placaInf = normalizePlacaOuAit(inf.veiculo?.placa);
-    const aitInf = normalizePlacaOuAit(inf.numero_ait);
-    return placaInf.includes(busca) || aitInf.includes(busca);
+    if (filtroInfracao) {
+      const busca = normalizePlacaOuAit(filtroInfracao);
+      const placaInf = normalizePlacaOuAit(inf.veiculo?.placa);
+      const aitInf = normalizePlacaOuAit(inf.numero_ait);
+      if (!placaInf.includes(busca) && !aitInf.includes(busca)) {
+        return false;
+      }
+    }
+    if (infracaoGravidade !== 'Todos' && inf.tipo_infracao?.gravidade !== infracaoGravidade) {
+      return false;
+    }
+    if (infracaoFase !== 'Todos' && (inf.fase_atual || 'Autuação') !== infracaoFase) {
+      return false;
+    }
+    return true;
   });
+
+  const infracoesPaginadas = infracoesFiltradas.slice(
+    (infracaoPage - 1) * infracaoPerPage,
+    infracaoPage * infracaoPerPage
+  );
+
+  const noticiasFiltradas = noticias.filter((item) => {
+    if (noticiaFiltroCategoria !== 'Todos' && item.categoria !== noticiaFiltroCategoria) {
+      return false;
+    }
+    if (noticiaBusca.trim() !== '') {
+      const query = normalizeString(noticiaBusca);
+      const titulo = normalizeString(item.titulo || '');
+      const subtitulo = normalizeString(item.subtitulo || '');
+      const conteudo = normalizeString(item.conteudo || '');
+      if (!titulo.includes(query) && !subtitulo.includes(query) && !conteudo.includes(query)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const noticiasPaginadas = noticiasFiltradas.slice(
+    (noticiaPage - 1) * noticiaPerPage,
+    noticiaPage * noticiaPerPage
+  );
+
+  const renderPagination = (currentPage, totalItems, itemsPerPage, onPageChange) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    if (totalPages <= 1) return null;
+
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+    const getPageNumbers = () => {
+      const pages = [];
+      const maxVisible = 5;
+      if (totalPages <= maxVisible) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        if (currentPage <= 3) {
+          pages.push(1, 2, 3, 4, '...', totalPages);
+        } else if (currentPage >= totalPages - 2) {
+          pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        } else {
+          pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+        }
+      }
+      return pages;
+    };
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-150">
+        <div className="text-xs text-gray-500 font-semibold">
+          Exibindo <span className="text-gray-800 font-bold">{startItem}</span> a <span className="text-gray-800 font-bold">{endItem}</span> de <span className="text-gray-800 font-bold">{totalItems}</span> registros
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3.5 py-2 text-xs font-bold text-gray-600 hover:text-primary-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <i className="fa-solid fa-chevron-left text-[10px]"></i> Anterior
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {getPageNumbers().map((page, index) => {
+              if (page === '...') {
+                return (
+                  <span key={`ellipsis-${index}`} className="px-2 text-gray-400 text-xs font-semibold">
+                    ...
+                  </span>
+                );
+              }
+              const isActive = currentPage === page;
+              return (
+                <button
+                  key={`page-${page}`}
+                  onClick={() => onPageChange(page)}
+                  className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-primary-600 text-white shadow-md shadow-primary-500/20 border border-primary-700'
+                      : 'text-gray-600 hover:text-primary-700 bg-gray-50 hover:bg-gray-100 border border-gray-200'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3.5 py-2 text-xs font-bold text-gray-600 hover:text-primary-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+          >
+            Próximo <i className="fa-solid fa-chevron-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken');
@@ -120,7 +330,7 @@ function AdminPainel() {
     carregarEstatisticas();
   }, [navigate]);
 
-  const carregarRecursos = async () => {
+  async function carregarRecursos() {
     try {
       const response = await api.get('/admin/recursos');
       setRecursos(response.data);
@@ -129,7 +339,7 @@ function AdminPainel() {
     }
   };
 
-  const carregarEventos = async () => {
+  async function carregarEventos() {
     try {
       const response = await api.get('/admin/eventos');
       setEventos(response.data);
@@ -138,7 +348,7 @@ function AdminPainel() {
     }
   };
 
-  const carregarAlvaras = async () => {
+  async function carregarAlvaras() {
     try {
       const response = await api.get('/admin/alvaras');
       setAlvaras(response.data);
@@ -147,7 +357,7 @@ function AdminPainel() {
     }
   };
 
-  const carregarInfracoes = async () => {
+  async function carregarInfracoes() {
     try {
       const response = await api.get('/admin/infracoes');
       setInfracoes(response.data);
@@ -156,7 +366,7 @@ function AdminPainel() {
     }
   };
 
-  const carregarNoticias = async () => {
+  async function carregarNoticias() {
     try {
       const response = await api.get('/admin/noticias');
       setNoticias(response.data);
@@ -165,7 +375,7 @@ function AdminPainel() {
     }
   };
 
-  const carregarEstatisticas = async () => {
+  async function carregarEstatisticas() {
     try {
       const response = await api.get('/admin/estatisticas');
       setEstatisticas(response.data);
@@ -389,11 +599,6 @@ function AdminPainel() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminNome');
-    navigate('/admin/login');
-  };
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
@@ -446,15 +651,51 @@ function AdminPainel() {
                 })}
               </div>
 
+              {/* FILTROS E BUSCA */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Processo</label>
+                  <div className="relative">
+                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input
+                      type="text"
+                      placeholder="Buscar por Protocolo, número do AIT ou Placa..."
+                      value={recursoBusca}
+                      onChange={(e) => {
+                        setRecursoBusca(e.target.value);
+                        setRecursoPage(1);
+                      }}
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Resultado / Status</label>
+                  <select
+                    value={recursoStatus}
+                    onChange={(e) => {
+                      setRecursoStatus(e.target.value);
+                      setRecursoPage(1);
+                    }}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
+                  >
+                    <option value="Todos">Todos os Status</option>
+                    <option value="Em Análise">Em Análise</option>
+                    <option value="Deferido">Deferido</option>
+                    <option value="Indeferido">Indeferido</option>
+                  </select>
+                </div>
+              </div>
+
               {recursosFiltrados.length === 0 ? (
                 <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
                   <FileText className="w-12 h-12 mb-3 text-gray-300 stroke-[1.5]" />
-                  <p className="font-bold text-base text-gray-600 mb-1">Nenhum processo pendente</p>
-                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos do tipo "{filtroTipo}" cadastrados ou pendentes de análise.</p>
+                  <p className="font-bold text-base text-gray-600 mb-1">Nenhum processo localizado</p>
+                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos que correspondam aos filtros aplicados.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {recursosFiltrados.map((rec) => (
+                  {recursosPaginados.map((rec) => (
                     <div key={rec.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
                       
                       <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
@@ -467,7 +708,13 @@ function AdminPainel() {
                           </div>
                           <p className="text-sm text-gray-600 mt-1">AIT: <strong>{rec.infracao?.numero_ait}</strong> | Placa: <strong>{rec.infracao?.placa_veiculo}</strong></p>
                         </div>
-                        <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full border border-yellow-200">
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                          rec.resultado_julgamento === 'Deferido'
+                            ? 'bg-green-100 text-green-800 border-green-200'
+                            : rec.resultado_julgamento === 'Indeferido'
+                            ? 'bg-red-100 text-red-800 border-red-200'
+                            : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                        }`}>
                           {rec.resultado_julgamento}
                         </span>
                       </div>
@@ -543,13 +790,26 @@ function AdminPainel() {
                           </div>
 
                           <div className="flex gap-3">
-                            <button onClick={() => julgarRecurso(rec.id, 'Deferido')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                            <button onClick={() => julgarRecurso(rec.id, 'Deferido')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
                               <CheckCircle className="w-5 h-5" /> Deferir (Aceitar Defesa)
                             </button>
-                            <button onClick={() => julgarRecurso(rec.id, 'Indeferido')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                            <button onClick={() => julgarRecurso(rec.id, 'Indeferido')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
                               <XCircle className="w-5 h-5" /> Indeferir (Manter Multa)
                             </button>
                           </div>
+                        </div>
+                      )}
+
+                      {rec.resultado_julgamento !== 'Em Análise' && rec.resposta_analise && (
+                        <div className="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-600 bg-gray-100/50 p-4 rounded-xl space-y-2">
+                          <div><strong>Parecer da JARI:</strong> <span className="italic">"{rec.resposta_analise}"</span></div>
+                          {rec.caminho_oficio_resposta && (
+                            <div className="pt-2">
+                              <a href={montarUrlArquivo(rec.caminho_oficio_resposta)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 rounded-lg border border-green-200 transition-all">
+                                <FileText className="w-3.5 h-3.5" /> Visualizar Ofício de Resposta
+                              </a>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -557,6 +817,7 @@ function AdminPainel() {
                   ))}
                 </div>
               )}
+              {renderPagination(recursoPage, recursosFiltrados.length, recursoPerPage, setRecursoPage)}
             </div>
           </>
         ) : menuAtivo === 'eventos' ? (
@@ -569,15 +830,51 @@ function AdminPainel() {
             {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
 
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-              {eventos.length === 0 ? (
+              {/* FILTROS E BUSCA */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Evento</label>
+                  <div className="relative">
+                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input
+                      type="text"
+                      placeholder="Buscar por Protocolo, Solicitante ou Local..."
+                      value={eventoBusca}
+                      onChange={(e) => {
+                        setEventoBusca(e.target.value);
+                        setEventoPage(1);
+                      }}
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Status do Pedido</label>
+                  <select
+                    value={eventoStatus}
+                    onChange={(e) => {
+                      setEventoStatus(e.target.value);
+                      setEventoPage(1);
+                    }}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
+                  >
+                    <option value="Todos">Todos os Status</option>
+                    <option value="Em Análise">Em Análise</option>
+                    <option value="Aprovado">Aprovado</option>
+                    <option value="Negado">Negado</option>
+                  </select>
+                </div>
+              </div>
+
+              {eventosFiltrados.length === 0 ? (
                 <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
                   <Calendar className="w-12 h-12 mb-3 text-gray-300 stroke-[1.5]" />
-                  <p className="font-bold text-base text-gray-600 mb-1">Nenhuma solicitação pendente</p>
-                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos de eventos cadastrados.</p>
+                  <p className="font-bold text-base text-gray-600 mb-1">Nenhum evento localizado</p>
+                  <p className="text-xs text-gray-400 font-medium">Não há solicitações de interdição que correspondam aos filtros aplicados.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {eventos.map((eve) => (
+                  {eventosPaginados.map((eve) => (
                     <div key={eve.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
                       <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
                         <div>
@@ -634,10 +931,10 @@ function AdminPainel() {
                             className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all mb-4 resize-none text-sm"
                           />
                           <div className="flex gap-3">
-                            <button onClick={() => julgarEvento(eve.id, 'Aprovado')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                            <button onClick={() => julgarEvento(eve.id, 'Aprovado')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
                               <CheckCircle className="w-5 h-5" /> Autorizar / Aprovar Pedido
                             </button>
-                            <button onClick={() => julgarEvento(eve.id, 'Negado')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                            <button onClick={() => julgarEvento(eve.id, 'Negado')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
                               <XCircle className="w-5 h-5" /> Negar Pedido
                             </button>
                           </div>
@@ -651,6 +948,7 @@ function AdminPainel() {
                   ))}
                 </div>
               )}
+              {renderPagination(eventoPage, eventosFiltrados.length, eventoPerPage, setEventoPage)}
             </div>
           </>
         ) : menuAtivo === 'alvaras' ? (
@@ -663,15 +961,66 @@ function AdminPainel() {
             {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
 
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-              {alvaras.length === 0 ? (
+              {/* FILTROS E BUSCA */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Requerimento</label>
+                  <div className="relative">
+                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input
+                      type="text"
+                      placeholder="Buscar por Protocolo, Nome, CPF ou Placa..."
+                      value={alvaraBusca}
+                      onChange={(e) => {
+                        setAlvaraBusca(e.target.value);
+                        setAlvaraPage(1);
+                      }}
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Tipo de Serviço</label>
+                  <select
+                    value={alvaraTipo}
+                    onChange={(e) => {
+                      setAlvaraTipo(e.target.value);
+                      setAlvaraPage(1);
+                    }}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
+                  >
+                    <option value="Todos">Todos os Serviços</option>
+                    <option value="Autorização de Permissionário">Autorização de Permissionário</option>
+                    <option value="Renovação de Alvará">Renovação de Alvará</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Status do Pedido</label>
+                  <select
+                    value={alvaraStatus}
+                    onChange={(e) => {
+                      setAlvaraStatus(e.target.value);
+                      setAlvaraPage(1);
+                    }}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
+                  >
+                    <option value="Todos">Todos os Status</option>
+                    <option value="Em Análise">Em Análise</option>
+                    <option value="Aprovado">Aprovado</option>
+                    <option value="Negado">Negado</option>
+                  </select>
+                </div>
+              </div>
+
+              {alvarasFiltrados.length === 0 ? (
                 <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
                   <FileText className="w-12 h-12 mb-3 text-gray-300 stroke-[1.5]" />
-                  <p className="font-bold text-base text-gray-600 mb-1">Nenhuma solicitação pendente</p>
-                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos de alvará/permissionário cadastrados.</p>
+                  <p className="font-bold text-base text-gray-600 mb-1">Nenhum requerimento localizado</p>
+                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos de alvará/permissionário que correspondam aos filtros aplicados.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {alvaras.map((alv) => (
+                  {alvarasPaginados.map((alv) => (
                     <div key={alv.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
                       <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
                         <div>
@@ -885,6 +1234,7 @@ function AdminPainel() {
                   ))}
                 </div>
               )}
+              {renderPagination(alvaraPage, alvarasFiltrados.length, alvaraPerPage, setAlvaraPage)}
             </div>
           </>
         ) : menuAtivo === 'infracoes' ? (
@@ -897,18 +1247,56 @@ function AdminPainel() {
 
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
               
-              {/* Barra de Busca */}
-              <div className="mb-6 max-w-md">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Autuação</label>
-                <div className="relative">
-                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                  <input
-                    type="text"
-                    placeholder="Filtrar por Placa ou Número do AIT..."
-                    value={filtroInfracao}
-                    onChange={(e) => setFiltroInfracao(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                  />
+              {/* FILTROS E BUSCA */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Autuação</label>
+                  <div className="relative">
+                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input
+                      type="text"
+                      placeholder="Placa ou número do AIT..."
+                      value={filtroInfracao}
+                      onChange={(e) => {
+                        setFiltroInfracao(e.target.value);
+                        setInfracaoPage(1);
+                      }}
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Gravidade da Infração</label>
+                  <select
+                    value={infracaoGravidade}
+                    onChange={(e) => {
+                      setInfracaoGravidade(e.target.value);
+                      setInfracaoPage(1);
+                    }}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
+                  >
+                    <option value="Todos">Todas as Gravidades</option>
+                    <option value="Leve">Leve</option>
+                    <option value="Média">Média</option>
+                    <option value="Grave">Grave</option>
+                    <option value="Gravíssima">Gravíssima</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Fase Atual</label>
+                  <select
+                    value={infracaoFase}
+                    onChange={(e) => {
+                      setInfracaoFase(e.target.value);
+                      setInfracaoPage(1);
+                    }}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
+                  >
+                    <option value="Todos">Todas as Fases</option>
+                    <option value="Autuação">Autuação</option>
+                    <option value="Penalidade">Penalidade</option>
+                    <option value="Recurso">Recurso</option>
+                  </select>
                 </div>
               </div>
 
@@ -920,7 +1308,7 @@ function AdminPainel() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {infracoesFiltradas.map((inf) => {
+                  {infracoesPaginadas.map((inf) => {
                     const estaAberto = infracaoAberta === inf.id;
                     const gravidadeCores = {
                       'Leve': 'bg-green-50 text-green-700 border-green-200',
@@ -1093,6 +1481,7 @@ function AdminPainel() {
                   })}
                 </div>
               )}
+              {renderPagination(infracaoPage, infracoesFiltradas.length, infracaoPerPage, setInfracaoPage)}
             </div>
           </>
         ) : menuAtivo === 'noticias' ? (
@@ -1211,15 +1600,53 @@ function AdminPainel() {
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-                {noticias.length === 0 ? (
+                {/* FILTROS E BUSCA */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Matéria</label>
+                    <div className="relative">
+                      <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                      <input
+                        type="text"
+                        placeholder="Buscar por Título, Subtítulo ou Conteúdo..."
+                        value={noticiaBusca}
+                        onChange={(e) => {
+                          setNoticiaBusca(e.target.value);
+                          setNoticiaPage(1);
+                        }}
+                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Categoria</label>
+                    <select
+                      value={noticiaFiltroCategoria}
+                      onChange={(e) => {
+                        setNoticiaFiltroCategoria(e.target.value);
+                        setNoticiaPage(1);
+                      }}
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
+                    >
+                      <option value="Todos">Todas as Categorias</option>
+                      <option value="Geral">Geral</option>
+                      <option value="Educação">Educação</option>
+                      <option value="Mobilidade">Mobilidade</option>
+                      <option value="Infraestrutura">Infraestrutura</option>
+                      <option value="Comunicados">Comunicados</option>
+                    </select>
+                  </div>
+                </div>
+
+                {noticiasFiltradas.length === 0 ? (
                   <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
                     <i className="fa-solid fa-newspaper text-4xl mb-3 text-gray-300"></i>
-                    <p className="font-bold text-base text-gray-600 mb-1">Nenhuma notícia publicada</p>
-                    <p className="text-xs text-gray-400 font-medium">Clique no botão "Cadastrar Notícia" para fazer a primeira publicação.</p>
+                    <p className="font-bold text-base text-gray-600 mb-1">Nenhuma notícia localizada</p>
+                    <p className="text-xs text-gray-400 font-medium">Não há matérias que correspondam aos filtros aplicados.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {noticias.map((item) => (
+                    {noticiasPaginadas.map((item) => (
                       <div key={item.id} className="border border-gray-200 hover:border-gray-250 rounded-xl p-4 bg-gray-50/40 hover:bg-gray-50 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                           {/* Mini Imagem */}
@@ -1268,6 +1695,7 @@ function AdminPainel() {
                     ))}
                   </div>
                 )}
+                {renderPagination(noticiaPage, noticiasFiltradas.length, noticiaPerPage, setNoticiaPage)}
               </div>
             )}
           </>

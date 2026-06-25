@@ -1,6 +1,7 @@
 # app/models/servicos.py
 from app.extensions import db
 from datetime import datetime
+from app.utils.timezone import get_brasilia_time
 
 class Veiculo(db.Model):
     __tablename__ = 'veiculos'
@@ -32,7 +33,7 @@ class AutoInfracao(db.Model):
     fase_atual = db.Column(db.String(50), default='Autuação')
     valor_final = db.Column(db.Numeric(10, 2))
     data_vencimento_defesa = db.Column(db.Date, nullable=True)
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=get_brasilia_time)
     
     # Novos campos legais e fiscais da notificação
     agente_aparelho = db.Column(db.String(50), nullable=True)
@@ -89,7 +90,7 @@ class Protocolo(db.Model):
     cidadao_id = db.Column(db.Integer, db.ForeignKey('cidadaos.id'), nullable=True)
     tipo_servico = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(50), default='Em Análise')
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=get_brasilia_time)
 
 
 class RecursoMulta(db.Model):
@@ -118,7 +119,7 @@ class RecursoAnexo(db.Model):
     recurso_id = db.Column(db.Integer, db.ForeignKey('recursos_multas.id'), nullable=False)
     caminho_arquivo = db.Column(db.String(255), nullable=False)
     nome_original = db.Column(db.String(150), nullable=True)
-    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=get_brasilia_time)
     
     recurso = db.relationship('RecursoMulta', backref=db.backref('anexos', lazy=True, cascade="all, delete-orphan"))
 

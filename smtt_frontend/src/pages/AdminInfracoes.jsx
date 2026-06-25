@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
-  Building2, LogOut, FileEdit, LayoutDashboard, Car, AlertTriangle, ShieldAlert, CheckCircle, 
+  Car, ShieldAlert, CheckCircle, 
   CarFront, MapPin, Calendar, FileDigit, Clock, AlignLeft, AlertOctagon, Info
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
@@ -42,9 +42,7 @@ function AdminInfracoes() {
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
   const [buscandoPlaca, setBuscandoPlaca] = useState(false);
-  
   const navigate = useNavigate();
-  const adminNome = localStorage.getItem('adminNome');
 
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken');
@@ -134,15 +132,9 @@ function AdminInfracoes() {
       setNumeroNait(''); setNumeroNip(''); setDataExpedicao('');
       setLinhaDigitavel(''); setNossoNumero(''); setDataVencimentoBoleto('');
       
-    } catch (error) {
+    } catch {
       setErro('Erro ao registrar a infração. Verifique os dados inseridos.');
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminNome');
-    navigate('/admin/login');
   };
 
   return (

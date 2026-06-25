@@ -70,7 +70,7 @@ function SolicitacaoEvento() {
       <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo-horizontal.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
+            <img src="/logo-sem.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
           </div>
           <button
             onClick={() => navigate('/')}

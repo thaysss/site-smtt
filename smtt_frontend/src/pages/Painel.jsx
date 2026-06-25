@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import html2pdf from 'html2pdf.js';
 import { 
-  Building2, LogOut, Car, AlertCircle, FileText, Download, 
+  Car, AlertCircle, FileText, Download, 
   Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X 
 } from 'lucide-react';
 import formularioPDF from '../assets/formulario_jari1.pdf'; 
@@ -41,17 +41,7 @@ function Painel() {
   const nomeUsuario = localStorage.getItem('nomeUsuario');
   const [arquivoCidadao, setArquivoCidadao] = useState(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    api.defaults.headers.Authorization = `Bearer ${token}`;
-    carregarDados();
-  }, [navigate]);
-
-  const carregarDados = async () => {
+  async function carregarDados() {
     try {
       const respVeiculos = await api.get('/servicos/veiculos');
       setVeiculos(respVeiculos.data);
@@ -65,6 +55,18 @@ function Painel() {
       }
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    api.defaults.headers.Authorization = `Bearer ${token}`;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    carregarDados();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate]);
 
   const handleCadastrarVeiculo = async (e) => {
     e.preventDefault();
@@ -393,7 +395,7 @@ function Painel() {
     html2pdf().set(opcoes).from(elemento).save();
   };
 
-  const handleLogout = (mensagemOpcional) => {
+  function handleLogout(mensagemOpcional) {
     localStorage.removeItem('token');
     localStorage.removeItem('nomeUsuario');
     navigate('/login', { state: { mensagem: mensagemOpcional || null } });
