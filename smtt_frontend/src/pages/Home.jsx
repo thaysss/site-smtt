@@ -135,12 +135,12 @@ function Home() {
 
       {/* Redesigned Main Navigation */}
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 transition-all duration-300">
-        <div className="max-w-8xl mx-auto px-4 sm:px-10 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-10 lg:px-10">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <a href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-                <img src="/logo-sem.png" alt="Logo SMTT" className="h-14 w-auto object-contain" />
+                <img src="/vc.png" alt="Logo SMTT" className="h-16 w-auto object-contain" />
               </a>
             </div>
 
@@ -353,13 +353,13 @@ function Home() {
 
           {/* Background Slide 1 */}
           <div className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${currentSlide === 0 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 pointer-events-none z-0'}`}>
-            <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Trânsito da cidade" className="w-full h-full object-cover animate-kenburns" />
+            <img src="/propria.png" alt="Trânsito da cidade" className="w-full h-full object-cover animate-kenburns" />
             <div className="absolute inset-0 bg-primary-900 mix-blend-multiply opacity-80"></div>
           </div>
 
           {/* Background Slide 2 */}
           <div className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${currentSlide === 1 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 pointer-events-none z-0'}`}>
-            <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Transporte público" className="w-full h-full object-cover animate-kenburns" />
+            <img src="/propri.png" alt="Transporte público" className="w-full h-full object-cover animate-kenburns" />
             <div className="absolute inset-0 bg-primary-900 mix-blend-multiply opacity-80"></div>
           </div>
 
@@ -404,15 +404,7 @@ function Home() {
               <div className="bg-white/95 rounded-2xl shadow-xl overflow-hidden text-slate-800 border border-slate-200/85 relative animate-fadeInUp flex flex-col backdrop-blur-md">
                 {/* Custom Glass Header with Tabs */}
                 <div className="bg-slate-50 border-b border-slate-100 flex">
-                  <button
-                    onClick={() => setActiveHeroTab('placa')}
-                    className={`flex-1 py-4 px-3 text-xs md:text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all duration-300 ${activeHeroTab === 'placa'
-                      ? 'border-primary-600 text-primary-600 bg-white'
-                      : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                      }`}
-                  >
-                    <i className="fa-solid fa-magnifying-glass"></i> Consulta de Veículo
-                  </button>
+
                   <button
                     onClick={() => setActiveHeroTab('avisos')}
                     className={`flex-1 py-4 px-3 text-xs md:text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all duration-300 relative ${activeHeroTab === 'avisos'
@@ -427,6 +419,16 @@ function Home() {
                       </span>
                     )}
                   </button>
+                  <button
+                    onClick={() => setActiveHeroTab('placa')}
+                    className={`flex-1 py-4 px-3 text-xs md:text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all duration-300 ${activeHeroTab === 'placa'
+                      ? 'border-primary-600 text-primary-600 bg-white'
+                      : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    <i className="fa-solid fa-magnifying-glass"></i> Consulta de Veículo
+                  </button>
+                  
                 </div>
 
                 {/* Tab Contents */}
@@ -785,7 +787,7 @@ function Home() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
               {estatisticas.length === 0 ? (
-                Array.from({ length: 4 }).map((_, idx) => (
+                Array.from({ length: 5 }).map((_, idx) => (
                   <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-center items-center animate-pulse h-36">
                     <div className="h-10 w-24 bg-white/10 rounded-xl mb-3"></div>
                     <div className="h-4 w-32 bg-white/5 rounded-lg"></div>
@@ -881,7 +883,7 @@ function Home() {
             <div>
 
               <div className="flex items-center gap-3 mb-4">
-                <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
+                <img src="/SMTT.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
                 <div>
                   <h4 className="font-sora font-extrabold text-sm text-white">SMTT Propriá</h4>
                   <span className="text-[9px] font-extrabold text-slate-450 uppercase tracking-wider block">Propriá / SE</span>
@@ -944,7 +946,7 @@ function Home() {
           {/* Bottom Copyright */}
           <div className="flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 pt-8 border-t border-white/5 gap-4">
             <div className="flex items-center gap-3">
-              <img src="/logo-nova.png" alt="Prefeitura de Propriá" className="h-6 w-auto object-contain opacity-70" />
+              <img src="/SMTT.png" alt="Prefeitura de Propriá" className="h-6 w-auto object-contain opacity-70" />
               <p className="text-center md:text-left">&copy; 2026 SMTT Propriá/SE. Todos os direitos reservados. Governo Municipal.</p>
             </div>
             <div className="flex gap-4">

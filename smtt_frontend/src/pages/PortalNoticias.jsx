@@ -79,7 +79,7 @@ function PortalNoticias() {
       <header className="bg-primary-900 text-white shadow-md py-4 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
+            <img src="/SMTT.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
             <div>
               <h1 className="font-bold text-lg leading-tight">SMTT Propriá</h1>
               <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Portal de Notícias</span>

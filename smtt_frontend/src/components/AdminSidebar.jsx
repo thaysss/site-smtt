@@ -73,7 +73,7 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
 
       {/* Header / Logo */}
       <div className={`p-4 border-b border-white/10 flex items-center gap-3 overflow-hidden h-20 shrink-0 ${isCollapsed ? 'justify-center' : 'px-6'}`}>
-        <img src="/logo.png" alt="Logo SMTT" className="w-10 h-14 object-contain shrink-0" />
+        <img src="/SMTT.png" alt="Logo SMTT" className="w-14 h-14 object-contain shrink-0" />
         {!isCollapsed && (
           <div className="animate-fadeIn">
             <h2 className="font-bold text-lg leading-tight whitespace-nowrap">SMTT Admin</h2>
@@ -101,7 +101,7 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="font-bold text-sm text-white truncate leading-tight" title={adminNome}>{adminNome}</h4>
-              <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold block mt-0.5">Agente Autuador</span>
+              <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">Servidor</span>
             </div>
           </div>
         )}

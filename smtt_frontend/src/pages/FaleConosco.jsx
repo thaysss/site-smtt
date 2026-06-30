@@ -76,7 +76,7 @@ function FaleConosco() {
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <a href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-                <img src="/logo-sem.png" alt="Logo SMTT" className="h-14 w-auto object-contain" />
+                <img src="/logo-smtt.png" alt="Logo SMTT" className="h-14 w-auto object-contain" />
               </a>
             </div>
 
@@ -477,9 +477,9 @@ function FaleConosco() {
 
             {/* Col 1: Sobre a SMTT */}
             <div>
-              <h3 className="font-sora font-bold text-base mb-6 border-l-4 border-secondary-500 pl-3">Sobre a SMTT</h3>
+              
               <div className="flex items-center gap-3 mb-4">
-                <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
+                <img src="/SMTT.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
                 <div>
                   <h4 className="font-sora font-extrabold text-sm text-white">SMTT Propriá</h4>
                   <span className="text-[9px] font-extrabold text-slate-450 uppercase tracking-wider block">Propriá / SE</span>
@@ -535,21 +535,14 @@ function FaleConosco() {
               </ul>
             </div>
 
-            {/* Col 4: Realização */}
-            <div>
-              <h3 className="font-sora font-bold text-base mb-6 border-l-4 border-secondary-500 pl-3">Realização</h3>
-              <div className="w-full max-w-[180px] bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center shadow-lg">
-                <img src="/logon.png" alt="Prefeitura de Propriá" className="h-16 w-auto object-contain opacity-80" />
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-3 text-center">Governo de Propriá</span>
-              </div>
-            </div>
+         
 
           </div>
 
           {/* Bottom Copyright */}
           <div className="flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 pt-8 border-t border-white/5 gap-4">
             <div className="flex items-center gap-3">
-              <img src="/logo-nova.png" alt="Prefeitura de Propriá" className="h-6 w-auto object-contain opacity-70" />
+              
               <p className="text-center md:text-left">&copy; 2026 SMTT Propriá/SE. Todos os direitos reservados. Governo Municipal.</p>
             </div>
             <div className="flex gap-4">
