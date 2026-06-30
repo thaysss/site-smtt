@@ -6,7 +6,7 @@
   /* Azul bem escuro do topo e rodapé */
   --cor-secundaria: #007bff;
   /* Azul claro do logotipo para destaques */
-  --cor-fundo: #f4f6f9;
+  --cor-fundo: white;
   --cor-texto: #333333;
   --cor-texto-claro: #666666;
   --sombra-card: 0 4px 15px rgba(0, 0, 0, 0.08);

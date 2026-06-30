@@ -13,7 +13,7 @@ import {
   Check
 } from 'lucide-react';
 import api from '../services/api';
-import formularioPDF from '../assets/formulario_jari1.pdf';
+import formularioPDF from '../assets/Requerimentos.pdf';
 
 function ContestacaoMulta() {
   const navigate = useNavigate();
@@ -164,7 +164,7 @@ function ContestacaoMulta() {
       <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo-horizontal.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
+            <img src="/logo-smtt.png" alt="Logo SMTT" className="h-14 w-auto object-contain" />
           </div>
           <button
             onClick={() => navigate('/')}
@@ -233,7 +233,7 @@ function ContestacaoMulta() {
                     <span className="text-gray-600 block mb-2">Acesse e preencha previamente para o cadastro de seu pedido.</span>
                     <a
                       href={formularioPDF}
-                      download="Requerimento_JARI_SMTT.pdf"
+                      download="Requerimento_Único.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-primary-700 font-bold hover:bg-blue-100 transition-colors shadow-sm text-[11px]"

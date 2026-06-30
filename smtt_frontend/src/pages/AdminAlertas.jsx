@@ -181,7 +181,7 @@ function AdminAlertas() {
       {/* ÁREA PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-6 md:p-10">
         <header className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Comunicação Viária</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Comunicação Interdição de via</h1>
           <p className="text-gray-500">Publique alertas de interdição, obras e acidentes que aparecerão no portal público.</p>
         </header>
 
