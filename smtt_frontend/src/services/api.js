@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // O endereço do nosso Flask
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', // O endereço do nosso Flask
 });
 
 // Interceptor: Antes de qualquer requisição sair, ele injeta o token (se existir)
