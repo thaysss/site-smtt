@@ -19,6 +19,7 @@ def create_app():
     from .routes.servicos import servicos_bp
     from .routes.admin import admin_bp
     
+    
     app.register_blueprint(public_bp)
     app.register_blueprint(auth_bp)# Registra o módulo de login
     app.register_blueprint(servicos_bp) # Registra o módulo de serviços
