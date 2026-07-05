@@ -4,9 +4,96 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
   Car, ShieldAlert, CheckCircle, 
-  CarFront, MapPin, Calendar, FileDigit, Clock, AlignLeft, AlertOctagon, Info
+  CarFront, MapPin, Calendar, FileDigit, Clock, AlignLeft, AlertOctagon, Info, CreditCard
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
+
+const INFRACOES_COMUNS_CTB = [
+  {
+    codigo: '74550',
+    descricao: 'Transitar em velocidade superior à máxima permitida em até 20%',
+    gravidade: 'Média',
+    pontos: '4',
+    valor: '130.16'
+  },
+  {
+    codigo: '74630',
+    descricao: 'Transitar em velocidade superior à máxima permitida em mais de 20% até 50%',
+    gravidade: 'Grave',
+    pontos: '5',
+    valor: '195.23'
+  },
+  {
+    codigo: '74710',
+    descricao: 'Transitar em velocidade superior à máxima permitida em mais de 50%',
+    gravidade: 'Gravíssima',
+    pontos: '7',
+    valor: '880.41'
+  },
+  {
+    codigo: '5541',
+    descricao: 'Estacionar em desacordo com a regulamentação especificada pela sinalização (Zona Azul)',
+    gravidade: 'Média',
+    pontos: '4',
+    valor: '130.16'
+  },
+  {
+    codigo: '51851',
+    descricao: 'Deixar o condutor de usar o cinto de segurança',
+    gravidade: 'Grave',
+    pontos: '5',
+    valor: '195.23'
+  },
+  {
+    codigo: '51852',
+    descricao: 'Deixar o passageiro de usar o cinto de segurança',
+    gravidade: 'Grave',
+    pontos: '5',
+    valor: '195.23'
+  },
+  {
+    codigo: '60501',
+    descricao: 'Avançar o sinal vermelho do semáforo',
+    gravidade: 'Gravíssima',
+    pontos: '7',
+    valor: '293.47'
+  },
+  {
+    codigo: '60502',
+    descricao: 'Avançar o sinal de parada obrigatória',
+    gravidade: 'Gravíssima',
+    pontos: '7',
+    valor: '293.47'
+  },
+  {
+    codigo: '73662',
+    descricao: 'Dirigir veículo segurando ou manuseando telefone celular',
+    gravidade: 'Gravíssima',
+    pontos: '7',
+    valor: '293.47'
+  },
+  {
+    codigo: '65992',
+    descricao: 'Conduzir o veículo registrado que não esteja devidamente licenciado',
+    gravidade: 'Gravíssima',
+    pontos: '7',
+    valor: '293.47'
+  },
+  {
+    codigo: '50100',
+    descricao: 'Dirigir veículo sem possuir Carteira Nacional de Habilitação (CNH)',
+    gravidade: 'Gravíssima',
+    pontos: '7',
+    valor: '880.41'
+  },
+  {
+    codigo: '51691',
+    descricao: 'Dirigir sob a influência de álcool (Lei Seca)',
+    gravidade: 'Gravíssima',
+    pontos: '7',
+    valor: '2934.70'
+  }
+];
 
 function AdminInfracoes() {
   const [placa, setPlaca] = useState('');
@@ -19,6 +106,73 @@ function AdminInfracoes() {
   const [gravidade, setGravidade] = useState('Média');
   const [pontos, setPontos] = useState('0');
   const [vencimentoDefesa, setVencimentoDefesa] = useState('');
+  const [sugestoesCTB, setSugestoesCTB] = useState([]);
+
+  // Função para lidar com alteração no código CTB e preenchimento automático
+  const handleCodigoCTBChange = async (val) => {
+    setCodigoInfracao(val);
+    
+    if (val.trim() === '') {
+      setSugestoesCTB([]);
+      return;
+    }
+    
+    // Filtro local nas infrações comuns
+    const filtradas = INFRACOES_COMUNS_CTB.filter(item => 
+      item.codigo.includes(val) || item.descricao.toLowerCase().includes(val.toLowerCase())
+    );
+    setSugestoesCTB(filtradas);
+
+    // Se bater exatamente com um código local, preenche
+    const correspondenteLocal = INFRACOES_COMUNS_CTB.find(item => item.codigo === val.trim());
+    if (correspondenteLocal) {
+      setDescricaoInfracao(correspondenteLocal.descricao);
+      setGravidade(correspondenteLocal.gravidade);
+      setPontos(correspondenteLocal.pontos);
+      setValor(correspondenteLocal.valor);
+      setSugestoesCTB([]);
+      return;
+    }
+
+    // Se tiver 4 ou mais dígitos, busca também no banco de dados (tipos já usados)
+    if (val.trim().length >= 4) {
+      try {
+        const res = await api.get(`/admin/tipos-infracao?codigo=${val.trim()}`);
+        if (res.data) {
+          setDescricaoInfracao(res.data.descricao);
+          setGravidade(res.data.gravidade);
+          setPontos(res.data.pontos.toString());
+          setValor(res.data.valor_base.toFixed(2));
+          setSugestoesCTB([]);
+        }
+      } catch (err) {
+        // Ignora se não localizado no banco
+      }
+    }
+  };
+
+  // Função para gerenciar alteração de data/hora e calcular datas futuras
+  const handleDataHoraChange = (val) => {
+    setDataHora(val);
+    if (!val) return;
+    
+    const dataInfracao = new Date(val);
+    if (isNaN(dataInfracao.getTime())) return;
+    
+    // Vencimento Defesa (+30 dias)
+    const dataDefesa = new Date(dataInfracao);
+    dataDefesa.setDate(dataDefesa.getDate() + 30);
+    setVencimentoDefesa(dataDefesa.toISOString().split('T')[0]);
+    
+    // Vencimento Boleto (+45 dias)
+    const dataBoleto = new Date(dataInfracao);
+    dataBoleto.setDate(dataBoleto.getDate() + 45);
+    setDataVencimentoBoleto(dataBoleto.toISOString().split('T')[0]);
+    
+    // Expedição (Hoje)
+    const hoje = new Date();
+    setDataExpedicao(hoje.toISOString().split('T')[0]);
+  };
 
   // Novos campos do veículo
   const [anoFabricacao, setAnoFabricacao] = useState('');
@@ -38,6 +192,7 @@ function AdminInfracoes() {
   const [linhaDigitavel, setLinhaDigitavel] = useState('');
   const [nossoNumero, setNossoNumero] = useState('');
   const [dataVencimentoBoleto, setDataVencimentoBoleto] = useState('');
+  const [faseAtual, setFaseAtual] = useState('Autuação');
 
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
@@ -118,7 +273,8 @@ function AdminInfracoes() {
         data_expedicao: dataExpedicao || null,
         linha_digitavel: linhaDigitavel,
         nosso_numero: nossoNumero,
-        data_vencimento_boleto: dataVencimentoBoleto || null
+        data_vencimento_boleto: dataVencimentoBoleto || null,
+        fase_atual: faseAtual
       });
 
       setMensagem(`Sucesso! Auto de Infração gerado: ${response.data.numero_ait}`);
@@ -131,6 +287,7 @@ function AdminInfracoes() {
       setMedicaoConsiderada(''); setMedicaoRegulamentada(''); setCodigoRenainf('');
       setNumeroNait(''); setNumeroNip(''); setDataExpedicao('');
       setLinhaDigitavel(''); setNossoNumero(''); setDataVencimentoBoleto('');
+      setFaseAtual('Autuação');
       
     } catch {
       setErro('Erro ao registrar a infração. Verifique os dados inseridos.');
@@ -198,7 +355,7 @@ function AdminInfracoes() {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data e Hora *</label>
                   <div className="relative">
                     <Calendar className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input type="datetime-local" value={dataHora} onChange={(e) => setDataHora(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-medium text-gray-700 transition-all" />
+                    <input type="datetime-local" value={dataHora} onChange={(e) => handleDataHoraChange(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-medium text-gray-700 transition-all" />
                   </div>
                 </div>
               </div>
@@ -235,11 +392,41 @@ function AdminInfracoes() {
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div className="col-span-1">
+                <div className="col-span-1 relative">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Código (CTB) *</label>
                   <div className="relative">
                     <FileDigit className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input type="text" placeholder="Ex: 5541" value={codigoInfracao} onChange={(e) => setCodigoInfracao(e.target.value)} required className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-gray-700 transition-all" />
+                    <input 
+                      type="text" 
+                      placeholder="Ex: 5541" 
+                      value={codigoInfracao} 
+                      onChange={(e) => handleCodigoCTBChange(e.target.value)} 
+                      required 
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-gray-700 transition-all" 
+                    />
+                    
+                    {sugestoesCTB.length > 0 && (
+                      <div className="absolute z-20 w-full bg-white border border-gray-200 rounded-xl mt-1 shadow-lg max-h-60 overflow-y-auto">
+                        {sugestoesCTB.map((sug) => (
+                          <button
+                            key={sug.codigo}
+                            type="button"
+                            onClick={() => {
+                              setCodigoInfracao(sug.codigo);
+                              setDescricaoInfracao(sug.descricao);
+                              setGravidade(sug.gravidade);
+                              setPontos(sug.pontos);
+                              setValor(sug.valor);
+                              setSugestoesCTB([]);
+                            }}
+                            className="w-full text-left px-4 py-2.5 hover:bg-blue-50 border-b border-gray-100 last:border-0 flex flex-col gap-0.5 transition-colors"
+                          >
+                            <span className="font-bold text-xs text-primary-700">Código {sug.codigo}</span>
+                            <span className="text-[11px] text-gray-600 line-clamp-1">{sug.descricao}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="col-span-2">
@@ -248,7 +435,7 @@ function AdminInfracoes() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Gravidade *</label>
                   <select value={gravidade} onChange={(e) => setGravidade(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all cursor-pointer">
@@ -269,6 +456,14 @@ function AdminInfracoes() {
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Vencimento Defesa *</label>
                   <input type="date" value={vencimentoDefesa} onChange={(e) => setVencimentoDefesa(e.target.value)} required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Fase Atual *</label>
+                  <select value={faseAtual} onChange={(e) => setFaseAtual(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all cursor-pointer">
+                    <option value="Autuação">Autuação</option>
+                    <option value="Penalidade">Penalidade</option>
+                    <option value="Recurso">Recurso</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -328,6 +523,46 @@ function AdminInfracoes() {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data de Expedição</label>
                   <input type="date" value={dataExpedicao} onChange={(e) => setDataExpedicao(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
+              </div>
+            </div>
+
+            {/* SEÇÃO 5: DADOS PARA PAGAMENTO E BOLETO (OPCIONAL) */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg text-primary-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+                <CreditCard className="text-primary-600 w-5 h-5" /> 5. Dados para Pagamento e Boleto (Opcional)
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Nosso Número</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ex: 12345678" 
+                    value={nossoNumero} 
+                    onChange={(e) => setNossoNumero(e.target.value)} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Vencimento do Boleto</label>
+                  <input 
+                    type="date" 
+                    value={dataVencimentoBoleto} 
+                    onChange={(e) => setDataVencimentoBoleto(e.target.value)} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Linha Digitável do Boleto</label>
+                <input 
+                  type="text" 
+                  placeholder="Ex: 34191.79001 01043.513184 91020.150008 7 90020000013016" 
+                  value={linhaDigitavel} 
+                  onChange={(e) => setLinhaDigitavel(e.target.value)} 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all font-mono text-sm" 
+                />
               </div>
             </div>
 

@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import html2pdf from 'html2pdf.js';
-import { 
-  Car, AlertCircle, FileText, Download, 
-  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X 
+import {
+  Car, AlertCircle, FileText, Download,
+  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, Coins, ExternalLink, Compass
 } from 'lucide-react';
-import formularioPDF from '../assets/formulario_jari1.pdf'; 
+import formularioPDF from '../assets/formulario_jari1.pdf';
 
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
@@ -20,14 +20,14 @@ const montarUrlArquivo = (caminho) => {
 function Painel() {
   const [veiculos, setVeiculos] = useState([]);
   const [multas, setMultas] = useState([]);
-  
+
   // Estados para o formulário de novo veículo
   const [placa, setPlaca] = useState('');
   const [renavam, setRenavam] = useState('');
-  
+
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
-  
+
   // Estados do Modal de Recurso
   const [modalAberto, setModalAberto] = useState(false);
   const [multaSelecionada, setMultaSelecionada] = useState(null);
@@ -36,6 +36,8 @@ function Painel() {
   const [tipoRecurso, setTipoRecurso] = useState('Defesa Prévia');
   const [abaAtiva, setAbaAtiva] = useState('formulario'); // 'formulario' ou 'anexos'
   const [arquivosAdicionais, setArquivosAdicionais] = useState([]);
+  const [buscaInfracao, setBuscaInfracao] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('Todos');
 
   const navigate = useNavigate();
   const nomeUsuario = localStorage.getItem('nomeUsuario');
@@ -83,7 +85,7 @@ function Painel() {
 
   const handleEnviarRecurso = async (e) => {
     e.preventDefault();
-    setRecursoErro(''); 
+    setRecursoErro('');
     setRecursoSucesso('');
 
     if (!arquivoCidadao) {
@@ -119,7 +121,7 @@ function Painel() {
       setArquivosAdicionais([]); // Limpa arquivos adicionais
       setTipoRecurso('Defesa Prévia');
       setAbaAtiva('formulario');
-      carregarDados(); 
+      carregarDados();
 
     } catch (error) {
       console.error(error.response);
@@ -142,9 +144,9 @@ function Painel() {
         <!-- CABEÇALHO -->
         <div style="display: flex; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 12px; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: #003399; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">SMTT</div>
+            <img src="/logo.png" alt="Logo SMTT" style="width: 40px;height: 40px;border-radius: 50%;object-fit: cover;"/>
             <div>
-              <h2 style="margin: 0; color: #003399; font-size: 11px; font-weight: bold; text-transform: uppercase;">Secretaria Municipal de Trânsito e Transporte</h2>
+              <h2 style="margin: 0; color: #003399; font-size: 11px; font-weight: bold; text-transform: uppercase;">Superintendência Municipal de Trânsito e Transporte</h2>
               <p style="margin: 1px 0 0 0; color: #555; font-size: 9px; font-weight: bold;">SMTT PROPRIA - PROPRIÁ/SE</p>
             </div>
           </div>
@@ -267,38 +269,7 @@ function Painel() {
         </div>
 
         <!-- SEÇÃO CONDICIONAL: NAIT OU NIP -->
-        ${!isNIP ? `
-          <div style="border: 1px solid #333; border-radius: 4px; overflow: hidden; margin-top: 20px;">
-            <div style="background-color: #333; color: white; padding: 4px 8px; font-weight: bold; font-size: 9px; text-transform: uppercase; text-align: center; letter-spacing: 0.5px;">FORMULÁRIO DE INDICAÇÃO DO REAL INFRATOR (DECLARAÇÃO DO REAL INFRATOR)</div>
-            <div style="padding: 8px; font-size: 8.5px; line-height: 1.4; color: #555; border-bottom: 1px solid #eee;">
-              Não sendo V.Sa. o responsável pela infração, ou sendo o veículo registrado em nome de pessoa jurídica, preencha o formulário abaixo informando o real condutor infrator no prazo legal estabelecido.
-            </div>
-            
-            <div style="padding: 8px; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; border-bottom: 1px solid #eee;">
-              <div>
-                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Nome Completo do Condutor:</strong>
-                <span style="color: #ccc;">____________________________________________________</span>
-              </div>
-              <div>
-                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">Registro CNH:</strong>
-                <span style="color: #ccc;">_______________</span>
-              </div>
-              <div>
-                <strong style="color: #666; font-size: 7.5px; display: block; text-transform: uppercase;">UF:</strong>
-                <span style="color: #ccc;">_____</span>
-              </div>
-            </div>
-
-            <div style="padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
-              <div style="padding-top: 10px;">
-                <div style="border-top: 1px solid #333; width: 85%; margin: auto; padding-top: 4px; font-size: 7.5px; font-weight: bold;">ASSINATURA DO CONDUTOR INDICADO</div>
-              </div>
-              <div style="padding-top: 10px;">
-                <div style="border-top: 1px solid #333; width: 85%; margin: auto; padding-top: 4px; font-size: 7.5px; font-weight: bold;">ASSINATURA DO PROPRIETÁRIO DO VEÍCULO</div>
-              </div>
-            </div>
-          </div>
-        ` : `
+        ${isNIP ? `
           <!-- SEÇÃO BOLETO BANESE -->
           <div style="border: 2px dashed #003399; margin-top: 25px; border-radius: 4px; overflow: hidden; background-color: #fff;">
             <div style="background-color: #003399; color: white; padding: 6px 12px; font-weight: bold; font-size: 10px; display: flex; justify-content: space-between; align-items: center;">
@@ -376,7 +347,7 @@ function Painel() {
               <div style="display: flex; height: 32px; width: 90%; background: repeating-linear-gradient(90deg, #111, #111 2px, #fff 2px, #fff 5px, #111 5px, #111 6px, #fff 6px, #fff 9px); margin-top: 4px;"></div>
             </div>
           </div>
-        `}
+        ` : ''}
 
         <div style="margin-top: 15px; border-top: 1px solid #ccc; padding-top: 6px; font-size: 7.5px; color: #777; text-align: center; font-style: italic;">
           Emitido via Sistema SMTT Digital - Portal do Cidadão. Código de verificação da autenticidade da notificação disponível nos registros eletrônicos do município.
@@ -398,277 +369,525 @@ function Painel() {
   function handleLogout(mensagemOpcional) {
     localStorage.removeItem('token');
     localStorage.removeItem('nomeUsuario');
-    navigate('/login', { state: { mensagem: mensagemOpcional || null } });
+    const msg = typeof mensagemOpcional === 'string' ? mensagemOpcional : null;
+    navigate('/login', { state: { mensagem: msg } });
+  };
+
+  const totalVeiculos = veiculos.length;
+  const totalMultas = multas.length;
+
+  const pontosCNH = multas
+    .filter(m => !m.fase_atual.includes('Cancelada') && !m.fase_atual.includes('Deferida'))
+    .reduce((acc, m) => acc + (m.tipo_infracao?.pontos || 0), 0);
+
+  const valorPendente = multas
+    .filter(m => !m.fase_atual.includes('Cancelada') && !m.fase_atual.includes('Deferida'))
+    .reduce((acc, m) => acc + parseFloat(m.valor_final || 0), 0)
+    .toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const multasFiltradas = multas.filter(m => {
+    if (buscaInfracao.trim() !== '') {
+      const query = buscaInfracao.toUpperCase().replace(/[- ]/g, '').trim();
+      const placaM = m.placa_veiculo ? m.placa_veiculo.toUpperCase().replace(/[- ]/g, '').trim() : '';
+      const aitM = m.numero_ait ? m.numero_ait.toUpperCase().replace(/[- ]/g, '').trim() : '';
+      if (!placaM.includes(query) && !aitM.includes(query)) {
+        return false;
+      }
+    }
+    if (filtroStatus !== 'Todos') {
+      if (filtroStatus === 'Ativas') {
+        return !m.fase_atual.includes('Cancelada') && !m.fase_atual.includes('Deferida');
+      }
+      if (filtroStatus === 'Defesa/Recurso') {
+        return m.fase_atual.includes('Análise') || m.fase_atual.includes('Recurso');
+      }
+      if (filtroStatus === 'Canceladas/Deferidas') {
+        return m.fase_atual.includes('Cancelada') || m.fase_atual.includes('Deferida');
+      }
+      if (!m.fase_atual.toLowerCase().includes(filtroStatus.toLowerCase())) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const getFaseStep = (fase) => {
+    const f = fase ? fase.toLowerCase() : '';
+    if (f.includes('cancelada') || f.includes('deferida') || f.includes('indeferida') || f.includes('paga') || f.includes('finalizado')) return 4;
+    if (f.includes('recurso') || f.includes('analise') || f.includes('análise')) return 3;
+    if (f.includes('penalidade')) return 2;
+    return 1;
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white pb-20">
-      
+
       {/* Header */}
       <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo-horizontal.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
+            <img src="/logo-smtt.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
             <div className="border-l border-gray-300 pl-3 hidden sm:block">
               <span className="text-xs uppercase tracking-wider text-gray-500 font-bold">Área do Cidadão</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-6">
             <span className="text-sm font-medium hidden md:block">Olá, <strong className="text-primary-600">{nomeUsuario}</strong></span>
-            <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors font-semibold border border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg bg-white">
+            <button onClick={() => handleLogout()} className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors font-semibold border border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg bg-white">
               Sair <i className="fa-solid fa-right-from-bracket"></i>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* COLUNA ESQUERDA: GESTÃO DE VEÍCULOS */}
-        <div className="lg:col-span-1 space-y-6">
-          
-          {/* Vincular Veículo */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-            <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
-              <Car className="text-primary-600 w-5 h-5" />
-              <h2 className="font-bold text-lg text-gray-900">Vincular Veículo</h2>
-            </div>
-            
-            {mensagem && <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm mb-4 border border-green-100 flex items-center gap-2"><CheckCircle className="w-4 h-4 shrink-0" />{mensagem}</div>}
-            {erro && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-100 flex items-center gap-2"><ShieldAlert className="w-4 h-4 shrink-0" />{erro}</div>}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
 
-            <form onSubmit={handleCadastrarVeiculo} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Placa</label>
-                <input type="text" maxLength="7" placeholder="ABC1D23" value={placa} onChange={(e) => setPlaca(e.target.value.toUpperCase())} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none uppercase font-bold text-gray-700 transition-all" required />
+        {/* SEÇÃO DE RESUMO (KPIs) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Veículos Vinculados</span>
+              <span className="text-2xl font-extrabold text-gray-900">{totalVeiculos}</span>
+            </div>
+            <div className="w-12 h-12 bg-blue-50 text-primary-600 rounded-xl flex items-center justify-center">
+              <Car className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Infrações</span>
+              <span className="text-2xl font-extrabold text-gray-900">{totalMultas}</span>
+            </div>
+            <div className="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Pontuação CNH</span>
+              <span className="text-2xl font-extrabold text-gray-900">{pontosCNH}</span>
+            </div>
+            <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Valor Pendente</span>
+              <span className="text-2xl font-extrabold text-gray-900">R$ {valorPendente}</span>
+            </div>
+            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
+              <Coins className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* ÁREA DE CONTEÚDO PRINCIPAL */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+          {/* COLUNA ESQUERDA: GESTÃO DE VEÍCULOS */}
+          <div className="lg:col-span-1 space-y-6">
+
+            {/* Vincular Veículo */}
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+              <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+                <Car className="text-primary-600 w-5 h-5" />
+                <h2 className="font-bold text-lg text-gray-900">Vincular Veículo</h2>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Renavam</label>
-                <div className="relative">
-                  <FileDigit className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input type="text" maxLength="11" placeholder="Somente números" value={renavam} onChange={(e) => setRenavam(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" required />
+
+              {mensagem && <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm mb-4 border border-green-100 flex items-center gap-2"><CheckCircle className="w-4 h-4 shrink-0" />{mensagem}</div>}
+              {erro && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-100 flex items-center gap-2"><ShieldAlert className="w-4 h-4 shrink-0" />{erro}</div>}
+
+              <form onSubmit={handleCadastrarVeiculo} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Placa</label>
+                  <input type="text" maxLength="7" placeholder="ABC1D23" value={placa} onChange={(e) => setPlaca(e.target.value.toUpperCase())} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none uppercase font-bold text-gray-700 transition-all" required />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Renavam</label>
+                  <div className="relative">
+                    <FileDigit className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input type="text" maxLength="11" placeholder="Somente números" value={renavam} onChange={(e) => setRenavam(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" required />
+                  </div>
+                </div>
+                <button type="submit" className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
+                  <Plus className="w-4 h-4" /> Adicionar Veículo
+                </button>
+              </form>
+            </div>
+
+            {/* Lista de Veículos */}
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+              <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-4">Meus Veículos</h3>
+              {veiculos.length === 0 ? (
+                <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhum veículo vinculado.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {veiculos.map(v => (
+                    <div key={v.id} className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:border-primary-500/30 transition-colors">
+                      <div>
+                        <span className="block font-bold text-lg text-primary-900 uppercase tracking-widest">{v.placa}</span>
+                        <span className="text-xs text-gray-500">Renavam: {v.renavam}</span>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-blue-50 text-primary-600 flex items-center justify-center">
+                        <Car className="w-4 h-4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* SERVIÇOS DISPONÍVEIS */}
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+              <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+                <Compass className="text-primary-600 w-5 h-5" />
+                <h2 className="font-bold text-lg text-gray-900">Serviços Disponíveis</h2>
+              </div>
+
+              <div className="space-y-4">
+                {/* Serviço 1: Alvarás */}
+                <div
+                  onClick={() => navigate('/solicitacao-alvara')}
+                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-blue-50/30 border border-transparent hover:border-blue-100 transition-all cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-primary-600 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-primary-600 transition-colors">
+                      Alvarás e Permissionários <ExternalLink className="w-3. h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </span>
+                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Renovação ou inclusão de auxiliar para táxi, mototáxi e escolar.</span>
+                  </div>
+                </div>
+
+                {/* Serviço 2: Eventos */}
+                <div
+                  onClick={() => navigate('/solicitacao-evento')}
+                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-red-50/30 border border-transparent hover:border-red-100 transition-all cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                    <Car className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-red-500 transition-colors">
+                      Autorização de Eventos <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </span>
+                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Solicite interdição de via ou apoio de tráfego para a realização de eventos.</span>
+                  </div>
+                </div>
+
+                {/* Serviço 3: Contestação de Multa */}
+                <div
+                  onClick={() => navigate('/contestacao-multa')}
+                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-amber-50/30 border border-transparent hover:border-amber-100 transition-all cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                    <ShieldAlert className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-amber-600 transition-colors">
+                      Contestação Avulsa <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </span>
+                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Abra defesas prévias ou recursos de multas de forma avulsa.</span>
+                  </div>
+                </div>
+
+                {/* Serviço 4: Consulta de Protocolos */}
+                <div
+                  onClick={() => navigate('/consultar')}
+                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-green-50/30 border border-transparent hover:border-green-100 transition-all cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                    <FileDigit className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-green-600 transition-colors">
+                      Consultar Protocolo <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </span>
+                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Consulte o andamento e pareceres dos seus protocolos abertos.</span>
+                  </div>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
-                <Plus className="w-4 h-4" /> Adicionar Veículo
-              </button>
-            </form>
-          </div>
-
-          {/* Lista de Veículos */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-            <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-4">Meus Veículos</h3>
-            {veiculos.length === 0 ? (
-              <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Nenhum veículo vinculado.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {veiculos.map(v => (
-                  <div key={v.id} className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:border-primary-500/30 transition-colors">
-                    <div>
-                      <span className="block font-bold text-lg text-primary-900 uppercase tracking-widest">{v.placa}</span>
-                      <span className="text-xs text-gray-500">Renavam: {v.renavam}</span>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-blue-50 text-primary-600 flex items-center justify-center">
-                      <Car className="w-4 h-4" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* COLUNA DIREITA: MULTAS E INFRAÇÕES */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 sm:p-8">
-            <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="text-red-500 w-6 h-6" />
-                <h2 className="font-bold text-xl text-gray-900">Minhas Infrações</h2>
-              </div>
-              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
-                {multas.length} registro(s)
-              </span>
             </div>
+          </div>
 
-            {multas.length === 0 ? (
-              <div className="text-center py-16 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-400" />
-                <p className="font-bold text-lg text-gray-600">Nada Consta</p>
-                <p className="text-sm mt-1">Nenhuma infração registrada para os seus veículos.</p>
+          {/* COLUNA DIREITA: MULTAS E INFRAÇÕES */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="text-red-500 w-6 h-6" />
+                  <h2 className="font-bold text-xl text-gray-900">Minhas Infrações</h2>
+                </div>
+                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
+                  {multas.length} registro(s)
+                </span>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {multas.map(multa => (
-                  <div key={multa.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                    
-                    {/* Cabeçalho do Card da Multa */}
-                    <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex flex-wrap justify-between items-center gap-2">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <span className="bg-primary-900 text-secondary-500 font-bold text-xs px-2 py-1 rounded uppercase tracking-wider">{multa.placa_veiculo}</span>
-                        <span className="text-sm font-bold text-gray-700">{multa.numero_ait}</span>
-                        {multa.recurso?.protocolo && (
-                          <span className="text-xs font-mono font-bold bg-blue-50 text-primary-600 border border-blue-200 px-2 py-0.5 rounded">
-                            Protocolo: {multa.recurso.protocolo}
-                          </span>
-                        )}
-                      </div>
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                        multa.fase_atual.includes('Cancelada') || multa.fase_atual.includes('Deferida')
+
+              {/* BARRA DE FILTROS E BUSCA */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Buscar Infração</label>
+                  <input
+                    type="text"
+                    placeholder="Placa ou número do AIT..."
+                    value={buscaInfracao}
+                    onChange={(e) => setBuscaInfracao(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Fase / Status</label>
+                  <select
+                    value={filtroStatus}
+                    onChange={(e) => setFiltroStatus(e.target.value)}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-bold text-gray-700 cursor-pointer"
+                  >
+                    <option value="Todos">Todos os Status</option>
+                    <option value="Ativas">Ativas (A pagar / Em recurso)</option>
+                    <option value="Autuação">Em Autuação</option>
+                    <option value="Penalidade">Em Penalidade</option>
+                    <option value="Defesa/Recurso">Em Análise / Recurso</option>
+                    <option value="Canceladas/Deferidas">Canceladas / Deferidas</option>
+                  </select>
+                </div>
+              </div>
+
+              {multas.length === 0 ? (
+                <div className="text-center py-16 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-400" />
+                  <p className="font-bold text-lg text-gray-600">Nada Consta</p>
+                  <p className="text-sm mt-1">Nenhuma infração registrada para os seus veículos.</p>
+                </div>
+              ) : multasFiltradas.length === 0 ? (
+                <div className="text-center py-12 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50 text-gray-500" />
+                  <p className="font-bold">Nenhum resultado localizado</p>
+                  <p className="text-xs mt-1">Nenhuma infração corresponde aos filtros de busca aplicados.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {multasFiltradas.map(multa => (
+                    <div key={multa.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+
+                      {/* Cabeçalho do Card da Multa */}
+                      <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex flex-wrap justify-between items-center gap-2">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="bg-primary-900 text-secondary-500 font-bold text-xs px-2 py-1 rounded uppercase tracking-wider">{multa.placa_veiculo}</span>
+                          <span className="text-sm font-bold text-gray-700">{multa.numero_ait}</span>
+                          {multa.recurso?.protocolo && (
+                            <span className="text-xs font-mono font-bold bg-blue-50 text-primary-600 border border-blue-200 px-2 py-0.5 rounded">
+                              Protocolo: {multa.recurso.protocolo}
+                            </span>
+                          )}
+                        </div>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${multa.fase_atual.includes('Cancelada') || multa.fase_atual.includes('Deferida')
                           ? 'bg-green-50 text-green-700 border-green-200'
                           : multa.fase_atual.includes('Análise') || multa.fase_atual.includes('Recurso')
-                          ? 'bg-blue-50 text-blue-700 border-blue-200'
-                          : 'bg-red-50 text-red-700 border-red-200'
-                      }`}>
-                        {multa.fase_atual}
-                      </span>
-                    </div>
-                    
-                    {/* Corpo do Card da Multa */}
-                    <div className="p-5">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div className="space-y-1 text-left">
-                          <p className="text-sm text-gray-800"><strong className="text-gray-500">Data:</strong> {multa.data_hora_infracao}</p>
-                          <p className="text-sm text-gray-800"><strong className="text-gray-500">Local:</strong> {multa.local_cometimento}</p>
-                          <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
-                          
-                          {multa.veiculo && (multa.veiculo.marca_modelo || multa.veiculo.cor) && (
-                            <p className="text-xs text-gray-600 bg-gray-100 px-2.5 py-1.5 rounded-lg mt-1.5 inline-block">
-                              <strong className="text-gray-500 font-bold uppercase text-[9px] block">Características do Carro</strong>
-                              <span className="font-semibold text-gray-700">{multa.veiculo.marca_modelo || 'N/D'} • {multa.veiculo.cor || 'N/D'} • {multa.veiculo.ano_fabricacao || 'N/D'}</span>
-                            </p>
-                          )}
-
-                          {multa.medicao_aferida && (
-                            <p className="text-xs text-gray-600 bg-blue-50/30 border border-blue-100 px-2.5 py-1.5 rounded-lg mt-1.5 block">
-                              <strong className="text-primary-800 font-bold uppercase text-[9px] block">Medição do Equipamento</strong>
-                              <span className="text-gray-700">Regulamentada: <strong>{multa.medicao_regulamentada}</strong> | Aferida: <strong>{multa.medicao_aferida}</strong> | Considerada: <strong>{multa.medicao_considerada}</strong></span>
-                            </p>
-                          )}
-                        </div>
-                        
-                        {/* Ações */}
-                        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2 shrink-0">
-                          {!multa.recurso && !multa.fase_atual.includes('Cancelada') && !multa.fase_atual.includes('Deferida') && (
-                            <button 
-                              onClick={() => { 
-                                setMultaSelecionada(multa); 
-                                setModalAberto(true); 
-                                setRecursoSucesso(''); 
-                                setRecursoErro(''); 
-                                setTipoRecurso('Defesa Prévia'); 
-                                setAbaAtiva('formulario'); 
-                                setArquivosAdicionais([]); 
-                              }}
-                              className="w-full md:w-auto bg-secondary-500 hover:bg-secondary-600 text-primary-950 font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                              <FileText className="w-4 h-4" /> Recorrer 
-                            </button>
-                          )}
-
-                          <button 
-                            onClick={() => gerarPDF(multa)}
-                            className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-                          >
-                            <Download className="w-4 h-4" /> Notificação ({multa.linha_digitavel ? 'NIP' : 'NAIT'})
-                          </button>
-                        </div>
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
+                          }`}>
+                          {multa.fase_atual}
+                        </span>
                       </div>
 
-                      {/* Boleto de Arrecadação BANESE caso disponível */}
-                      {multa.linha_digitavel && (
-                        <div className="mt-4 p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-3 text-left">
-                          <div className="flex justify-between items-center flex-wrap gap-1">
-                            <span className="text-xs font-bold text-primary-600 flex items-center gap-1.5 uppercase tracking-wide">
-                              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                              Boleto de Arrecadação BANESE
-                            </span>
-                            {multa.data_vencimento_boleto && (
-                              <span className="text-xs font-bold text-gray-500">
-                                Vencimento: {multa.data_vencimento_boleto}
-                              </span>
+                      {/* Corpo do Card da Multa */}
+                      <div className="p-5">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                          <div className="space-y-1 text-left">
+                            <p className="text-sm text-gray-800"><strong className="text-gray-500">Data:</strong> {multa.data_hora_infracao}</p>
+                            <p className="text-sm text-gray-800"><strong className="text-gray-500">Local:</strong> {multa.local_cometimento}</p>
+                            <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
+
+                            {multa.veiculo && (multa.veiculo.marca_modelo || multa.veiculo.cor) && (
+                              <p className="text-xs text-gray-600 bg-gray-100 px-2.5 py-1.5 rounded-lg mt-1.5 inline-block">
+                                <strong className="text-gray-500 font-bold uppercase text-[9px] block">Características do Carro</strong>
+                                <span className="font-semibold text-gray-700">{multa.veiculo.marca_modelo || 'N/D'} • {multa.veiculo.cor || 'N/D'} • {multa.veiculo.ano_fabricacao || 'N/D'}</span>
+                              </p>
+                            )}
+
+                            {multa.medicao_aferida && (
+                              <p className="text-xs text-gray-600 bg-blue-50/30 border border-blue-100 px-2.5 py-1.5 rounded-lg mt-1.5 block">
+                                <strong className="text-primary-800 font-bold uppercase text-[9px] block">Medição do Equipamento</strong>
+                                <span className="text-gray-700">Regulamentada: <strong>{multa.medicao_regulamentada}</strong> | Aferida: <strong>{multa.medicao_aferida}</strong> | Considerada: <strong>{multa.medicao_considerada}</strong></span>
+                              </p>
                             )}
                           </div>
-                          <div className="font-mono text-xs text-gray-700 bg-white p-3 rounded-lg border border-blue-200 select-all break-all leading-relaxed shadow-inner">
-                            {multa.linha_digitavel}
-                          </div>
-                          <div className="flex justify-between items-center flex-wrap gap-2">
-                            <span className="text-xs text-gray-500 font-medium">
-                              Valor com 20% desc. (até vencimento): <strong className="text-green-700 font-bold text-sm">R$ {(parseFloat(multa.valor_final) * 0.8).toFixed(2)}</strong>
-                            </span>
+
+                          {/* Ações */}
+                          <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2 shrink-0">
+                            {!multa.recurso && !multa.fase_atual.includes('Cancelada') && !multa.fase_atual.includes('Deferida') && (
+                              <button
+                                onClick={() => {
+                                  setMultaSelecionada(multa);
+                                  setModalAberto(true);
+                                  setRecursoSucesso('');
+                                  setRecursoErro('');
+                                  setTipoRecurso('Defesa Prévia');
+                                  setAbaAtiva('formulario');
+                                  setArquivosAdicionais([]);
+                                }}
+                                className="w-full md:w-auto bg-secondary-500 hover:bg-secondary-600 text-primary-950 font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                              >
+                                <FileText className="w-4 h-4" /> Recorrer
+                              </button>
+                            )}
+
                             <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(multa.linha_digitavel);
-                                alert('Código de barras copiado com sucesso! Já pode pagar no app do seu banco.');
-                              }}
-                              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                              onClick={() => gerarPDF(multa)}
+                              className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                             >
-                              Copiar Código de Barras
+                              <Download className="w-4 h-4" /> Notificação ({multa.linha_digitavel ? 'NIP' : 'NAIT'})
                             </button>
                           </div>
                         </div>
-                      )}
 
-                      {/* Caixa de detalhes do recurso aberto e resposta da JARI */}
-                      {multa.recurso && (
-                        <div className="mt-5 p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3 relative overflow-hidden text-left">
-                          <div className="absolute top-0 left-0 w-1.5 h-full bg-primary-600"></div>
-                          
-                          <div className="flex flex-wrap justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-wider pl-2">
-                            <span>Protocolo: <span className="text-primary-600 font-mono font-bold">{multa.recurso.protocolo}</span></span>
-                            <span>Tipo: <span className="text-gray-700">{multa.recurso.tipo_recurso}</span></span>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 text-sm pl-2">
-                            <span className="font-bold text-gray-600">Resultado:</span>
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                              multa.recurso.resultado_julgamento === 'Deferido' ? 'bg-green-50 text-green-700 border-green-200' :
-                              multa.recurso.resultado_julgamento === 'Indeferido' ? 'bg-red-50 text-red-700 border-red-200' :
-                              'bg-yellow-50 text-yellow-700 border-yellow-200'
-                            }`}>
-                              {multa.recurso.resultado_julgamento}
-                            </span>
-                          </div>
+                        {/* Linha do Tempo do Processo */}
+                        <div className="mt-6 pt-4 border-t border-gray-100">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-3 text-left">Acompanhamento do Processo</span>
+                          <div className="relative flex justify-between items-center w-full max-w-lg mx-auto py-2">
 
-                          {multa.recurso.resultado_julgamento !== 'Em Análise' && multa.recurso.justificativa_julgamento && (
-                            <div className="text-sm text-gray-700 bg-white p-4 rounded-xl border border-gray-200 mt-2 pl-4">
-                              <strong className="text-xs uppercase tracking-wider text-gray-400 block mb-1">Parecer Oficial da Junta (JARI):</strong>
-                              <p className="italic leading-relaxed text-gray-800">"{multa.recurso.justificativa_julgamento}"</p>
-                              
-                              {multa.recurso.anexo_resposta_jari && (
-                                <a 
-                                  href={montarUrlArquivo(multa.recurso.anexo_resposta_jari)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-primary-600 font-bold rounded-lg hover:bg-blue-100 transition-colors text-xs mt-3 shadow-sm"
-                                >
-                                  <Download className="w-3.5 h-3.5" /> Baixar Resposta Oficial JARI
-                                </a>
+                            {/* Linha horizontal de fundo */}
+                            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 z-0"></div>
+
+                            {/* Linha horizontal ativa */}
+                            <div
+                              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary-600 transition-all duration-500 z-0"
+                              style={{
+                                width: `${((getFaseStep(multa.fase_atual) - 1) / 3) * 100}%`
+                              }}
+                            ></div>
+
+                            {/* Passos */}
+                            {[
+                              { step: 1, label: 'Autuação', desc: 'AIT Registrado' },
+                              { step: 2, label: 'Penalidade', desc: 'Notificação / Boleto' },
+                              { step: 3, label: 'Análise ', desc: 'Em julgamento' },
+                              { step: 4, label: 'Finalizado', desc: 'Processo Concluído' }
+                            ].map((item) => {
+                              const currentStep = getFaseStep(multa.fase_atual);
+                              const isCompleted = currentStep > item.step;
+                              const isActive = currentStep === item.step;
+
+                              return (
+                                <div key={item.step} className="relative z-10 flex flex-col items-center">
+                                  <div
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2 ${isCompleted
+                                      ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
+                                      : isActive
+                                        ? 'bg-white border-primary-600 text-primary-600 scale-110 ring-4 ring-blue-50 font-extrabold'
+                                        : 'bg-white border-gray-300 text-gray-400'
+                                      }`}
+                                  >
+                                    {isCompleted ? '✓' : item.step}
+                                  </div>
+                                  <span className={`text-[10px] font-bold mt-1.5 ${isActive ? 'text-primary-700' : isCompleted ? 'text-gray-700' : 'text-gray-400'}`}>{item.label}</span>
+                                  <span className="text-[8px] text-gray-400 hidden sm:block mt-0.5">{item.desc}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Boleto de Arrecadação BANESE caso disponível */}
+                        {multa.linha_digitavel && (
+                          <div className="mt-4 p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-3 text-left">
+                            <div className="flex justify-between items-center flex-wrap gap-1">
+                              <span className="text-xs font-bold text-primary-600 flex items-center gap-1.5 uppercase tracking-wide">
+                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                Boleto de Arrecadação BANESE
+                              </span>
+                              {multa.data_vencimento_boleto && (
+                                <span className="text-xs font-bold text-gray-500">
+                                  Vencimento: {multa.data_vencimento_boleto}
+                                </span>
                               )}
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                            <div className="font-mono text-xs text-gray-700 bg-white p-3 rounded-lg border border-blue-200 select-all break-all leading-relaxed shadow-inner">
+                              {multa.linha_digitavel}
+                            </div>
+                            <div className="flex justify-between items-center flex-wrap gap-2">
+                              <span className="text-xs text-gray-500 font-medium">
+                                Valor com 20% desc. (até vencimento): <strong className="text-green-700 font-bold text-sm">R$ {(parseFloat(multa.valor_final) * 0.8).toFixed(2)}</strong>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(multa.linha_digitavel);
+                                  alert('Código de barras copiado com sucesso! Já pode pagar no app do seu banco.');
+                                }}
+                                className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                              >
+                                Copiar Código de Barras
+                              </button>
+                            </div>
+                          </div>
+                        )}
 
-                  </div>
-                ))}
-              </div>
-            )}
+                        {/* Caixa de detalhes do recurso aberto e resposta da JARI */}
+                        {multa.recurso && (
+                          <div className="mt-5 p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3 relative overflow-hidden text-left">
+                            <div className="absolute top-0 left-0 w-1.5 h-full bg-primary-600"></div>
+
+                            <div className="flex flex-wrap justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-wider pl-2">
+                              <span>Protocolo: <span className="text-primary-600 font-mono font-bold">{multa.recurso.protocolo}</span></span>
+                              <span>Tipo: <span className="text-gray-700">{multa.recurso.tipo_recurso}</span></span>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-sm pl-2">
+                              <span className="font-bold text-gray-600">Resultado:</span>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${multa.recurso.resultado_julgamento === 'Deferido' ? 'bg-green-50 text-green-700 border-green-200' :
+                                multa.recurso.resultado_julgamento === 'Indeferido' ? 'bg-red-50 text-red-700 border-red-200' :
+                                  'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                }`}>
+                                {multa.recurso.resultado_julgamento}
+                              </span>
+                            </div>
+
+                            {multa.recurso.resultado_julgamento !== 'Em Análise' && multa.recurso.justificativa_julgamento && (
+                              <div className="text-sm text-gray-700 bg-white p-4 rounded-xl border border-gray-200 mt-2 pl-4">
+                                <strong className="text-xs uppercase tracking-wider text-gray-400 block mb-1">Parecer Oficial da Junta (JARI):</strong>
+                                <p className="italic leading-relaxed text-gray-800">"{multa.recurso.justificativa_julgamento}"</p>
+
+                                {multa.recurso.anexo_resposta_jari && (
+                                  <a
+                                    href={montarUrlArquivo(multa.recurso.anexo_resposta_jari)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-primary-600 font-bold rounded-lg hover:bg-blue-100 transition-colors text-xs mt-3 shadow-sm"
+                                  >
+                                    <Download className="w-3.5 h-3.5" /> Baixar Resposta Oficial JARI
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </div> {/* Fecha grid de 3 colunas */}
       </main>
 
       {/* JANELA MODAL DE RECURSO */}
       {modalAberto && (
         <div className="fixed inset-0 bg-primary-950/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-lg shadow-2xl relative overflow-hidden">
-            
+
             <button onClick={() => setModalAberto(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors">
               <X className="w-5 h-5" />
             </button>
@@ -686,22 +905,20 @@ function Painel() {
                 <button
                   type="button"
                   onClick={() => setAbaAtiva('formulario')}
-                  className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
-                    abaAtiva === 'formulario'
-                      ? 'border-primary-600 text-primary-600'
-                      : 'border-transparent text-gray-400 hover:text-gray-600'
-                  }`}
+                  className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${abaAtiva === 'formulario'
+                    ? 'border-primary-600 text-primary-600'
+                    : 'border-transparent text-gray-400 hover:text-gray-600'
+                    }`}
                 >
                   1. Dados do Recurso
                 </button>
                 <button
                   type="button"
                   onClick={() => setAbaAtiva('anexos')}
-                  className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all flex items-center justify-center gap-1.5 ${
-                    abaAtiva === 'anexos'
-                      ? 'border-primary-600 text-primary-600'
-                      : 'border-transparent text-gray-400 hover:text-gray-600'
-                  }`}
+                  className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all flex items-center justify-center gap-1.5 ${abaAtiva === 'anexos'
+                    ? 'border-primary-600 text-primary-600'
+                    : 'border-transparent text-gray-400 hover:text-gray-600'
+                    }`}
                 >
                   2. Documentos Adicionais
                   {arquivosAdicionais.length > 0 && (
@@ -712,7 +929,7 @@ function Painel() {
                 </button>
               </div>
             )}
-            
+
             {recursoSucesso ? (
               <div className="text-center py-6">
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -726,7 +943,7 @@ function Painel() {
               </div>
             ) : (
               <form onSubmit={handleEnviarRecurso} className="space-y-6">
-                
+
                 {abaAtiva === 'formulario' && (
                   <div className="space-y-6">
                     {/* Passo a Passo */}
@@ -737,15 +954,15 @@ function Painel() {
                         <li>Preencha, assine e escaneie (ou tire uma foto nítida).</li>
                         <li>Anexe o documento preenchido e envie.</li>
                       </ol>
-                      
-                      <a 
+
+                      <a
                         href={formularioPDF}
-                        download="Requerimento_JARI_SMTT.pdf" 
+                        download="Requerimento_JARI_SMTT.pdf"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-primary-600 font-bold hover:bg-gray-50 transition-colors text-sm shadow-sm"
                       >
-                        <Download className="w-4 h-4" /> Baixar Formulário de Requerimento Único 
+                        <Download className="w-4 h-4" /> Baixar Formulário de Requerimento Único
                       </a>
                     </div>
 
@@ -753,10 +970,10 @@ function Painel() {
                     <div className="mb-5">
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Tipo de Recurso *</label>
                       <select
-                         value={tipoRecurso}
-                         onChange={(e) => setTipoRecurso(e.target.value)}
-                         required
-                         className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all cursor-pointer"
+                        value={tipoRecurso}
+                        onChange={(e) => setTipoRecurso(e.target.value)}
+                        required
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all cursor-pointer"
                       >
                         <option value="Defesa Prévia">Defesa Prévia</option>
                         <option value="Recurso JARI">Recurso JARI</option>
@@ -767,12 +984,12 @@ function Painel() {
                     {/* Campo para anexar o arquivo principal */}
                     <div className="mb-6">
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Anexar Formulário Preenchido *</label>
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
                         onChange={(e) => setArquivoCidadao(e.target.files[0])}
-                        required 
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-pointer" 
+                        required
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-pointer"
                       />
                       {arquivoCidadao && (
                         <p className="text-xs text-green-600 font-bold mt-1.5 flex items-center gap-1">
@@ -783,8 +1000,8 @@ function Painel() {
 
                     <div className="flex gap-3 pt-2">
                       <button type="button" onClick={() => setModalAberto(false)} className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancelar</button>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => {
                           if (!arquivoCidadao) {
                             setRecursoErro('Por favor, anexe o formulário principal antes de prosseguir.');
@@ -831,15 +1048,15 @@ function Painel() {
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-1.5">
                         <Upload className="w-3.5 h-3.5 text-gray-500" /> Selecionar Arquivos Adicionais
                       </label>
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         multiple
                         accept=".pdf,.jpg,.jpeg,.png"
                         onChange={(e) => {
                           const novos = Array.from(e.target.files);
                           setArquivosAdicionais(prev => [...prev, ...novos]);
                         }}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-pointer" 
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-pointer"
                       />
                     </div>
 
@@ -871,15 +1088,15 @@ function Painel() {
                     )}
 
                     <div className="flex gap-3 pt-2">
-                      <button 
-                        type="button" 
-                        onClick={() => setAbaAtiva('formulario')} 
+                      <button
+                        type="button"
+                        onClick={() => setAbaAtiva('formulario')}
                         className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors border border-gray-200"
                       >
                         Voltar
                       </button>
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         className="flex-1 py-3 bg-primary-600 text-white font-bold rounded-xl shadow-md hover:bg-primary-700 transition-colors"
                       >
                         Enviar Recurso

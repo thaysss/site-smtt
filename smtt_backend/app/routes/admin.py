@@ -98,7 +98,8 @@ def registrar_infracao():
         data_expedicao=data_expedicao,
         linha_digitavel=dados.get('linha_digitavel'),
         nosso_numero=dados.get('nosso_numero'),
-        data_vencimento_boleto=data_vencimento_boleto
+        data_vencimento_boleto=data_vencimento_boleto,
+        fase_atual=dados.get('fase_atual', 'Autuação')
     )
     
     db.session.add(nova_infracao)
@@ -114,6 +115,19 @@ def registrar_infracao():
 def listar_infracoes():
     infracoes = AutoInfracao.query.order_by(AutoInfracao.criado_em.desc()).all()
     return jsonify([i.to_dict() for i in infracoes]), 200
+
+
+@admin_bp.route('/tipos-infracao', methods=['GET'])
+def listar_tipos_infracao():
+    codigo = request.args.get('codigo')
+    if codigo:
+        tipo = TipoInfracaoCTB.query.filter_by(codigo_infracao=codigo).first()
+        if tipo:
+            return jsonify(tipo.to_dict()), 200
+        return jsonify({"erro": "Código de infração não cadastrado."}), 404
+        
+    tipos = TipoInfracaoCTB.query.all()
+    return jsonify([t.to_dict() for t in tipos]), 200
 
 
 # ==========================================
