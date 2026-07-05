@@ -102,13 +102,18 @@ function AdminPainel() {
     return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
   };
 
-  const countPendentes = (tipo) => {
+  const normalizePlacaOuAit = (str) => {
+    if (!str) return '';
+    return str.toUpperCase().replace(/[- ]/g, '').trim();
+  };
+
+  const countRecursos = (tipo) => {
     if (tipo === 'Todos') {
-      return recursos.filter((rec) => rec.resultado_julgamento === 'Em Análise').length;
+      return recursos.length;
     }
     const normalizedTipo = normalizeString(tipo);
     return recursos.filter(
-      (rec) => normalizeString(rec.tipo_recurso || 'Defesa Prévia') === normalizedTipo && rec.resultado_julgamento === 'Em Análise'
+      (rec) => normalizeString(rec.tipo_recurso || 'Defesa Prévia') === normalizedTipo
     ).length;
   };
 
@@ -189,11 +194,6 @@ function AdminPainel() {
     (alvaraPage - 1) * alvaraPerPage,
     alvaraPage * alvaraPerPage
   );
-
-  const normalizePlacaOuAit = (str) => {
-    if (!str) return '';
-    return str.toUpperCase().replace(/[- ]/g, '').trim();
-  };
 
   const infracoesFiltradas = infracoes.filter((inf) => {
     if (filtroInfracao) {
@@ -624,7 +624,7 @@ function AdminPainel() {
                 {tiposRecurso.map((tipo) => {
                   const ativo = filtroTipo === tipo;
                   const fontPeso = ativo ? 'font-bold' : 'font-semibold';
-                  const pendentes = countPendentes(tipo);
+                  const total = countRecursos(tipo);
                   return (
                     <button
                       key={tipo}
@@ -637,9 +637,13 @@ function AdminPainel() {
                     >
                       <Layers className={`w-4 h-4 transition-transform duration-200 ${ativo ? 'text-primary-600 scale-110' : 'text-gray-400'}`} />
                       <span>{tipo}</span>
-                      {pendentes > 0 ? (
-                        <span className="flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-primary-600 text-white text-[10px] font-extrabold shadow-sm animate-pulse">
-                          {pendentes}
+                      {total > 0 ? (
+                        <span className={`flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full text-[10px] font-extrabold shadow-sm ${
+                          ativo 
+                            ? 'bg-primary-600 text-white' 
+                            : 'bg-gray-200 text-gray-700'
+                        }`}>
+                          {total}
                         </span>
                       ) : (
                         <span className="flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 text-[10px] font-bold">
