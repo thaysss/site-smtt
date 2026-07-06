@@ -465,25 +465,7 @@ function Painel() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Pontuação CNH</span>
-              <span className="text-2xl font-extrabold text-gray-900">{pontosCNH}</span>
-            </div>
-            <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
-              <ShieldAlert className="w-6 h-6" />
-            </div>
-          </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Valor Pendente</span>
-              <span className="text-2xl font-extrabold text-gray-900">R$ {valorPendente}</span>
-            </div>
-            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
-              <Coins className="w-6 h-6" />
-            </div>
-          </div>
         </div>
 
         {/* ÁREA DE CONTEÚDO PRINCIPAL */}
