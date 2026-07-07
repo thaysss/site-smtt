@@ -51,7 +51,13 @@ def registrar_infracao():
         db.session.add(tipo_infracao)
         db.session.flush()
 
-    numero_gerado = f"AIT{random.randint(100000, 999999)}"
+    numero_ait_input = dados.get('numero_ait', '').upper().strip()
+    if numero_ait_input:
+        if AutoInfracao.query.filter_by(numero_ait=numero_ait_input).first():
+            return jsonify({"erro": f"O Auto de Infração {numero_ait_input} já está cadastrado."}), 400
+        numero_gerado = numero_ait_input
+    else:
+        numero_gerado = f"AIT{random.randint(100000, 999999)}"
     
     try:
         data_hora_infracao = datetime.strptime(dados['data_hora_infracao'], "%Y-%m-%d %H:%M:%S")
