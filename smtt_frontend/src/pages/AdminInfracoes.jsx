@@ -180,6 +180,7 @@ function AdminInfracoes() {
   const [cor, setCor] = useState('');
 
   // Novos campos de controle e medições
+  const [numeroAit, setNumeroAit] = useState('');
   const [agenteAparelho, setAgenteAparelho] = useState('');
   const [desdobramento, setDesdobramento] = useState('1');
   const [medicaoAferida, setMedicaoAferida] = useState('');
@@ -259,6 +260,7 @@ function AdminInfracoes() {
         data_vencimento_defesa: vencimentoDefesa,
 
         // Novos campos passados ao payload
+        numero_ait: numeroAit,
         ano_fabricacao: anoFabricacao ? parseInt(anoFabricacao) : null,
         marca_modelo: marcaModelo,
         cor: cor,
@@ -283,14 +285,15 @@ function AdminInfracoes() {
       setPlaca(''); setDataHora(''); setLocal(''); setCodigoInfracao(''); 
       setDescricaoInfracao(''); setVencimentoDefesa('');
       setAnoFabricacao(''); setMarcaModelo(''); setCor('');
+      setNumeroAit('');
       setAgenteAparelho(''); setDesdobramento('1'); setMedicaoAferida('');
       setMedicaoConsiderada(''); setMedicaoRegulamentada(''); setCodigoRenainf('');
       setNumeroNait(''); setNumeroNip(''); setDataExpedicao('');
       setLinhaDigitavel(''); setNossoNumero(''); setDataVencimentoBoleto('');
       setFaseAtual('Autuação');
       
-    } catch {
-      setErro('Erro ao registrar a infração. Verifique os dados inseridos.');
+    } catch (err) {
+      setErro(err.response?.data?.erro || 'Erro ao registrar a infração. Verifique os dados inseridos.');
     }
   };
 
@@ -495,7 +498,17 @@ function AdminInfracoes() {
                 <Info className="text-primary-600 w-5 h-5" /> 4. Identificação Legal e Controle
               </h3>
               
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número do Auto (AIT)</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ex: AIT123456 (Autogerado)" 
+                    value={numeroAit} 
+                    onChange={(e) => setNumeroAit(e.target.value.toUpperCase())} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none uppercase font-bold text-gray-800 transition-all" 
+                  />
+                </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Código RENAINF</label>
                   <input type="text" placeholder="Ex: 11255979160" value={codigoRenainf} onChange={(e) => setCodigoRenainf(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
@@ -504,6 +517,9 @@ function AdminInfracoes() {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Agente / Aparelho</label>
                   <input type="text" placeholder="Ex: 257" value={agenteAparelho} onChange={(e) => setAgenteAparelho(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número NAIT</label>
                   <input type="text" placeholder="Ex: 7003209824" value={numeroNait} onChange={(e) => setNumeroNait(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
@@ -512,14 +528,11 @@ function AdminInfracoes() {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número NIP</label>
                   <input type="text" placeholder="Ex: 7003190223" value={numeroNip} onChange={(e) => setNumeroNip(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Desdobramento</label>
                   <input type="text" placeholder="Ex: 1" value={desdobramento} onChange={(e) => setDesdobramento(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data de Expedição</label>
                   <input type="date" value={dataExpedicao} onChange={(e) => setDataExpedicao(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" />
                 </div>

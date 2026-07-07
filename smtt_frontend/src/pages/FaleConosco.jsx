@@ -486,7 +486,7 @@ function FaleConosco() {
                 </div>
               </div>
               <p className="text-slate-400 text-xs mb-6 leading-relaxed">
-                Superintendência Municipal de Transportes e Trânsito de Propriá/SE. Atuando continuamente para promover um trânsito mais seguro, ordeiro e com mobilidade eficiente para todos os cidadãos proprienses.
+                Superintendência Municipal de Transportes e Trânsito de Propriá/SE. Atuando continuamente para promover um trânsito mais seguro, ordeiro e com mobilidade eficiente para todos os cidadãos propriaenses.
               </p>
               <div className="flex space-x-3.5">
                 <a href="#" onClick={(e) => e.preventDefault()} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-[#003399] hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-md" aria-label="Facebook">
@@ -522,7 +522,7 @@ function FaleConosco() {
               <ul className="space-y-4 text-xs text-slate-400 font-medium">
                 <li className="flex items-start gap-3">
                   <i className="fa-solid fa-location-dot mt-0.5 text-secondary-500 text-sm"></i>
-                  <span className="leading-relaxed">Avenida João Barbosa Pôrto, 1829<br />Propriá - SE - CEP 49900-000<br />Funcionamento: 08h às 14h</span>
+                  <span className="leading-relaxed">Avenida João Barbosa Pôrto, 1829<br />Propriá - SE - CEP 49900-000<br />Funcionamento: 07h às 13h</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <i className="fa-solid fa-phone text-secondary-500 text-sm"></i>
