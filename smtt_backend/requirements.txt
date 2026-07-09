@@ -3,3 +3,7 @@ Flask-JWT-Extended
 flask_sqlalchemy
 dotenv
 Flask-CORS
+psutil
+pytest
+gunicorn
+psutil
