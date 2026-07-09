@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smtt-backend:latest
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    restart: always
+    # Docker healthcheck utilizing Python's built-in urllib to avoid installing curl in a slim image
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

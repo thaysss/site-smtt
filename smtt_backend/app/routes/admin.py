@@ -11,6 +11,23 @@ import random
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
+from flask_jwt_extended import verify_jwt_in_request, get_jwt
+
+@admin_bp.before_request
+def verificar_se_eh_admin():
+    # Ignora preflight do CORS
+    if request.method == 'OPTIONS':
+        return
+        
+    try:
+        verify_jwt_in_request()
+        claims = get_jwt()
+        if claims.get("role") != "admin":
+            return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
+    except Exception as e:
+        return jsonify({"erro": "Autenticação necessária.", "detalhes": str(e)}), 401
+
+
 # ==========================================
 # 1. INFRAÇÕES (Lançamento de Multas)
 # ==========================================

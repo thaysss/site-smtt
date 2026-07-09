@@ -1,0 +1,6 @@
+{
+  "max_cpu_percent": 85.0,
+  "max_memory_percent": 90.0,
+  "max_db_latency_ms": 1000.0,
+  "alert_webhook_url": ""
+}
