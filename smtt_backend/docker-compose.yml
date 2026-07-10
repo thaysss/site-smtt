@@ -11,6 +11,8 @@ services:
     env_file:
       - .env
     restart: always
+    volumes:
+      - smtt_uploads_data:/app/app/static/uploads
     # Docker healthcheck utilizing Python's built-in urllib to avoid installing curl in a slim image
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
@@ -18,3 +20,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+
+volumes:
+  smtt_uploads_data:

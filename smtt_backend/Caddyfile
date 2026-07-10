@@ -1,0 +1,23 @@
+# Caddyfile - Configuração recomendada para Proxy Reverso com SSL automático
+# Caddy é ideal pois gerencia e renova certificados Let's Encrypt / ZeroSSL automaticamente.
+
+# Substitua com o domínio público que aponta para o servidor onde o backend Docker está hospedado
+api.seusite-smtt.com.br {
+    # Redireciona todas as requisições HTTPS para a porta exposta pelo container Gunicorn (5000)
+    reverse_proxy localhost:5000
+
+    # Configurações de cabeçalhos de segurança básicos recomendados para produção
+    header {
+        # Previne o site de ser emoldurado em iframe (proteção contra Clickjacking)
+        X-Frame-Options "DENY"
+        # Habilita detecção de cross-site scripting do navegador
+        X-XSS-Protection "1; mode=block"
+        # Previne MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        # Desliga o cabeçalho Server do Caddy para dificultar fingerprinting de segurança
+        -Server
+    }
+
+    # Compressão de dados para acelerar carregamento de dados da API
+    encode gzip zstd
+}

@@ -45,3 +45,6 @@ smtt_backend/app/__pycache__/__init__.cpython-312.pyc
 smtt_backend/app/routes/__pycache__/admin.cpython-312.pyc
 smtt_backend/app/routes/__pycache__/admin.cpython-312.pyc
 smtt_backend/app/__pycache__/__init__.cpython-312.pyc
+smtt_backend/.env.example
+smtt_frontend/.env.development
+smtt_frontend/.env.production

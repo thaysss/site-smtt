@@ -8,7 +8,7 @@ from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 import psutil
 
-from .config import Config
+from .config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
 from .extensions import db, jwt
 from .utils.logging_setup import setup_logging, request_id_var
 from .utils.alerts import start_alert_monitor
@@ -18,7 +18,15 @@ def create_app(test_config=None):
     setup_logging()
     
     app = Flask(__name__)
-    app.config.from_object(Config)
+    
+    import os
+    env = os.getenv('FLASK_ENV', 'development')
+    if env == 'production':
+        app.config.from_object(ProductionConfig)
+    elif env == 'testing':
+        app.config.from_object(TestingConfig)
+    else:
+        app.config.from_object(DevelopmentConfig)
     
     if test_config:
         app.config.update(test_config)
