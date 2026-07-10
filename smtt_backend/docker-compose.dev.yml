@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smtt-backend:dev
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    # Mapeamentos para desenvolvimento
+    volumes:
+      # Sincroniza o código local com o container para refletir alterações em tempo real (hot-reload)
+      - .:/app
+      # Volume persistente separado para uploads locais
+      - smtt_uploads_data_dev:/app/app/static/uploads
+    
+    # Sobrescreve o Gunicorn de produção pelo servidor de desenvolvimento do Flask com reloader ativo
+    command: ["python", "run.py"]
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  smtt_uploads_data_dev:
