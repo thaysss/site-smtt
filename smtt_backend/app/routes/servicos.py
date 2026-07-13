@@ -5,7 +5,14 @@ from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, RecursoAnexo
 import random
 from datetime import datetime
+import uuid
 from app.utils.timezone import get_brasilia_time
+
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 servicos_bp = Blueprint('servicos', __name__, url_prefix='/api/servicos')
 
@@ -115,6 +122,10 @@ def abrir_recurso(id):
     cidadao_id = get_jwt_identity()
     infracao = AutoInfracao.query.get_or_404(id)
     
+    # Valida se a infração pertence ao cidadão autenticado
+    if not infracao.veiculo or str(infracao.veiculo.cidadao_id) != str(cidadao_id):
+        return jsonify({"erro": "Acesso negado. Esta infração não pertence a um veículo cadastrado em seu perfil."}), 403
+    
     print("DEBUG ABRIR RECURSO:")
     print("request.files:", request.files)
     print("request.form:", request.form)
@@ -137,63 +148,70 @@ def abrir_recurso(id):
     from werkzeug.utils import secure_filename
     from flask import current_app
 
-    # Lógica para salvar o arquivo do cidadão
-    caminho_salvo = None
-    arquivo = request.files.get('arquivo_recurso') # Pega o arquivo do React
-    
-    if arquivo and arquivo.filename != '':
+    try:
+        # Lógica para salvar o arquivo do cidadão
+        caminho_salvo = None
+        arquivo = request.files.get('arquivo_recurso') # Pega o arquivo do React
+        
         # Salva numa subpasta 'cidadao' para organizar
         pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
         os.makedirs(pasta_destino, exist_ok=True)
         
-        nome_seguro = secure_filename(f"req_{numero_protocolo}_{arquivo.filename}")
-        caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
-        arquivo.save(caminho_arquivo)
+        if arquivo and arquivo.filename != '':
+            if not allowed_file(arquivo.filename):
+                raise ValueError("O arquivo de recurso enviado possui uma extensão não permitida. Apenas PDF, PNG, JPG e JPEG são permitidos.")
+            ext = arquivo.filename.rsplit('.', 1)[1].lower() if '.' in arquivo.filename else 'pdf'
+            nome_seguro = secure_filename(f"req_{numero_protocolo}_{uuid.uuid4().hex}.{ext}")
+            caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
+            arquivo.save(caminho_arquivo)
+            
+            caminho_salvo = f"/static/uploads/cidadao/{nome_seguro}"
+    
+        # Captura o tipo de recurso enviado pelo cidadão
+        tipo_recurso = request.form.get('tipo_recurso', 'Defesa Prévia')
+    
+        # Cria o Recurso vinculando o arquivo
+        novo_recurso = RecursoMulta(
+            auto_infracao_id=infracao.id,
+            protocolo_id=novo_protocolo.id,
+            tipo_recurso=tipo_recurso,
+            resultado_julgamento='Em Análise',
+            arquivo_recurso_cidadao=caminho_salvo  # 👉 Grava o link no banco!
+        )
+        db.session.add(novo_recurso)
+        db.session.flush() # Sincroniza para obter o ID do recurso para os anexos
+    
+        # Lógica para salvar múltiplos arquivos adicionais
+        arquivos_adicionais = []
+        for key in request.files:
+            if key.startswith('arquivos'):
+                arquivos_adicionais.extend(request.files.getlist(key))
+                
+        for idx, arq in enumerate(arquivos_adicionais):
+            if arq and arq.filename != '':
+                if not allowed_file(arq.filename):
+                    raise ValueError(f"O anexo '{arq.filename}' possui uma extensão não permitida. Apenas PDF, PNG, JPG e JPEG são permitidos.")
+                ext = arq.filename.rsplit('.', 1)[1].lower() if '.' in arq.filename else 'pdf'
+                nome_seguro_anexo = secure_filename(f"anexo_{numero_protocolo}_{idx}_{uuid.uuid4().hex}.{ext}")
+                caminho_anexo = os.path.join(pasta_destino, nome_seguro_anexo)
+                arq.save(caminho_anexo)
+                
+                caminho_salvo_anexo = f"/static/uploads/cidadao/{nome_seguro_anexo}"
+                
+                novo_anexo = RecursoAnexo(
+                    recurso_id=novo_recurso.id,
+                    caminho_arquivo=caminho_salvo_anexo,
+                    nome_original=arq.filename
+                )
+                db.session.add(novo_anexo)
         
-        caminho_salvo = f"/static/uploads/cidadao/{nome_seguro}"
+        # Atualiza a fase da infração dinamicamente
+        infracao.fase_atual = f"Em Análise ({tipo_recurso})"
+        
+        db.session.commit()
+    except ValueError as ve:
+        return jsonify({"erro": str(ve)}), 400
 
-    # Captura o tipo de recurso enviado pelo cidadão
-    tipo_recurso = request.form.get('tipo_recurso', 'Defesa Prévia')
-
-    # Cria o Recurso vinculando o arquivo
-    novo_recurso = RecursoMulta(
-        auto_infracao_id=infracao.id,
-        protocolo_id=novo_protocolo.id,
-        tipo_recurso=tipo_recurso,
-        resultado_julgamento='Em Análise',
-        arquivo_recurso_cidadao=caminho_salvo  # 👉 Grava o link no banco!
-    )
-    db.session.add(novo_recurso)
-    db.session.flush() # Sincroniza para obter o ID do recurso para os anexos
-
-    # Lógica para salvar múltiplos arquivos adicionais
-    arquivos_adicionais = []
-    for key in request.files:
-        if key.startswith('arquivos'):
-            arquivos_adicionais.extend(request.files.getlist(key))
-            
-    pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
-    os.makedirs(pasta_destino, exist_ok=True)
-
-    for idx, arq in enumerate(arquivos_adicionais):
-        if arq and arq.filename != '':
-            nome_seguro_anexo = secure_filename(f"anexo_{numero_protocolo}_{idx}_{arq.filename}")
-            caminho_anexo = os.path.join(pasta_destino, nome_seguro_anexo)
-            arq.save(caminho_anexo)
-            
-            caminho_salvo_anexo = f"/static/uploads/cidadao/{nome_seguro_anexo}"
-            
-            novo_anexo = RecursoAnexo(
-                recurso_id=novo_recurso.id,
-                caminho_arquivo=caminho_salvo_anexo,
-                nome_original=arq.filename
-            )
-            db.session.add(novo_anexo)
-    
-    # Atualiza a fase da infração dinamicamente
-    infracao.fase_atual = f"Em Análise ({tipo_recurso})"
-    
-    db.session.commit()
 
     return jsonify({
         "mensagem": "Recurso enviado com sucesso!",

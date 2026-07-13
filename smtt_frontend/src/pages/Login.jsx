@@ -13,12 +13,21 @@ function Login() {
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
   const location = useLocation();
-  const [erro, setErro] = useState(() => location.state?.mensagem || '');
+  const [erro, setErro] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('message') === 'session_expired') {
+      return 'Sua sessão expirou por inatividade ou tempo limite. Por favor, faça login novamente.';
+    }
+    return location.state?.mensagem || '';
+  });
   const [sucesso, setSucesso] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (location.state?.mensagem) {
+    const params = new URLSearchParams(location.search);
+    if (params.get('message') === 'session_expired') {
+      navigate(location.pathname, { replace: true });
+    } else if (location.state?.mensagem) {
       // Limpa o state para não reexibir ao recarregar a página
       navigate(location.pathname, { replace: true, state: {} });
     }
