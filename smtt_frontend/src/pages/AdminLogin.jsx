@@ -1,14 +1,28 @@
 // src/pages/AdminLogin.jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { User, Lock, ArrowLeft } from 'lucide-react';
 
 function AdminLogin() {
+  const location = useLocation();
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
+  const [erro, setErro] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('message') === 'session_expired') {
+      return 'Sua sessão expirou por inatividade ou tempo limite. Por favor, faça login novamente.';
+    }
+    return '';
+  });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('message') === 'session_expired') {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

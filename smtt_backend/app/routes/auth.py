@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.models.cidadao import Cidadao
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 # app/routes/auth.py
@@ -45,7 +45,12 @@ from app.models.servidor import Servidor
 
 # Adicione estas rotas no final do arquivo auth.py
 @auth_bp.route('/admin/cadastro', methods=['POST'])
+@jwt_required()
 def cadastro_admin():
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
+        
     dados = request.get_json()
     if Servidor.query.filter_by(matricula=dados['matricula']).first():
         return jsonify({"erro": "Matrícula já cadastrada"}), 400

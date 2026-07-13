@@ -6,6 +6,7 @@ from flask import Blueprint, jsonify
 from sqlalchemy import text
 from app.extensions import db
 from app.utils.cache import cache_instance
+from flask_jwt_extended import jwt_required, get_jwt
 
 health_bp = Blueprint('health', __name__)
 
@@ -95,7 +96,12 @@ def health_check():
     }), code
 
 @health_bp.route('/metrics', methods=['GET'])
+@jwt_required()
 def metrics():
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
+        
     """Performance metrics endpoint returning detailed process, db pool, and cache stats."""
     import psutil
     process = psutil.Process()
