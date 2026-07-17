@@ -69,6 +69,10 @@ with app.app_context():
         db.session.execute(text("ALTER TABLE solicitacoes_alvara ADD COLUMN IF NOT EXISTS caminho_alvara_emitido VARCHAR(255);"))
         db.session.execute(text("ALTER TABLE solicitacoes_alvara ADD COLUMN IF NOT EXISTS caminho_requerimento VARCHAR(255);"))
         
+        # 7. Alterar tabela solicitacoes_eventos para permitir local_evento nulo
+        print("Alterando tabela solicitacoes_eventos para permitir local_evento nulo...")
+        db.session.execute(text("ALTER TABLE solicitacoes_eventos ALTER COLUMN local_evento DROP NOT NULL;"))
+        
         db.session.commit()
         print("[SUCCESS] Migração concluída com sucesso no Supabase!")
     except Exception as e:

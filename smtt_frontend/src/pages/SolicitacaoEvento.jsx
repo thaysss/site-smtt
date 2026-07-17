@@ -126,8 +126,16 @@ function SolicitacaoEvento() {
                   <p className="text-xs text-primary-100 mt-1">Preencha os dados do responsável pelo evento ao lado, anexe o arquivo escaneado do requerimento assinado e clique em "Enviar Solicitação".</p>
                 </div>
               </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0">4</div>
+                <div>
+                  <h3 className="font-bold text-sm">Observações</h3>
+                  <p className="text-xs text-primary-100 mt-1">1-	A apresentação do requerimento não garante que o evento será autorizado.<br />
+                    2- Em decorrênica da análise do requerimento poderão ser solicitadas informações e/ou documentos complementares para viabilizar a autorização, bem como, reunião de alinhamento.
+                  </p>
+                </div>
+              </div>
             </div>
-
             <div className="border-t border-primary-800 pt-6 mt-8">
               <h4 className="font-bold text-sm text-secondary-500 mb-2">Importante:</h4>
               <p className="text-xs text-primary-100 leading-relaxed">
@@ -215,14 +223,14 @@ function SolicitacaoEvento() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Vias a serem Interditadas / Local *</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Vias a serem Interditadas / Local </label>
                     <input
                       type="text"
                       placeholder="Ex: Av. Beira Rio (entre ruas A e B)"
                       value={localEvento}
                       onChange={(e) => setLocalEvento(e.target.value)}
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
-                      required
+
                     />
                   </div>
                 </div>

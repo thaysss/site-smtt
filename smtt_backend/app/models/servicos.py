@@ -157,7 +157,7 @@ class SolicitacaoEvento(db.Model):
     email = db.Column(db.String(100), nullable=False)
     telefone = db.Column(db.String(20), nullable=False)
     data_evento = db.Column(db.String(50), nullable=False)
-    local_evento = db.Column(db.String(255), nullable=False)
+    local_evento = db.Column(db.String(255), nullable=True)
     descricao = db.Column(db.Text, nullable=True)
     caminho_arquivo = db.Column(db.String(255), nullable=False)
     resposta_analise = db.Column(db.Text, default='Sua solicitação de evento está em análise pela equipe técnica da SMTT.')

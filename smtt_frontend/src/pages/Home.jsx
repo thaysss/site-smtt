@@ -393,9 +393,9 @@ function Home() {
                 <a href="#servicos" className="bg-secondary-500 hover:bg-secondary-600 text-primary-950 px-8 py-3.5 rounded-xl font-bold shadow-lg hover:shadow-secondary-500/20 transition-all duration-300 hover:-translate-y-0.5 text-center text-sm">
                   Acessar Serviços
                 </a>
-                <button onClick={() => navigate('/login')} className="bg-white/5 border border-white/30 text-white hover:bg-white/10 hover:border-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 hover:-translate-y-0.5 text-center text-sm">
+                <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" className="bg-white/5 border border-white/30 text-white hover:bg-white/10 hover:border-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 hover:-translate-y-0.5 text-center text-sm">
                   Conheça a SMTT
-                </button>
+                </a>
               </div>
             </div>
 
@@ -428,7 +428,7 @@ function Home() {
                   >
                     <i className="fa-solid fa-magnifying-glass"></i> Consulta de Veículo
                   </button>
-                  
+
                 </div>
 
                 {/* Tab Contents */}
@@ -899,12 +899,8 @@ function Home() {
                 <a href="https://www.instagram.com/smttpropria?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-gradient-to-tr hover:from-amber-500 hover:via-red-500 hover:to-purple-650 hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-md" aria-label="Instagram">
                   <i className="fa-brands fa-instagram text-sm"></i>
                 </a>
-                <a href="#" onClick={(e) => e.preventDefault()} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-[#1da1f2] hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-md" aria-label="Twitter">
-                  <i className="fa-brands fa-twitter text-sm"></i>
-                </a>
-                <a href="#" onClick={(e) => e.preventDefault()} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-red-600 hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-md" aria-label="YouTube">
-                  <i className="fa-brands fa-youtube text-sm"></i>
-                </a>
+
+
               </div>
             </div>
 

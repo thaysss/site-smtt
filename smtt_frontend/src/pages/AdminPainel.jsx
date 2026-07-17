@@ -905,7 +905,7 @@ function AdminPainel() {
                       <div className="bg-white p-5 rounded-xl border border-gray-200 mb-4 space-y-3">
                         <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-1">Dados da Interdição</p>
                         <p className="text-sm text-gray-800">Data e Horário: <strong>{eve.data_evento}</strong></p>
-                        <p className="text-sm text-gray-800">Local e Vias: <strong>{eve.local_evento}</strong></p>
+                        <p className="text-sm text-gray-800">Local e Vias: <strong>{eve.local_evento || 'Não informado'}</strong></p>
                         {eve.descricao && <p className="text-sm text-gray-700 mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">"{eve.descricao}"</p>}
                         
                         <div className="pt-2">
