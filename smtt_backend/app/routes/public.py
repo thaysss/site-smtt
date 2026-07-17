@@ -83,7 +83,7 @@ def enviar_solicitacao_evento():
     local_evento = request.form.get('local_evento')
     descricao = request.form.get('descricao', '')
     
-    if not (nome and cpf_cnpj and email and telefone and data_evento and local_evento):
+    if not (nome and cpf_cnpj and email and telefone and data_evento):
         return jsonify({"erro": "Todos os campos obrigatórios devem ser preenchidos."}), 400
         
     arquivo = request.files.get('arquivo')
