@@ -781,60 +781,6 @@ function AdminInfracoes() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                  <div className="col-span-1 relative">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Código da Infração *</label>
-                    <div className="relative">
-                      <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Ex: 5541"
-                        value={codigoInfracao}
-                        onChange={(e) => handleCodigoCTBChange(e.target.value)}
-                        required
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-gray-700 transition-all text-sm"
-                      />
-
-                      {sugestoesCTB.length > 0 && (
-                        <div className="absolute z-20 w-full bg-white border border-gray-200 rounded-xl mt-1 shadow-lg max-h-60 overflow-y-auto divide-y divide-gray-100">
-                          {sugestoesCTB.map((sug) => (
-                            <button
-                              key={sug.codigo}
-                              type="button"
-                              onClick={() => {
-                                setCodigoInfracao(sug.codigo);
-                                setDescricaoInfracao(sug.descricao);
-                                setAmparoLegal(sug.amparo_legal || 'Art. 181, XVII');
-                                setGravidade(sug.gravidade);
-                                setPontos(sug.pontos);
-                                setValor(sug.valor);
-                                setSugestoesCTB([]);
-                                if (isSpeedLimitInfraction(sug.codigo) && medicaoAferida) {
-                                  recalculateSpeed(sug.codigo, medicaoAferida);
-                                }
-                              }}
-                              className="w-full text-left px-4 py-3 hover:bg-primary-50 flex items-start gap-3 transition-colors text-xs"
-                            >
-                              <FileDigit className="w-5 h-5 text-primary-500 shrink-0 mt-0.5" />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-bold text-sm text-primary-950">Código {sug.codigo}</span>
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sug.gravidade === 'Leve' ? 'bg-green-100 text-green-700' :
-                                      sug.gravidade === 'Média' ? 'bg-amber-100 text-amber-700' :
-                                        sug.gravidade === 'Grave' ? 'bg-orange-100 text-orange-700' :
-                                          'bg-red-100 text-red-700'
-                                    }`}>
-                                    {sug.gravidade}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-gray-500 line-clamp-2">{sug.descricao}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
                   <div className="col-span-1 relative">
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Código da Infração *</label>
