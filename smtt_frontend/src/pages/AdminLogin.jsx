@@ -40,21 +40,21 @@ function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-primary-900 font-sans text-gray-800 flex flex-col justify-center items-center selection:bg-secondary-500 selection:text-primary-950 p-4 relative overflow-hidden">
-      
+
       {/* Padrão de Fundo Institucional */}
       <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
-      
+
       <div className="w-full max-w-md relative z-10">
-        
+
         {/* Botão Voltar */}
         <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white flex items-center gap-2 text-sm font-medium mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Voltar ao Portal Público
         </button>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-10 border-t-4 border-secondary-500 relative overflow-hidden">
-          
+
           <div className="text-center mb-8">
-            <img src="/logo.png" alt="Logo SMTT" className="w-16 h-16 object-contain mx-auto mb-4" />
+            <img src="/logo.png" alt="Logo SMTT" className="w-20 h-20 object-contain mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900">Acesso Restrito</h2>
             <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-bold">Portal do Servidor SMTT</p>
           </div>
@@ -69,7 +69,7 @@ function AdminLogin() {
                 <input type="text" value={usuario} onChange={(e) => setUsuario(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="Digite seu usuário" required />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Senha</label>
               <div className="relative">
@@ -84,9 +84,9 @@ function AdminLogin() {
           </form>
 
         </div>
-        
+
         <div className="text-center mt-6 text-gray-400 text-xs">
-          Sistema de Gestão de Trânsito © 2026<br/>Acesso exclusivo para agentes autorizados.
+          Sistema de Gestão de Trânsito © 2026<br />Acesso exclusivo para agentes autorizados.
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Configurações específicas para o ambiente de desenvolvimento local."""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL_LOCAL', 'sqlite:///smtt_local.db')
 
 class ProductionConfig(Config):
     """Configurações específicas para o ambiente de produção."""
