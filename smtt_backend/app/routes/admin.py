@@ -61,6 +61,7 @@ def registrar_infracao():
         tipo_infracao = TipoInfracaoCTB(
             codigo_infracao=codigo_ctb,
             descricao=dados.get('descricao_infracao', 'Descrição não informada'),
+            amparo_legal=dados.get('amparo_legal', 'Art. 181, XVII'),
             gravidade=dados.get('gravidade', 'Média'),
             pontos=int(dados.get('pontos', 4)),
             valor_base=float(dados.get('valor_final', 0.00))

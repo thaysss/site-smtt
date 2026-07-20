@@ -56,3 +56,8 @@ smtt_backend/app/__pycache__/config.cpython-312.pyc
 smtt_backend/app/__pycache__/__init__.cpython-312.pyc
 smtt_backend/app/__pycache__/config.cpython-312.pyc
 smtt_backend/app/__pycache__/config.cpython-312.pyc
+smtt_backend/app/routes/__pycache__/public.cpython-312.pyc
+smtt_backend/app/routes/__pycache__/admin.cpython-312.pyc
+smtt_backend/app/__pycache__/config.cpython-312.pyc
+smtt_backend/app/models/__pycache__/servicos.cpython-312.pyc
+smtt_backend/instance/smtt_local.db

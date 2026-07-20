@@ -5,16 +5,85 @@ import api from '../services/api';
 import html2pdf from 'html2pdf.js';
 import {
   Car, AlertCircle, FileText, Download,
-  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, Coins, ExternalLink, Compass
+  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, Coins, ExternalLink, Compass,
+  Info
 } from 'lucide-react';
-import formularioPDF from '../assets/formulario_jari1.pdf';
+import formularioPDF from '../assets/requerimento.pdf';
 
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const montarUrlArquivo = (caminho) => {
   if (!caminho) return '';
-  if (/^https?:\/\//i.test(caminho)) return caminho;
-  return `${apiBaseUrl}${caminho}`;
+  if (caminho.startsWith('http://') || caminho.startsWith('https://')) return caminho;
+  return `${apiBaseUrl}${caminho.startsWith('/') ? '' : '/'}${caminho}`;
+};
+
+const getInfracaoInfoByCodigo = (codigo) => {
+  const cod = String(codigo || '').trim();
+  switch (cod) {
+    case '74550':
+      return {
+        amparo: 'Art. 218, I',
+        descricao: 'TRANSITAR EM VELOCIDADE SUPERIOR À MÁXIMA PERMITIDA EM ATÉ 20%'
+      };
+    case '74630':
+      return {
+        amparo: 'Art. 218, II',
+        descricao: 'TRANSITAR EM VELOCIDADE SUPERIOR À MÁXIMA PERMITIDA EM MAIS DE 20% ATÉ 50%'
+      };
+    case '74710':
+      return {
+        amparo: 'Art. 218, III',
+        descricao: 'TRANSITAR EM VELOCIDADE SUPERIOR À MÁXIMA PERMITIDA EM MAIS DE 50%'
+      };
+    case '5541':
+      return {
+        amparo: 'Art. 181, XVII',
+        descricao: 'ESTACIONAR EM DESACORDO COM A REGULAMENTAÇÃO ESPECIFICADA PELA SINALIZAÇÃO (ZONA AZUL)'
+      };
+    case '51851':
+      return {
+        amparo: 'Art. 167',
+        descricao: 'DEIXAR O CONDUTOR DE USAR O CINTO DE SEGURANÇA'
+      };
+    case '51852':
+      return {
+        amparo: 'Art. 167',
+        descricao: 'DEIXAR O PASSAGEIRO DE USAR O CINTO DE SEGURANÇA'
+      };
+    case '60501':
+      return {
+        amparo: 'Art. 208',
+        descricao: 'AVANÇAR O SINAL VERMELHO DO SEMÁFORO'
+      };
+    case '60502':
+      return {
+        amparo: 'Art. 208',
+        descricao: 'AVANÇAR O SINAL DE PARADA OBRIGATÓRIA'
+      };
+    case '73662':
+      return {
+        amparo: 'Art. 252, PARÁGRAFO ÚNICO',
+        descricao: 'DIRIGIR VEÍCULO SEGURANDO OU MANUSEANDO TELEFONE CELULAR'
+      };
+    case '65992':
+      return {
+        amparo: 'Art. 230, V',
+        descricao: 'CONDUZIR O VEÍCULO REGISTRADO QUE NÃO ESTEJA DEVIDAMENTE LICENCIADO'
+      };
+    case '50100':
+      return {
+        amparo: 'Art. 162, I',
+        descricao: 'DIRIGIR VEÍCULO SEM POSSUIR CARTEIRA NACIONAL DE HABILITAÇÃO (CNH)'
+      };
+    case '51691':
+      return {
+        amparo: 'Art. 165',
+        descricao: 'DIRIGIR SOB A INFLUÊNCIA DE ÁLCOOL (LEI SECA)'
+      };
+    default:
+      return null;
+  }
 };
 
 function Painel() {
@@ -130,12 +199,17 @@ function Painel() {
   };
 
   const gerarPDF = (multa) => {
-    const isNIP = !!multa.linha_digitavel;
+    const isNIP = multa.fase_atual?.toLowerCase() === 'penalidade';
     const documentTitle = isNIP ? 'NOTIFICAÇÃO DA IMPOSIÇÃO DE PENALIDADE - NIP' : 'NOTIFICAÇÃO DA AUTUAÇÃO DE INFRAÇÃO DE TRÂNSITO - NAIT';
     const docNumberLabel = isNIP ? 'Nº da NIP' : 'Nº da NAIT';
     const docNumberValue = isNIP ? (multa.numero_nip || '7003190223') : (multa.numero_nait || '7003209824');
     const valorNominal = multa.valor_final || '0.00';
     const valorDesconto = (parseFloat(valorNominal) * 0.8).toFixed(2);
+
+    const cod = multa.tipo_infracao?.codigo_infracao || multa.codigo_infracao || '';
+    const infoLocal = getInfracaoInfoByCodigo(cod);
+    const amparoLegalVal = multa.tipo_infracao?.amparo_legal || infoLocal?.amparo || 'Art. 181, XVII';
+    const descricaoVal = multa.tipo_infracao?.descricao || infoLocal?.descricao || 'ESTACIONAR EM DESACORDO COM A REGULAMENTAÇÃO ESPECIFICADA PELA SINALIZAÇÃO';
 
     const elemento = document.createElement('div');
     elemento.innerHTML = `
@@ -211,11 +285,11 @@ function Painel() {
           <div style="padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; border-bottom: 1px solid #eee; background-color: #fafafa;">
             <div>
               <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Enquadramento (CTB):</strong>
-              <span>${multa.tipo_infracao?.amparo_legal || 'Art. 181, XVII'}</span>
+              <span>${amparoLegalVal}</span>
             </div>
             <div>
               <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Cód. Infração / Desdobr.:</strong>
-              <span>${multa.tipo_infracao?.codigo_infracao || multa.codigo_infracao || '5541'} / ${multa.desdobramento || '1'}</span>
+              <span>${cod} / ${multa.desdobramento || '1'}</span>
             </div>
             <div>
               <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Pontuação/Gravidade:</strong>
@@ -229,7 +303,7 @@ function Painel() {
 
           <div style="padding: 6px; border-bottom: 1px solid #eee;">
             <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Descrição da Infração:</strong>
-            <span style="font-weight: bold; text-transform: uppercase; font-size: 9.5px;">${multa.tipo_infracao?.descricao || 'ESTACIONAR EM DESACORDO COM A REGULAMENTACAO ESPECIFICADA PELA SINALIZACAO'}</span>
+            <span style="font-weight: bold; text-transform: uppercase; font-size: 9.5px;">${descricaoVal}</span>
           </div>
 
           <div style="padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background-color: #fafafa;">
@@ -375,6 +449,7 @@ function Painel() {
 
   const totalVeiculos = veiculos.length;
   const totalMultas = multas.length;
+  const totalRecursos = multas.filter(m => m.recurso).length;
 
   const pontosCNH = multas
     .filter(m => !m.fase_atual.includes('Cancelada') && !m.fase_atual.includes('Deferida'))
@@ -444,8 +519,8 @@ function Painel() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
 
         {/* SEÇÃO DE RESUMO (KPIs) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+          <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
             <div>
               <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Veículos Vinculados</span>
               <span className="text-2xl font-extrabold text-gray-900">{totalVeiculos}</span>
@@ -455,9 +530,9 @@ function Painel() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-center justify-between">
+          <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
             <div>
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Infrações</span>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Infrações Registradas</span>
               <span className="text-2xl font-extrabold text-gray-900">{totalMultas}</span>
             </div>
             <div className="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
@@ -465,7 +540,15 @@ function Painel() {
             </div>
           </div>
 
-
+          <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
+            <div>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Recursos em Andamento</span>
+              <span className="text-2xl font-extrabold text-primary-600">{totalRecursos}</span>
+            </div>
+            <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
+              <FileText className="w-6 h-6" />
+            </div>
+          </div>
         </div>
 
         {/* ÁREA DE CONTEÚDO PRINCIPAL */}
@@ -503,23 +586,40 @@ function Painel() {
             </div>
 
             {/* Lista de Veículos */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-              <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-4">Meus Veículos</h3>
+            <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6">
+              <h3 className="font-bold text-xs text-gray-400 uppercase tracking-wider mb-4">Meus Veículos</h3>
               {veiculos.length === 0 ? (
-                <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                   <Car className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">Nenhum veículo vinculado.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {veiculos.map(v => (
-                    <div key={v.id} className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:border-primary-500/30 transition-colors">
-                      <div>
-                        <span className="block font-bold text-lg text-primary-900 uppercase tracking-widest">{v.placa}</span>
-                        <span className="text-xs text-gray-500">Renavam: {v.renavam}</span>
+                    <div key={v.id} className="flex flex-col sm:flex-row justify-between items-center p-4 bg-gray-50 border border-gray-150 rounded-2xl hover:border-primary-300 hover:bg-white hover:shadow-soft transition-all duration-200 gap-3">
+                      <div className="flex flex-col items-center sm:items-start w-full sm:w-auto text-center sm:text-left">
+                        {/* Placa Mercosul */}
+                        <div className="w-full max-w-[140px] bg-white border-2 border-black rounded-md overflow-hidden shadow-sm relative mb-2 font-sans mx-auto sm:mx-0">
+                          {/* Faixa Azul Superior */}
+                          <div className="bg-[#003399] text-white py-0.5 px-1.5 flex justify-between items-center text-[7px] font-bold tracking-wider uppercase h-4.5">
+                            <span className="opacity-75">Mercosul</span>
+                            <span>Brasil</span>
+                            <span className="w-2.5 h-1.5 bg-yellow-400 rounded-sm relative overflow-hidden flex items-center justify-center shrink-0">
+                              <span className="absolute w-1.5 h-1.5 bg-green-600 rotate-45"></span>
+                              <span className="absolute w-0.5 h-0.5 bg-blue-800 rounded-full"></span>
+                            </span>
+                          </div>
+                          {/* Corpo da Placa */}
+                          <div className="py-1.5 px-2 flex items-center justify-center bg-white">
+                            <span className="font-extrabold text-sm text-black tracking-widest font-mono select-all">
+                              {v.placa}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">RENAVAM: <span className="text-gray-600 font-mono">{v.renavam}</span></span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-blue-50 text-primary-600 flex items-center justify-center">
-                        <Car className="w-4 h-4" />
+                      <div className="w-9 h-9 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0 shadow-sm">
+                        <Car className="w-5 h-5" />
                       </div>
                     </div>
                   ))}
@@ -684,11 +784,63 @@ function Painel() {
 
                       {/* Corpo do Card da Multa */}
                       <div className="p-5">
+                        {/* Banner Informativo de Fase */}
+                        {multa.fase_atual?.toLowerCase() === 'autuação' ? (
+                          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4 text-left flex items-start gap-2.5 animate-fadeIn shadow-sm">
+                            <Info className="w-4.5 h-4.5 text-primary-600 shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="font-bold text-[11px] text-primary-900 uppercase tracking-wide">Fase de Autuação (Defesa Prévia)</h4>
+                              <p className="text-[11px] text-gray-600 leading-relaxed mt-0.5">
+                                Esta autuação foi registrada e está aberta para apresentação de <strong>Defesa Prévia</strong> até: <strong className="text-primary-850 font-bold">{multa.data_vencimento_defesa || 'A consultar'}</strong>. Nenhum boleto é emitido nesta fase.
+                              </p>
+                            </div>
+                          </div>
+                        ) : multa.fase_atual?.toLowerCase() === 'penalidade' ? (
+                          <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4 text-left flex items-start gap-2.5 animate-fadeIn shadow-sm">
+                            <ShieldAlert className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="font-bold text-[11px] text-amber-900 uppercase tracking-wide">Fase de Penalidade (Multa Imposta)</h4>
+                              <p className="text-[11px] text-gray-600 leading-relaxed mt-0.5">
+                                A multa foi imposta e está disponível para pagamento ou contestação via Recurso JARI. Efetue o pagamento até o vencimento para garantir <strong>20% de desconto</strong>.
+                              </p>
+                            </div>
+                          </div>
+                        ) : null}
+
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                           <div className="space-y-1 text-left">
                             <p className="text-sm text-gray-800"><strong className="text-gray-500">Data:</strong> {multa.data_hora_infracao}</p>
                             <p className="text-sm text-gray-800"><strong className="text-gray-500">Local:</strong> {multa.local_cometimento}</p>
-                            <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
+                            {multa.fase_atual?.toLowerCase() !== 'autuação' && (
+                              <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
+                            )}
+
+                             {(() => {
+                              const codInfracao = multa.tipo_infracao?.codigo_infracao || multa.codigo_infracao || '';
+                              const infoLocal = getInfracaoInfoByCodigo(codInfracao);
+                              const amparoText = multa.tipo_infracao?.amparo_legal || infoLocal?.amparo || 'Art. 181, XVII';
+                              const descText = multa.tipo_infracao?.descricao || infoLocal?.descricao || 'Descrição não informada';
+                              return (
+                                <div className="text-xs text-gray-600 bg-slate-50 border border-slate-150 px-2.5 py-2 rounded-xl mt-2 block">
+                                  <strong className="text-slate-500 font-bold uppercase text-[9px] block">Enquadramento Legal (CTB)</strong>
+                                  <span className="text-gray-800 font-medium block mt-0.5">
+                                    Código <strong>{codInfracao}</strong> • <strong className="text-primary-750 font-bold">{amparoText}</strong>
+                                  </span>
+                                  <p className="text-xs text-gray-500 leading-relaxed mt-1 font-medium">{descText}</p>
+                                  <div className="mt-1.5 flex items-center gap-2">
+                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                      (multa.tipo_infracao?.gravidade || 'Média') === 'Leve' ? 'bg-green-100 text-green-700' :
+                                      (multa.tipo_infracao?.gravidade || 'Média') === 'Média' ? 'bg-amber-100 text-amber-700' :
+                                      (multa.tipo_infracao?.gravidade || 'Média') === 'Grave' ? 'bg-orange-100 text-orange-700' :
+                                      'bg-red-100 text-red-700'
+                                    }`}>
+                                      {multa.tipo_infracao?.gravidade || 'Média'}
+                                    </span>
+                                    <span className="text-[9px] text-gray-400 font-bold">{multa.tipo_infracao?.pontos || '4'} Pontos</span>
+                                  </div>
+                                </div>
+                              );
+                            })()}
 
                             {multa.veiculo && (multa.veiculo.marca_modelo || multa.veiculo.cor) && (
                               <p className="text-xs text-gray-600 bg-gray-100 px-2.5 py-1.5 rounded-lg mt-1.5 inline-block">
@@ -728,7 +880,7 @@ function Painel() {
                               onClick={() => gerarPDF(multa)}
                               className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                             >
-                              <Download className="w-4 h-4" /> Notificação ({multa.linha_digitavel ? 'NIP' : 'NAIT'})
+                              <Download className="w-4 h-4" /> Notificação ({multa.fase_atual?.toLowerCase() === 'penalidade' ? 'NIP' : 'NAIT'})
                             </button>
                           </div>
                         </div>
@@ -736,14 +888,14 @@ function Painel() {
                         {/* Linha do Tempo do Processo */}
                         <div className="mt-6 pt-4 border-t border-gray-100">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-3 text-left">Acompanhamento do Processo</span>
-                          <div className="relative flex justify-between items-center w-full max-w-lg mx-auto py-2">
+                          <div className="relative flex justify-between items-center w-full max-w-lg mx-auto py-3">
 
                             {/* Linha horizontal de fundo */}
-                            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 z-0"></div>
+                            <div className="absolute left-0 right-0 top-[22px] h-0.5 bg-gray-200 z-0"></div>
 
                             {/* Linha horizontal ativa */}
                             <div
-                              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary-600 transition-all duration-500 z-0"
+                              className="absolute left-0 top-[22px] h-0.5 bg-primary-600 transition-all duration-500 z-0"
                               style={{
                                 width: `${((getFaseStep(multa.fase_atual) - 1) / 3) * 100}%`
                               }}
@@ -752,28 +904,32 @@ function Painel() {
                             {/* Passos */}
                             {[
                               { step: 1, label: 'Autuação', desc: 'AIT Registrado' },
-                              { step: 2, label: 'Penalidade', desc: 'Notificação / Boleto' },
-                              { step: 3, label: 'Análise ', desc: 'Em julgamento' },
-                              { step: 4, label: 'Finalizado', desc: 'Processo Concluído' }
+                              { step: 2, label: 'Penalidade', desc: 'Multa Emitida' },
+                              { step: 3, label: 'Julgamento', desc: 'Defesa / Recurso' },
+                              { step: 4, label: 'Finalizado', desc: 'Concluído' }
                             ].map((item) => {
                               const currentStep = getFaseStep(multa.fase_atual);
                               const isCompleted = currentStep > item.step;
                               const isActive = currentStep === item.step;
 
                               return (
-                                <div key={item.step} className="relative z-10 flex flex-col items-center">
+                                <div key={item.step} className="relative z-10 flex flex-col items-center select-none">
                                   <div
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2 ${isCompleted
-                                      ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
+                                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2 ${isCompleted
+                                      ? 'bg-primary-600 border-primary-600 text-white shadow-md'
                                       : isActive
-                                        ? 'bg-white border-primary-600 text-primary-600 scale-110 ring-4 ring-blue-50 font-extrabold'
+                                        ? 'bg-white border-primary-600 text-primary-600 scale-110 ring-4 ring-primary-100 font-extrabold shadow-sm'
                                         : 'bg-white border-gray-300 text-gray-400'
                                       }`}
                                   >
-                                    {isCompleted ? '✓' : item.step}
+                                    {isCompleted ? (
+                                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    ) : item.step}
                                   </div>
-                                  <span className={`text-[10px] font-bold mt-1.5 ${isActive ? 'text-primary-700' : isCompleted ? 'text-gray-700' : 'text-gray-400'}`}>{item.label}</span>
-                                  <span className="text-[8px] text-gray-400 hidden sm:block mt-0.5">{item.desc}</span>
+                                  <span className={`text-[10px] font-bold mt-2 ${isActive ? 'text-primary-700 font-extrabold' : isCompleted ? 'text-gray-700' : 'text-gray-400'}`}>{item.label}</span>
+                                  <span className="text-[8px] text-gray-400 hidden sm:block mt-0.5 font-medium">{item.desc}</span>
                                 </div>
                               );
                             })}
@@ -781,7 +937,7 @@ function Painel() {
                         </div>
 
                         {/* Boleto de Arrecadação BANESE caso disponível */}
-                        {multa.linha_digitavel && (
+                        {multa.linha_digitavel && multa.fase_atual?.toLowerCase() !== 'autuação' && (
                           <div className="mt-4 p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-3 text-left">
                             <div className="flex justify-between items-center flex-wrap gap-1">
                               <span className="text-xs font-bold text-primary-600 flex items-center gap-1.5 uppercase tracking-wide">

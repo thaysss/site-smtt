@@ -2,6 +2,11 @@
 import os
 from app import create_app, db
 from app.models.servidor import Servidor
+from dotenv import load_dotenv
+
+# Carrega as variáveis do arquivo .env
+load_dotenv()
+
 
 app = create_app()
 
@@ -25,6 +30,13 @@ with app.app_context():
         
         db.session.add(novo_servidor)
         db.session.commit()
-        print("✅ Conta de servidor criada com sucesso no Supabase!")
+        db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+        env = os.getenv('FLASK_ENV', 'development')
+        if env == 'production' or 'supabase' in db_uri:
+            print("✅ Conta de servidor criada com sucesso no Supabase (Produção)!")
+        elif 'sqlite' in db_uri:
+            print("✅ Conta de servidor criada com sucesso no SQLite Local!")
+        else:
+            print("✅ Conta de servidor criada com sucesso no PostgreSQL Local!")
     else:
         print("⚠️ O servidor com esta matrícula já existe no banco de dados.")
