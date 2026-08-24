@@ -15,6 +15,7 @@ class Veiculo(db.Model):
     ano_fabricacao = db.Column(db.Integer, nullable=True)
     marca_modelo = db.Column(db.String(100), nullable=True)
     cor = db.Column(db.String(50), nullable=True)
+    uf = db.Column(db.String(2), nullable=True, default='SE')
 
 
 class AutoInfracao(db.Model):
@@ -78,7 +79,8 @@ class AutoInfracao(db.Model):
                 "renavam": self.veiculo.renavam if self.veiculo else "",
                 "ano_fabricacao": self.veiculo.ano_fabricacao if self.veiculo else None,
                 "marca_modelo": self.veiculo.marca_modelo if self.veiculo else "",
-                "cor": self.veiculo.cor if self.veiculo else ""
+                "cor": self.veiculo.cor if self.veiculo else "",
+                "uf": self.veiculo.uf if self.veiculo else "SE"
             }
         }
 

@@ -128,6 +128,7 @@ function AdminInfracoes() {
   const [anoFabricacao, setAnoFabricacao] = useState('');
   const [marcaModelo, setMarcaModelo] = useState('');
   const [cor, setCor] = useState('');
+  const [uf, setUf] = useState('SE');
 
   // Novos campos de controle e medições
   const [numeroAit, setNumeroAit] = useState('');
@@ -247,18 +248,20 @@ function AdminInfracoes() {
 
     try {
       const response = await api.get(`/admin/veiculos/consulta/${placaAlvo}`);
-      const { marca_modelo, cor: corVeiculo, ano_fabricacao, renavam: renavamVeiculo } = response.data;
+      const { marca_modelo, cor: corVeiculo, ano_fabricacao, renavam: renavamVeiculo, uf: ufVeiculo } = response.data;
 
       if (marca_modelo) setMarcaModelo(marca_modelo);
       if (corVeiculo) setCor(corVeiculo);
       if (ano_fabricacao) setAnoFabricacao(ano_fabricacao.toString());
       if (renavamVeiculo && !nossoNumero) setNossoNumero(renavamVeiculo);
+      if (ufVeiculo) setUf(ufVeiculo);
 
       setVeiculoConsultado({
         marca_modelo,
         cor: corVeiculo,
         ano_fabricacao,
-        renavam: renavamVeiculo
+        renavam: renavamVeiculo,
+        uf: ufVeiculo || 'SE'
       });
 
       setMensagem('Veículo localizado! Características preenchidas de forma automática.');
@@ -270,6 +273,7 @@ function AdminInfracoes() {
         cor: '',
         ano_fabricacao: '',
         renavam: '',
+        uf: 'SE',
         isManual: true
       });
     } finally {
@@ -481,6 +485,7 @@ function AdminInfracoes() {
       const dataFormatada = dataHora.replace('T', ' ') + ':00';
       const response = await api.post('/admin/infracoes', {
         placa: placa.toUpperCase().replace('-', ''),
+        uf: uf,
         data_hora_infracao: dataFormatada,
         local_cometimento: local,
         valor_final: parseFloat(valor),
@@ -516,7 +521,7 @@ function AdminInfracoes() {
       // Limpa os campos
       setPlaca(''); setDataHora(''); setLocal(''); setCodigoInfracao('');
       setDescricaoInfracao(''); setAmparoLegal('Art. 181, XVII'); setVencimentoDefesa('');
-      setAnoFabricacao(''); setMarcaModelo(''); setCor('');
+      setAnoFabricacao(''); setMarcaModelo(''); setCor(''); setUf('SE');
       setNumeroAit('');
       setAgenteAparelho(''); setDesdobramento('1'); setMedicaoAferida('');
       setMedicaoConsiderada(''); setMedicaoRegulamentada(''); setCodigoRenainf('');
@@ -545,7 +550,7 @@ function AdminInfracoes() {
           <p className="text-gray-500 text-sm">Registre os Autos de Infração com todos os dados legais necessários para notificação.</p>
         </header>
 
-        <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 max-w-4xl relative overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 w-full relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
 
           {mensagem && (
@@ -688,7 +693,7 @@ function AdminInfracoes() {
                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Detalhamento do Registro</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-2">
                       <div>
                         <span className="text-[10px] uppercase font-bold text-gray-400 block">Marca / Modelo</span>
                         <span className="text-xs font-bold text-primary-900">{marcaModelo || 'Não Informado'}</span>
@@ -707,6 +712,10 @@ function AdminInfracoes() {
                         <span className="text-xs font-bold text-primary-900">{anoFabricacao || 'Não Informado'}</span>
                       </div>
                       <div>
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block">UF</span>
+                        <span className="text-xs font-bold text-primary-900 uppercase">{veiculoConsultado.uf || 'SE'}</span>
+                      </div>
+                      <div>
                         <span className="text-[10px] uppercase font-bold text-gray-400 block">Nº Registro (Renavam)</span>
                         <span className="text-xs font-bold text-primary-900">{nossoNumero || 'Pendente'}</span>
                       </div>
@@ -717,7 +726,7 @@ function AdminInfracoes() {
                 {/* Campos do veículo editáveis/manuais */}
                 <div className="bg-gray-50 rounded-2xl p-5 border border-gray-150 space-y-4">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Características Físicas do Veículo</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div>
                       <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1.5">Marca / Modelo</label>
                       <input
@@ -746,6 +755,17 @@ function AdminInfracoes() {
                         value={anoFabricacao}
                         onChange={(e) => setAnoFabricacao(e.target.value)}
                         className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1.5">UF do Veículo</label>
+                      <input
+                        type="text"
+                        maxLength="2"
+                        placeholder="Ex: SE"
+                        value={uf}
+                        onChange={(e) => setUf(e.target.value.toUpperCase())}
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-bold uppercase"
                       />
                     </div>
                   </div>
@@ -1100,12 +1120,12 @@ function AdminInfracoes() {
                     <Info className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-primary-950">4. Dados Fiscais, Prazos e Controle Legal</h3>
-                    <p className="text-xs text-gray-400">Preencha datas de notificação, números de protocolo e dados do boleto bancário.</p>
+                    <h3 className="font-bold text-lg text-primary-950">4. Dados Fiscais e Controle Legal</h3>
+                    <p className="text-xs text-gray-400">Preencha o número do auto de infração (AIT) e a data de expedição.</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-1.5">
                       Número do Auto (AIT)
@@ -1125,30 +1145,7 @@ function AdminInfracoes() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número NAIT</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: 7003209824"
-                      value={numeroNait}
-                      onChange={(e) => setNumeroNait(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número NIP</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: 7003190223"
-                      value={numeroNip}
-                      onChange={(e) => setNumeroNip(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data de Expedição</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data de Expedição do Auto</label>
                     <input
                       type="date"
                       value={dataExpedicao}
@@ -1156,61 +1153,6 @@ function AdminInfracoes() {
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Nosso Número (Boleto)</label>
-                    <input
-                      type="text"
-                      placeholder="Identificador do Boleto"
-                      value={nossoNumero}
-                      onChange={(e) => setNossoNumero(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Vencimento do Boleto</label>
-                    <input
-                      type="date"
-                      value={dataVencimentoBoleto}
-                      onChange={(e) => setDataVencimentoBoleto(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Linha Digitável do Boleto</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: 34191.79001 01043.513184..."
-                      value={linhaDigitavel}
-                      onChange={(e) => setLinhaDigitavel(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all font-mono text-xs"
-                    />
-                  </div>
-                </div>
-
-                {/* Cartão de Ações do Financeiro */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 mt-0.5">
-                      <CreditCard className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wide">Faturamento da Autuação</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed">
-                        Você pode gerar automaticamente a linha digitável do boleto bancário de pagamento com base no valor e data de vencimento.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleGerarDadosBoleto}
-                    className="w-full md:w-auto px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 shrink-0 animate-fadeIn"
-                  >
-                    <Sparkles className="w-4 h-4 text-secondary-500" />
-                    Gerar Dados de Pagamento
-                  </button>
                 </div>
               </div>
             )}
@@ -1366,7 +1308,7 @@ function AdminInfracoes() {
                         />
                       ))}
                     </div>
-                    <span className="text-[9px] font-mono mt-1 text-gray-500">{linhaDigitavel || 'AIT-AUTO-GERADO-PENDENTE-DE-GRAVACAO'}</span>
+                    <span className="text-[9px] font-mono mt-1 text-gray-500">{numeroAit || 'AIT-AUTO-GERADO-PENDENTE-DE-GRAVACAO'}</span>
                   </div>
                 </div>
 

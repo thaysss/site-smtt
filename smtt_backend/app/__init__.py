@@ -38,6 +38,37 @@ def create_app(test_config=None):
     CORS(app, origins=cors_origins)
         
     db.init_app(app)
+    
+    # Migrações automáticas de esquema de banco de dados
+    with app.app_context():
+        from sqlalchemy import text
+        try:
+            # Tabela veiculos
+            db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS ano_fabricacao INTEGER;"))
+            db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS marca_modelo VARCHAR(100);"))
+            db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS cor VARCHAR(50);"))
+            db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS uf VARCHAR(2) DEFAULT 'SE';"))
+            
+            # Tabela autos_infracao
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS agente_aparelho VARCHAR(50);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS desdobramento VARCHAR(10) DEFAULT '1';"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS medicao_aferida VARCHAR(30);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS medicao_considerada VARCHAR(30);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS medicao_regulamentada VARCHAR(30);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS codigo_renainf VARCHAR(30);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS numero_nait VARCHAR(30);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS numero_nip VARCHAR(30);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS data_expedicao DATE;"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS linha_digitavel VARCHAR(100);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS nosso_numero VARCHAR(50);"))
+            db.session.execute(text("ALTER TABLE autos_infracao ADD COLUMN IF NOT EXISTS data_vencimento_boleto DATE;"))
+            
+            db.session.commit()
+            logging.getLogger("app.info").info("Migrações automáticas de banco executadas com sucesso!")
+        except Exception as e:
+            db.session.rollback()
+            logging.getLogger("app.error").error(f"Erro na migração automática de banco de dados: {e}")
+
     jwt.init_app(app) # Inicializa o gerenciador de Tokens
     
     # Start the alert checker in the background

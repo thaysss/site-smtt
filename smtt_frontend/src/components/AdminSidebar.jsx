@@ -28,7 +28,7 @@ const AdminSidebar = ({ activeItem, onTabChange }) => {
     { id: 'infracoes', label: 'Infrações Lançadas', icon: 'fa-list-check', isTab: true },
     { id: 'noticias', label: 'Notícias', icon: 'fa-newspaper', isTab: true },
     { id: 'estatisticas', label: 'Estatísticas', icon: 'fa-chart-line', isTab: true },
-    { id: 'lancar-infracao', label: 'Lançar Infração', icon: 'fa-file-signature', isTab: false },
+    { id: 'lancar-infracao', label: 'Lançar AIT', icon: 'fa-file-signature', isTab: false },
 
     { id: 'alertas', label: 'Avisos de Interdição', icon: 'fa-triangle-exclamation', isTab: false },
   ];

@@ -252,7 +252,14 @@ function NoticiaDetalhe() {
 
       {/* Footer */}
       <footer className="bg-primary-950 text-gray-400 py-8 border-t border-white/5 text-center text-xs">
-        <p>© 2026 SMTT Propriá/SE. Todos os direitos reservados.</p>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+          <p>© 2026 SMTT Propriá/SE. Todos os direitos reservados.</p>
+          <div className="flex gap-4">
+            <button onClick={() => navigate('/privacidade')} className="hover:text-white transition-colors">Privacidade</button>
+            <span>|</span>
+            <button onClick={() => navigate('/termos')} className="hover:text-white transition-colors">Termos</button>
+          </div>
+        </div>
       </footer>
 
     </div>

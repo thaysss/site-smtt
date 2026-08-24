@@ -54,6 +54,8 @@ def registrar_infracao():
         veiculo.marca_modelo = dados.get('marca_modelo')
     if dados.get('cor'):
         veiculo.cor = dados.get('cor')
+    if dados.get('uf'):
+        veiculo.uf = dados.get('uf').upper()
         
     # 2. Verifica ou cria o TIPO de Infração (Evita erro de Foreign Key no Supabase)
     tipo_infracao = TipoInfracaoCTB.query.filter_by(codigo_infracao=codigo_ctb).first()
@@ -139,6 +141,47 @@ def registrar_infracao():
 def listar_infracoes():
     infracoes = AutoInfracao.query.order_by(AutoInfracao.criado_em.desc()).all()
     return jsonify([i.to_dict() for i in infracoes]), 200
+
+
+@admin_bp.route('/infracoes/<int:id>', methods=['PUT'])
+def atualizar_infracao(id):
+    infracao = AutoInfracao.query.get_or_404(id)
+    dados = request.get_json()
+    
+    if 'numero_nait' in dados:
+        infracao.numero_nait = dados['numero_nait']
+    if 'numero_nip' in dados:
+        infracao.numero_nip = dados['numero_nip']
+    if 'data_expedicao' in dados:
+        if dados['data_expedicao']:
+            try:
+                infracao.data_expedicao = datetime.strptime(dados['data_expedicao'], "%Y-%m-%d").date()
+            except ValueError:
+                pass
+        else:
+            infracao.data_expedicao = None
+    if 'linha_digitavel' in dados:
+        infracao.linha_digitavel = dados['linha_digitavel']
+    if 'nosso_numero' in dados:
+        infracao.nosso_numero = dados['nosso_numero']
+    if 'data_vencimento_boleto' in dados:
+        if dados['data_vencimento_boleto']:
+            try:
+                infracao.data_vencimento_boleto = datetime.strptime(dados['data_vencimento_boleto'], "%Y-%m-%d").date()
+            except ValueError:
+                pass
+        else:
+            infracao.data_vencimento_boleto = None
+    if 'fase_atual' in dados:
+        infracao.fase_atual = dados['fase_atual']
+    if 'valor_final' in dados:
+        try:
+            infracao.valor_final = float(dados['valor_final'])
+        except (ValueError, TypeError):
+            pass
+            
+    db.session.commit()
+    return jsonify({"mensagem": "Infração atualizada com sucesso!", "infracao": infracao.to_dict()}), 200
 
 
 @admin_bp.route('/tipos-infracao', methods=['GET'])
@@ -302,14 +345,16 @@ def consultar_placa_externa(placa):
                 "marca_modelo": "I/CHARMING BULL KRC50",
                 "cor": "PRETA",
                 "ano_fabricacao": 2015,
-                "renavam": "1125597916"
+                "renavam": "1125597916",
+                "uf": "SE"
             }), 200
         elif placa_limpa == "QKZ1C12":
             return jsonify({
                 "marca_modelo": "RENAULT/OROCH 16 EXP42",
                 "cor": "CINZA",
                 "ano_fabricacao": 2016,
-                "renavam": "700320982"
+                "renavam": "700320982",
+                "uf": "SE"
             }), 200
         else:
             # Outros carros com dados realistas
@@ -320,7 +365,8 @@ def consultar_placa_externa(placa):
                 "marca_modelo": random.choice(modelos),
                 "cor": random.choice(cores),
                 "ano_fabricacao": random.randint(2013, 2025),
-                "renavam": f"00{random.randint(100000000, 999999999)}"
+                "renavam": f"00{random.randint(100000000, 999999999)}",
+                "uf": random.choice(["SP", "RJ", "MG", "BA", "SE", "PE"])
             }), 200
             
     # 2. CHAMADA REAL PARA A APIPLACAS
@@ -352,12 +398,14 @@ def consultar_placa_externa(placa):
                 ano_fabricacao = None
                 
             renavam = dados.get('renavam', '')
+            uf = dados.get('uf', '').strip().upper() or dados.get('estado', '').strip().upper() or 'SE'
             
             return jsonify({
                 "marca_modelo": marca_modelo,
                 "cor": cor,
                 "ano_fabricacao": ano_fabricacao,
-                "renavam": renavam
+                "renavam": renavam,
+                "uf": uf
             }), 200
         else:
             # Caso dê erro de cota ou token inválido, fallback para simulação
@@ -366,7 +414,8 @@ def consultar_placa_externa(placa):
                 "marca_modelo": "FORD/KA SE 1.0",
                 "cor": "BRANCA",
                 "ano_fabricacao": 2018,
-                "renavam": "00827361928"
+                "renavam": "00827361928",
+                "uf": "SP"
             }), 200
             
     except Exception as e:
@@ -376,7 +425,8 @@ def consultar_placa_externa(placa):
             "marca_modelo": "VOLKSWAGEN/GOL 1.6",
             "cor": "PRATA",
             "ano_fabricacao": 2017,
-            "renavam": "00736182917"
+            "renavam": "00736182917",
+            "uf": "SE"
         }), 200
 
 
