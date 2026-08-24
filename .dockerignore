@@ -1,0 +1,11 @@
+.git
+.gitignore
+smtt_frontend
+smtt_backend/.env
+smtt_backend/.venv
+smtt_backend/venv
+smtt_backend/__pycache__
+smtt_backend/**/__pycache__
+smtt_backend/.pytest_cache
+smtt_backend/instance
+*.py[cod]
