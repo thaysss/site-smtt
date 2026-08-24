@@ -15,6 +15,8 @@ import PortalNoticias from './pages/PortalNoticias';
 import NoticiaDetalhe from './pages/NoticiaDetalhe';
 import ContestacaoMulta from './pages/ContestacaoMulta';
 import FaleConosco from './pages/FaleConosco';
+import Termos from './pages/Termos';
+import Privacidade from './pages/Privacidade';
 
 // Guarda de Rota para Cidadão Autenticado
 const ProtectedRoute = ({ children }) => {
@@ -89,6 +91,8 @@ function App() {
         <Route path="/noticias" element={<PortalNoticias />} />
         <Route path="/noticias/:id" element={<NoticiaDetalhe />} />
         <Route path="/fale-conosco" element={<FaleConosco />} />
+        <Route path="/termos" element={<Termos />} />
+        <Route path="/privacidade" element={<Privacidade />} />
       </Routes>
     </BrowserRouter>
   );

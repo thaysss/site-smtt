@@ -14,6 +14,7 @@ with app.app_context():
         db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS ano_fabricacao INTEGER;"))
         db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS marca_modelo VARCHAR(100);"))
         db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS cor VARCHAR(50);"))
+        db.session.execute(text("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS uf VARCHAR(2) DEFAULT 'SE';"))
         
         # 2. Colunas da tabela autos_infracao
         print("Adicionando colunas na tabela autos_infracao...")

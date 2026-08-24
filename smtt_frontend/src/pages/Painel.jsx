@@ -244,7 +244,7 @@ function Painel() {
             </div>
             <div>
               <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Placa/UF:</strong>
-              <span style="font-weight: bold; text-transform: uppercase;">${multa.placa_veiculo || 'N/A'}/SE</span>
+              <span style="font-weight: bold; text-transform: uppercase;">${multa.placa_veiculo || 'N/A'}/${multa.veiculo?.uf || 'SE'}</span>
             </div>
             <div>
               <strong style="color: #666; font-size: 8px; display: block; text-transform: uppercase;">Nº do Auto (AIT):</strong>
@@ -815,7 +815,7 @@ function Painel() {
                               <p className="text-sm text-gray-800"><strong className="text-gray-500">Valor:</strong> <span className="font-bold text-red-600">R$ {multa.valor_final}</span></p>
                             )}
 
-                             {(() => {
+                            {(() => {
                               const codInfracao = multa.tipo_infracao?.codigo_infracao || multa.codigo_infracao || '';
                               const infoLocal = getInfracaoInfoByCodigo(codInfracao);
                               const amparoText = multa.tipo_infracao?.amparo_legal || infoLocal?.amparo || 'Art. 181, XVII';
@@ -828,12 +828,11 @@ function Painel() {
                                   </span>
                                   <p className="text-xs text-gray-500 leading-relaxed mt-1 font-medium">{descText}</p>
                                   <div className="mt-1.5 flex items-center gap-2">
-                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                                      (multa.tipo_infracao?.gravidade || 'Média') === 'Leve' ? 'bg-green-100 text-green-700' :
+                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${(multa.tipo_infracao?.gravidade || 'Média') === 'Leve' ? 'bg-green-100 text-green-700' :
                                       (multa.tipo_infracao?.gravidade || 'Média') === 'Média' ? 'bg-amber-100 text-amber-700' :
-                                      (multa.tipo_infracao?.gravidade || 'Média') === 'Grave' ? 'bg-orange-100 text-orange-700' :
-                                      'bg-red-100 text-red-700'
-                                    }`}>
+                                        (multa.tipo_infracao?.gravidade || 'Média') === 'Grave' ? 'bg-orange-100 text-orange-700' :
+                                          'bg-red-100 text-red-700'
+                                      }`}>
                                       {multa.tipo_infracao?.gravidade || 'Média'}
                                     </span>
                                     <span className="text-[9px] text-gray-400 font-bold">{multa.tipo_infracao?.pontos || '4'} Pontos</span>

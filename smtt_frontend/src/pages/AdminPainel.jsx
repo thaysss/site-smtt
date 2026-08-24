@@ -90,6 +90,22 @@ function AdminPainel() {
   
   const navigate = useNavigate();
 
+  // ESTADOS DO VINCO DE NAIT E NIP
+  const [modalNaitAberta, setModalNaitAberta] = useState(false);
+  const [modalNipAberta, setModalNipAberta] = useState(false);
+  const [infracaoFocoControle, setInfracaoFocoControle] = useState(null);
+  
+  // inputs para NAIT
+  const [naitNumero, setNaitNumero] = useState('');
+  const [naitDataExpedicao, setNaitDataExpedicao] = useState('');
+
+  // inputs para NIP
+  const [nipNumero, setNipNumero] = useState('');
+  const [nipNossoNumero, setNipNossoNumero] = useState('');
+  const [nipLinhaDigitavel, setNipLinhaDigitavel] = useState('');
+  const [nipDataVencimentoBoleto, setNipDataVencimentoBoleto] = useState('');
+  const [nipValorFinal, setNipValorFinal] = useState('');
+
   const handleMenuClick = (aba) => {
     setMenuAtivo(aba);
     localStorage.setItem('adminMenuAtivo', aba);
@@ -402,6 +418,80 @@ function AdminPainel() {
     setOrdemEst(est.ordem || 0);
     setModoEdicaoEst(true);
     setExibindoFormEst(true);
+  };
+
+  // Funções para Modais de NAIT/NIP
+  const abrirModalNait = (inf) => {
+    setInfracaoFocoControle(inf);
+    setNaitNumero(inf.numero_nait || `700${Math.floor(1000000 + Math.random() * 9000000)}`);
+    setNaitDataExpedicao(inf.data_expedicao ? inf.data_expedicao.split('/').reverse().join('-') : new Date().toISOString().split('T')[0]);
+    setModalNaitAberta(true);
+  };
+
+  const abrirModalNip = (inf) => {
+    setInfracaoFocoControle(inf);
+    setNipNumero(inf.numero_nip || `700${Math.floor(1000000 + Math.random() * 9000000)}`);
+    setNipNossoNumero(inf.nosso_numero || '');
+    setNipLinhaDigitavel(inf.linha_digitavel || '');
+    setNipDataVencimentoBoleto(inf.data_vencimento_boleto ? inf.data_vencimento_boleto.split('/').reverse().join('-') : '');
+    setNipValorFinal(inf.valor_final || inf.tipo_infracao?.valor_base || '0.00');
+    setModalNipAberta(true);
+  };
+
+  const handleGerarBoletoModal = () => {
+    if (!infracaoFocoControle) return;
+    const valorNum = parseFloat(nipValorFinal || 0);
+    const nossoNum = nipNossoNumero || `84${Math.floor(10000000 + Math.random() * 90000000)}`;
+    setNipNossoNumero(nossoNum);
+
+    const valFormatado = valorNum.toFixed(2).replace('.', '');
+    const valPad = valFormatado.padStart(10, '0');
+    const linhaFicticia = `34191.79${Math.floor(100 + Math.random() * 900)} ${Math.floor(10000 + Math.random() * 90000)}.${Math.floor(100000 + Math.random() * 900000)} ${Math.floor(10000 + Math.random() * 90000)}.${Math.floor(100000 + Math.random() * 900000)} ${Math.floor(1 + Math.random() * 9)} ${valPad}`;
+    setNipLinhaDigitavel(linhaFicticia);
+
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() + 45);
+    setNipDataVencimentoBoleto(baseDate.toISOString().split('T')[0]);
+  };
+
+  const salvarControleNait = async () => {
+    if (!naitNumero) {
+      alert("O número da NAIT é obrigatório.");
+      return;
+    }
+    try {
+      await api.put(`/admin/infracoes/${infracaoFocoControle.id}`, {
+        numero_nait: naitNumero,
+        data_expedicao: naitDataExpedicao || null
+      });
+      alert("NAIT vinculada com sucesso!");
+      setModalNaitAberta(false);
+      carregarInfracoes();
+    } catch (err) {
+      alert(err.response?.data?.erro || "Erro ao salvar NAIT.");
+    }
+  };
+
+  const salvarControleNip = async () => {
+    if (!nipNumero) {
+      alert("O número da NIP é obrigatório.");
+      return;
+    }
+    try {
+      await api.put(`/admin/infracoes/${infracaoFocoControle.id}`, {
+        numero_nip: nipNumero,
+        nosso_numero: nipNossoNumero || null,
+        linha_digitavel: nipLinhaDigitavel || null,
+        data_vencimento_boleto: nipDataVencimentoBoleto || null,
+        valor_final: nipValorFinal ? parseFloat(nipValorFinal) : null,
+        fase_atual: 'Penalidade'
+      });
+      alert("NIP vinculada com sucesso!");
+      setModalNipAberta(false);
+      carregarInfracoes();
+    } catch (err) {
+      alert(err.response?.data?.erro || "Erro ao salvar NIP.");
+    }
   };
 
   const salvarEstatistica = async (e) => {
@@ -1478,6 +1568,47 @@ function AdminPainel() {
                                 </code>
                               </div>
                             )}
+
+                            {/* Ações de Controle (NAIT/NIP) */}
+                            <div className="sm:col-span-2 md:col-span-3 pt-4 border-t border-gray-100 flex flex-wrap gap-3">
+                              {!inf.numero_nait ? (
+                                <button
+                                  onClick={() => abrirModalNait(inf)}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                                >
+                                  <i className="fa-solid fa-file-signature"></i>
+                                  Vincular NAIT
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => abrirModalNait(inf)}
+                                  className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5"
+                                >
+                                  <i className="fa-solid fa-pen-to-square"></i>
+                                  Editar NAIT ({inf.numero_nait})
+                                </button>
+                              )}
+
+                              {inf.numero_nait && !inf.numero_nip && (
+                                <button
+                                  onClick={() => abrirModalNip(inf)}
+                                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                                >
+                                  <i className="fa-solid fa-file-invoice-dollar"></i>
+                                  Vincular NIP (Penalidade)
+                                </button>
+                              )}
+
+                              {inf.numero_nip && (
+                                <button
+                                  onClick={() => abrirModalNip(inf)}
+                                  className="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5"
+                                >
+                                  <i className="fa-solid fa-pen-to-square"></i>
+                                  Editar NIP ({inf.numero_nip})
+                                </button>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1846,6 +1977,193 @@ function AdminPainel() {
               </div>
             )}
           </>
+        )}
+        {/* Modal Vincular NAIT */}
+        {modalNaitAberta && infracaoFocoControle && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-150 w-full max-w-lg overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
+              
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <i className="fa-solid fa-file-signature"></i>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base text-primary-950">Vincular / Editar NAIT</h3>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">AIT: {infracaoFocoControle.numero_ait}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setModalNaitAberta(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-150 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-colors"
+                >
+                  <i className="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número da NAIT *</label>
+                  <input
+                    type="text"
+                    value={naitNumero}
+                    onChange={(e) => setNaitNumero(e.target.value)}
+                    placeholder="Ex: 7003209824"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Data de Expedição da Notificação</label>
+                  <input
+                    type="date"
+                    value={naitDataExpedicao}
+                    onChange={(e) => setNaitDataExpedicao(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setModalNaitAberta(false)}
+                  className="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold text-xs rounded-xl transition-colors shadow-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={salvarControleNait}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors"
+                >
+                  Confirmar NAIT
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Vincular NIP */}
+        {modalNipAberta && infracaoFocoControle && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-150 w-full max-w-xl overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-green-600"></div>
+              
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                    <i className="fa-solid fa-file-invoice-dollar"></i>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base text-primary-950">Vincular / Editar NIP (Penalidade)</h3>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">AIT: {infracaoFocoControle.numero_ait}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setModalNipAberta(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-150 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-colors"
+                >
+                  <i className="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Número da NIP *</label>
+                    <input
+                      type="text"
+                      value={nipNumero}
+                      onChange={(e) => setNipNumero(e.target.value)}
+                      placeholder="Ex: 7003190223"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all text-sm font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Valor da Multa (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={nipValorFinal}
+                      onChange={(e) => setNipValorFinal(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all text-sm font-bold text-red-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Nosso Número (Boleto)</label>
+                    <input
+                      type="text"
+                      value={nipNossoNumero}
+                      onChange={(e) => setNipNossoNumero(e.target.value)}
+                      placeholder="Identificador do Boleto"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Vencimento do Boleto</label>
+                    <input
+                      type="date"
+                      value={nipDataVencimentoBoleto}
+                      onChange={(e) => setNipDataVencimentoBoleto(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Linha Digitável do Boleto</label>
+                  <input
+                    type="text"
+                    value={nipLinhaDigitavel}
+                    onChange={(e) => setNipLinhaDigitavel(e.target.value)}
+                    placeholder="Ex: 34191.79001 01043.513184..."
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all text-xs font-mono"
+                  />
+                </div>
+
+                {/* Cartão de Ações do Financeiro */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0 mt-0.5">
+                      <i className="fa-solid fa-wallet"></i>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wide">Faturamento da Autuação</h4>
+                      <p className="text-[10px] text-slate-500 leading-relaxed">
+                        Gerar automaticamente o boleto bancário fictício para pagamento com base no valor.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGerarBoletoModal}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5 shrink-0"
+                  >
+                    <i className="fa-solid fa-wand-magic-sparkles"></i>
+                    Gerar Boleto
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setModalNipAberta(false)}
+                  className="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold text-xs rounded-xl transition-colors shadow-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={salvarControleNip}
+                  className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors"
+                >
+                  Confirmar NIP
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>

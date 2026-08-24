@@ -546,9 +546,9 @@ function FaleConosco() {
               <p className="text-center md:text-left">&copy; 2026 SMTT Propriá/SE. Todos os direitos reservados. Governo Municipal.</p>
             </div>
             <div className="flex gap-4">
-              <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-white transition-colors">Privacidade</a>
+              <button onClick={() => navigate('/privacidade')} className="hover:text-white transition-colors">Privacidade</button>
               <span>|</span>
-              <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-white transition-colors">Termos</a>
+              <button onClick={() => navigate('/termos')} className="hover:text-white transition-colors">Termos</button>
             </div>
           </div>
         </div>
