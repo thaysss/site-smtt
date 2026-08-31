@@ -2245,3 +2245,494 @@ body.alto-contraste .text-gray-900 {
     flex: none;
   }
 }
+/* ==========================================================================
+   Portal do Cidadão - Login e cadastro
+   ========================================================================== */
+.citizen-auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #172033;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(37, 99, 235, 0.09), transparent 27rem),
+    radial-gradient(circle at 94% 88%, rgba(234, 179, 8, 0.09), transparent 25rem),
+    #f5f7fb;
+  font-family: 'Inter', sans-serif;
+}
+
+.citizen-auth-header {
+  min-height: 82px;
+  padding: 12px clamp(20px, 5vw, 72px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e7ebf2;
+  box-shadow: 0 4px 18px rgba(15, 35, 75, 0.04);
+  backdrop-filter: blur(12px);
+}
+
+.citizen-auth-logo,
+.citizen-auth-back {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.citizen-auth-logo img {
+  width: auto;
+  height: 54px;
+  display: block;
+  object-fit: contain;
+}
+
+.citizen-auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #40506a;
+  font-size: 14px;
+  font-weight: 700;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.citizen-auth-back:hover {
+  color: #1d4ed8;
+  transform: translateX(-2px);
+}
+
+.citizen-auth-main {
+  width: 100%;
+  padding: clamp(28px, 5vw, 64px) 20px;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.citizen-auth-card {
+  width: min(100%, 1000px);
+  display: grid;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(420px, 1.18fr);
+  overflow: hidden;
+  border: 1px solid rgba(211, 219, 232, 0.9);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(17, 37, 76, 0.13);
+}
+
+.citizen-auth-card.is-register {
+  width: min(100%, 1120px);
+}
+
+.citizen-auth-intro {
+  min-height: 530px;
+  padding: clamp(34px, 4vw, 52px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 42px;
+  color: #fff;
+  background:
+    linear-gradient(145deg, rgba(5, 24, 65, 0.97), rgba(13, 70, 155, 0.94)),
+    url('/propria.png') center/cover;
+  position: relative;
+  isolation: isolate;
+}
+
+.citizen-auth-intro::after {
+  content: '';
+  width: 240px;
+  height: 240px;
+  position: absolute;
+  right: -90px;
+  bottom: -95px;
+  z-index: -1;
+  border: 38px solid rgba(255, 204, 0, 0.13);
+  border-radius: 50%;
+}
+
+.citizen-auth-badge {
+  width: fit-content;
+  margin-bottom: 28px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.citizen-auth-intro h1 {
+  max-width: 430px;
+  margin: 0 0 18px;
+  color: #fff;
+  font: 700 clamp(27px, 3vw, 40px)/1.16 'Sora', sans-serif;
+  letter-spacing: -0.04em;
+}
+
+.citizen-auth-intro p {
+  max-width: 430px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.citizen-auth-benefits {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  list-style: none;
+}
+
+.citizen-auth-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.citizen-auth-benefits svg {
+  flex: 0 0 auto;
+  color: #facc15;
+}
+
+.citizen-auth-form-panel {
+  padding: clamp(34px, 4vw, 52px);
+  align-self: center;
+}
+
+.citizen-auth-heading {
+  margin-bottom: 26px;
+}
+
+.citizen-auth-heading > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.citizen-auth-heading h2 {
+  margin: 0 0 9px;
+  color: #12213d;
+  font: 700 clamp(25px, 3vw, 32px)/1.2 'Sora', sans-serif;
+}
+
+.citizen-auth-heading p {
+  margin: 0;
+  color: #69758a;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.citizen-auth-message {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.citizen-auth-message svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.citizen-auth-message.is-error {
+  color: #b42318;
+  border-color: #fecaca;
+  background: #fff5f5;
+}
+
+.citizen-auth-message.is-success {
+  color: #087443;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.citizen-auth-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.citizen-auth-group.is-full,
+.citizen-auth-submit.is-full {
+  grid-column: 1 / -1;
+}
+
+.citizen-auth-group > label {
+  display: block;
+  margin: 0 0 7px;
+  color: #344157;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
+
+.citizen-auth-group > label::after {
+  content: ' *';
+  color: #dc2626;
+}
+
+.citizen-auth-group > small {
+  display: block;
+  margin-top: 6px;
+  color: #788397;
+  font-size: 11px;
+}
+
+.citizen-auth-field {
+  position: relative;
+}
+
+.citizen-auth-field > svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  z-index: 1;
+  color: #8a96a9;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: color 0.2s ease;
+}
+
+.citizen-auth-field input {
+  height: 48px;
+  margin: 0;
+  padding: 0 14px 0 44px;
+  border: 1px solid #d6dce7;
+  border-radius: 10px;
+  background: #f9fafc;
+  color: #172033;
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.citizen-auth-field.has-action input {
+  padding-right: 46px;
+}
+
+.citizen-auth-field input::placeholder {
+  color: #9aa4b4;
+}
+
+.citizen-auth-field:focus-within > svg {
+  color: #2563eb;
+}
+
+.citizen-auth-field input:focus {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.11);
+}
+
+.citizen-auth-field > button {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b778c;
+  cursor: pointer;
+}
+
+.citizen-auth-field > button:hover {
+  background: #edf3ff;
+  color: #1d4ed8;
+}
+
+.citizen-auth-submit {
+  min-height: 50px;
+  margin-top: 4px;
+  padding: 13px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(100deg, #1d4ed8, #2563eb);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 9px 20px rgba(37, 99, 235, 0.22);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.citizen-auth-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.29);
+}
+
+.citizen-auth-submit:disabled {
+  opacity: 0.68;
+  cursor: wait;
+}
+
+.citizen-auth-spinner {
+  animation: citizen-auth-spin 0.8s linear infinite;
+}
+
+.citizen-auth-switch {
+  margin-top: 26px;
+  padding-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid #e9edf3;
+  color: #6c7789;
+  font-size: 13px;
+}
+
+.citizen-auth-switch button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1d4ed8;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.citizen-auth-switch button:hover {
+  color: #153eaa;
+  text-decoration: underline;
+}
+
+@keyframes citizen-auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 860px) {
+  .citizen-auth-card,
+  .citizen-auth-card.is-register {
+    width: min(100%, 650px);
+    grid-template-columns: 1fr;
+  }
+
+  .citizen-auth-intro {
+    min-height: auto;
+    padding: 34px;
+    gap: 26px;
+  }
+
+  .citizen-auth-badge {
+    margin-bottom: 18px;
+  }
+
+  .citizen-auth-intro h1 {
+    max-width: 540px;
+    font-size: 28px;
+  }
+
+  .citizen-auth-benefits {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .citizen-auth-benefits li {
+    align-items: flex-start;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 600px) {
+  .citizen-auth-header {
+    min-height: 70px;
+    padding: 10px 16px;
+  }
+
+  .citizen-auth-logo img {
+    height: 44px;
+  }
+
+  .citizen-auth-main {
+    padding: 20px 12px 28px;
+    align-items: flex-start;
+  }
+
+  .citizen-auth-card {
+    border-radius: 17px;
+  }
+
+  .citizen-auth-intro {
+    padding: 27px 24px;
+  }
+
+  .citizen-auth-intro h1 {
+    margin-bottom: 12px;
+    font-size: 24px;
+  }
+
+  .citizen-auth-intro p {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .citizen-auth-benefits {
+    display: none;
+  }
+
+  .citizen-auth-form-panel {
+    padding: 28px 22px;
+  }
+
+  .citizen-auth-form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .citizen-auth-group.is-full,
+  .citizen-auth-submit.is-full {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 390px) {
+  .citizen-auth-back span {
+    display: none;
+  }
+
+  .citizen-auth-form-panel {
+    padding-inline: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .citizen-auth-back,
+  .citizen-auth-submit {
+    transition: none;
+  }
+}

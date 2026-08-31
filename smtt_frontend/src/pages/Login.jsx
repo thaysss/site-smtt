@@ -2,7 +2,53 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { User, Lock, Mail, Phone, MapPin, FileDigit } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  FileDigit,
+  LoaderCircle,
+  Lock,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  User,
+} from 'lucide-react';
+
+const formatCpf = (value) => value
+  .replace(/\D/g, '')
+  .slice(0, 11)
+  .replace(/(\d{3})(\d)/, '$1.$2')
+  .replace(/(\d{3})(\d)/, '$1.$2')
+  .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+
+const formatPhone = (value) => {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 10) {
+    return digits
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{4})(\d)/, '$1-$2');
+  }
+
+  return digits
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2');
+};
+
+function FormField({ id, label, icon: Icon, className = '', ...inputProps }) {
+  return (
+    <div className={`citizen-auth-group ${className}`}>
+      <label htmlFor={id}>{label}</label>
+      <div className="citizen-auth-field">
+        <Icon size={19} aria-hidden="true" />
+        <input id={id} {...inputProps} />
+      </div>
+    </div>
+  );
+}
 
 function Login() {
   const [isCadastro, setIsCadastro] = useState(false);
@@ -12,11 +58,13 @@ function Login() {
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [enviando, setEnviando] = useState(false);
   const location = useLocation();
   const [erro, setErro] = useState(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('message') === 'session_expired') {
-      return 'Sua sessão expirou por inatividade ou tempo limite. Por favor, faça login novamente.';
+      return 'Sua sessão expirou. Faça login novamente para continuar.';
     }
     return location.state?.mensagem || '';
   });
@@ -28,143 +76,140 @@ function Login() {
     if (params.get('message') === 'session_expired') {
       navigate(location.pathname, { replace: true });
     } else if (location.state?.mensagem) {
-      // Limpa o state para não reexibir ao recarregar a página
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErro(''); setSucesso('');
+  const trocarModo = (cadastro) => {
+    setIsCadastro(cadastro);
+    setErro('');
+    setSucesso('');
+    setMostrarSenha(false);
+  };
 
-    if (isCadastro) {
-      try {
-        await api.post('/auth/cadastro', { nome, cpf, email, senha, telefone, endereco });
-        setSucesso('Conta criada com sucesso! Faça login para continuar.');
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErro('');
+    setSucesso('');
+    setEnviando(true);
+
+    const cpfNumerico = cpf.replace(/\D/g, '');
+    const telefoneNumerico = telefone.replace(/\D/g, '');
+
+    if (cpfNumerico.length !== 11) {
+      setErro('Digite um CPF com 11 números.');
+      setEnviando(false);
+      return;
+    }
+
+    try {
+      if (isCadastro) {
+        await api.post('/auth/cadastro', {
+          nome: nome.trim(),
+          cpf: cpfNumerico,
+          email: email.trim().toLowerCase(),
+          senha,
+          telefone: telefoneNumerico,
+          endereco: endereco.trim(),
+        });
+        setSucesso('Conta criada com sucesso! Agora entre com seu CPF e senha.');
         setIsCadastro(false);
         setSenha('');
-      } catch (error) {
-        setErro(error.response?.data?.erro || 'Erro ao criar conta.');
-      }
-    } else {
-      try {
-        const response = await api.post('/auth/login', { cpf, senha });
+        setMostrarSenha(false);
+      } else {
+        const response = await api.post('/auth/login', { cpf: cpfNumerico, senha });
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('nomeUsuario', response.data.nome);
-        navigate('/painel'); 
-      } catch (error) {
-        setErro(error.response?.data?.erro || 'CPF ou senha inválidos.');
+        navigate('/painel');
       }
+    } catch (error) {
+      setErro(error.response?.data?.erro || (isCadastro ? 'Não foi possível criar a conta.' : 'CPF ou senha inválidos.'));
+    } finally {
+      setEnviando(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 flex flex-col selection:bg-primary-600 selection:text-white">
-      
-      {/* Header */}
-      <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo-smtt.png" alt="Logo SMTT" className="h-14 w-auto object-contain" />
-          </div>
-          <button
-            onClick={() => navigate('/')}
-            className="text-sm text-gray-600 hover:text-primary-600 flex items-center gap-1 transition-colors font-semibold"
-          >
-            <i className="fa-solid fa-arrow-left"></i> Voltar ao Início
-          </button>
-        </div>
+    <div className="citizen-auth-page">
+      <header className="citizen-auth-header">
+        <button type="button" className="citizen-auth-logo" onClick={() => navigate('/')} aria-label="Ir para a página inicial">
+          <img src="/logo-smtt.png" alt="SMTT Propriá" />
+        </button>
+        <button type="button" className="citizen-auth-back" onClick={() => navigate('/')}>
+          <ArrowLeft size={17} aria-hidden="true" />
+          <span>Voltar ao início</span>
+        </button>
       </header>
 
-      {/* ÁREA CENTRAL DO FORMULÁRIO */}
-      <div className="flex-1 flex items-center justify-center p-4 py-10">
-        <div className="bg-white w-full max-w-md rounded-2xl shadow-md border border-gray-100 p-8">
-          
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-primary-600 mb-2">
-              {isCadastro ? 'Criar sua Conta' : 'Acesso ao Cidadão'}
-            </h2>
-            <p className="text-gray-500 text-sm">
-              {isCadastro ? 'Preencha seus dados reais para acessar os serviços' : 'Entre com seu CPF e senha para acessar o painel'}
-            </p>
-          </div>
-          
-          {erro && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm mb-6 text-center border border-red-100 flex items-center justify-center gap-2 font-medium">{erro}</div>}
-          {sucesso && <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm mb-6 text-center border border-green-100 flex items-center justify-center gap-2 font-medium">{sucesso}</div>}
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* CAMPOS DE CADASTRO */}
-            {isCadastro && (
-              <>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Nome Completo *</label>
-                  <div className="relative">
-                    <User className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="Seu nome" required />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Telefone *</label>
-                    <div className="relative">
-                      <Phone className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={telefone} onChange={(e) => setTelefone(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="(00) 00000" required />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">E-mail *</label>
-                    <div className="relative">
-                      <Mail className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="@email" required />
-                    </div>
-                  </div>
-                </div>
- 
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Endereço *</label>
-                  <div className="relative">
-                    <MapPin className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input type="text" value={endereco} onChange={(e) => setEndereco(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="Rua, Número, Bairro" required />
-                  </div>
-                </div>
-              </>
-            )}
- 
-            {/* CAMPOS COMUNS (CPF E SENHA) */}
+      <main className="citizen-auth-main">
+        <section className={`citizen-auth-card ${isCadastro ? 'is-register' : ''}`}>
+          <aside className="citizen-auth-intro">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">CPF *</label>
-              <div className="relative">
-                <FileDigit className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input type="text" maxLength="11" value={cpf} onChange={(e) => setCpf(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="Apenas números" required />
-              </div>
+              <span className="citizen-auth-badge">
+                <ShieldCheck size={16} aria-hidden="true" />
+                Portal do Cidadão
+              </span>
+              <h1>{isCadastro ? 'Crie seu acesso aos serviços digitais' : 'Seus serviços em um só lugar'}</h1>
+              <p>{isCadastro
+                ? 'Informe seus dados para acompanhar solicitações e utilizar os serviços online da SMTT.'
+                : 'Entre com segurança para consultar e acompanhar suas solicitações.'}</p>
             </div>
-            
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Senha *</label>
-              <div className="relative">
-                <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="Sua senha" required />
-              </div>
+            <ul className="citizen-auth-benefits" aria-label="Benefícios do portal">
+              <li><CheckCircle2 size={18} /> Acompanhamento de protocolos</li>
+              <li><CheckCircle2 size={18} /> Dados protegidos e acesso seguro</li>
+              <li><CheckCircle2 size={18} /> Serviços disponíveis pela internet</li>
+            </ul>
+          </aside>
+
+          <div className="citizen-auth-form-panel">
+            <div className="citizen-auth-heading">
+              <span>{isCadastro ? 'Novo cadastro' : 'Bem-vindo de volta'}</span>
+              <h2>{isCadastro ? 'Criar conta' : 'Entrar no portal'}</h2>
+              <p>{isCadastro
+                ? 'Preencha todos os campos abaixo com seus dados reais.'
+                : 'Use o CPF cadastrado e sua senha de acesso.'}</p>
             </div>
-            
-            <button type="submit" className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 rounded-xl shadow-md hover:-translate-y-0.5 transition-all mt-4">
-              {isCadastro ? 'Finalizar Cadastro' : 'Entrar no Painel'}
-            </button>
-          </form>
- 
-          {/* ALTERNADOR DE TELA */}
-          <div className="text-center mt-8 pt-6 border-t border-gray-100 text-sm">
-            {isCadastro ? (
-              <span className="text-gray-500">Já possui conta? <button className="font-bold text-primary-600 hover:text-primary-800 transition-colors" onClick={() => { setIsCadastro(false); setErro(''); setSucesso(''); }}>Faça Login aqui</button></span>
-            ) : (
-              <span className="text-gray-500">Ainda não tem cadastro? <button className="font-bold text-primary-600 hover:text-primary-800 transition-colors" onClick={() => { setIsCadastro(true); setErro(''); setSucesso(''); }}>Crie sua conta</button></span>
-            )}
+
+            {erro && <div className="citizen-auth-message is-error" role="alert"><AlertCircle size={18} /><span>{erro}</span></div>}
+            {sucesso && <div className="citizen-auth-message is-success" role="status"><CheckCircle2 size={18} /><span>{sucesso}</span></div>}
+
+            <form onSubmit={handleSubmit} className="citizen-auth-form">
+              {isCadastro && (
+                <>
+                  <FormField id="nome-completo" label="Nome completo" icon={User} className="is-full" type="text" value={nome} onChange={(event) => setNome(event.target.value)} placeholder="Digite seu nome completo" autoComplete="name" minLength={3} required />
+                  <FormField id="email" label="E-mail" icon={Mail} type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nome@exemplo.com" autoComplete="email" required />
+                  <FormField id="telefone" label="Telefone" icon={Phone} type="tel" inputMode="numeric" value={telefone} onChange={(event) => setTelefone(formatPhone(event.target.value))} placeholder="(79) 99999-9999" autoComplete="tel" minLength={14} required />
+                  <FormField id="endereco" label="Endereço" icon={MapPin} className="is-full" type="text" value={endereco} onChange={(event) => setEndereco(event.target.value)} placeholder="Rua, número e bairro" autoComplete="street-address" minLength={5} required />
+                </>
+              )}
+
+              <FormField id="cpf" label="CPF" icon={FileDigit} type="text" inputMode="numeric" value={cpf} onChange={(event) => setCpf(formatCpf(event.target.value))} placeholder="000.000.000-00" autoComplete="username" minLength={14} required />
+
+              <div className="citizen-auth-group">
+                <label htmlFor="senha">Senha</label>
+                <div className="citizen-auth-field has-action">
+                  <Lock size={19} aria-hidden="true" />
+                  <input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(event) => setSenha(event.target.value)} placeholder={isCadastro ? 'Mínimo de 6 caracteres' : 'Digite sua senha'} autoComplete={isCadastro ? 'new-password' : 'current-password'} minLength={isCadastro ? 6 : undefined} required />
+                  <button type="button" onClick={() => setMostrarSenha((valor) => !valor)} aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'} title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>
+                    {mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}
+                  </button>
+                </div>
+                {isCadastro && <small>Use pelo menos 6 caracteres.</small>}
+              </div>
+
+              <button type="submit" className="citizen-auth-submit is-full" disabled={enviando}>
+                {enviando && <LoaderCircle size={19} className="citizen-auth-spinner" />}
+                {enviando ? 'Aguarde...' : (isCadastro ? 'Criar minha conta' : 'Entrar no painel')}
+              </button>
+            </form>
+
+            <div className="citizen-auth-switch">
+              <span>{isCadastro ? 'Já possui uma conta?' : 'Ainda não possui cadastro?'}</span>
+              <button type="button" onClick={() => trocarModo(!isCadastro)}>{isCadastro ? 'Fazer login' : 'Criar conta gratuitamente'}</button>
+            </div>
           </div>
- 
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
