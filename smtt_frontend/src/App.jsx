@@ -9,6 +9,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminAlertas from './pages/AdminAlertas';
 import AdminInfracoes from './pages/AdminInfracoes';
 import AdminVeiculos from './pages/AdminVeiculos';
+import AdminUsuarios from './pages/AdminUsuarios';
 import ConsultaProtocolo from './pages/ConsultaProtocolo';
 import SolicitacaoEvento from './pages/SolicitacaoEvento';
 import SolicitacaoAlvara from './pages/SolicitacaoAlvara';
@@ -86,6 +87,7 @@ function App() {
         <Route path="/admin/alertas" element={<AdminProtectedRoute><AdminAlertas /></AdminProtectedRoute>} />
         <Route path="/admin/infracoes" element={<AdminProtectedRoute><AdminInfracoes /></AdminProtectedRoute>} />
         <Route path="/admin/veiculos" element={<AdminProtectedRoute><AdminVeiculos /></AdminProtectedRoute>} />
+        <Route path="/admin/usuarios" element={<AdminProtectedRoute><AdminUsuarios /></AdminProtectedRoute>} />
         <Route path="/consultar" element={<ConsultaProtocolo />} />
         <Route path="/solicitacao-evento" element={<SolicitacaoEvento />} />
         <Route path="/solicitacao-alvara" element={<SolicitacaoAlvara />} />
