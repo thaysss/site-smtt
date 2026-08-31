@@ -4,6 +4,7 @@ import unittest
 from flask_jwt_extended import create_access_token
 from app import create_app
 from app.extensions import db
+from app.models.servidor import Servidor
 
 class TestAdminAuthentication(unittest.TestCase):
     def setUp(self):
@@ -64,6 +65,35 @@ class TestAdminAuthentication(unittest.TestCase):
         # Should return an empty list of alerts as DB is in-memory and empty
         data = json.loads(response.data)
         self.assertEqual(data, [])
+
+    def test_admin_can_create_another_admin(self):
+        token = create_access_token(identity="admin-123", additional_claims={"role": "admin"})
+        response = self.client.post('/api/auth/admin/cadastro', headers={
+            'Authorization': f'Bearer {token}'
+        }, json={
+            'nome': 'Nova Administradora',
+            'matricula': ' 9876 ',
+            'cargo': 'Supervisora',
+            'senha': 'senha-segura'
+        })
+
+        self.assertEqual(response.status_code, 201)
+        servidor = Servidor.query.filter_by(matricula='9876').one()
+        self.assertEqual(servidor.nome, 'Nova Administradora')
+        self.assertTrue(servidor.verificar_senha('senha-segura'))
+
+    def test_create_admin_validates_required_fields_and_password(self):
+        token = create_access_token(identity="admin-123", additional_claims={"role": "admin"})
+        headers = {'Authorization': f'Bearer {token}'}
+
+        missing_fields = self.client.post('/api/auth/admin/cadastro', headers=headers, json={})
+        short_password = self.client.post('/api/auth/admin/cadastro', headers=headers, json={
+            'nome': 'Servidor', 'matricula': '123', 'senha': 'curta'
+        })
+
+        self.assertEqual(missing_fields.status_code, 400)
+        self.assertEqual(short_password.status_code, 400)
+        self.assertIn('8 caracteres', short_password.get_json()['erro'])
 
 if __name__ == '__main__':
     unittest.main()
