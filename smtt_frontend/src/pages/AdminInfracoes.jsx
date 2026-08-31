@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
   Car, ShieldAlert, CheckCircle,
-  CarFront, MapPin, Calendar, FileDigit, Clock, AlignLeft, AlertOctagon, Info, CreditCard,
-  ChevronLeft, ChevronRight, Search, Sparkles, Printer, ClipboardCheck, ShieldCheck
+  CarFront, MapPin, Calendar, FileDigit, Clock, AlertOctagon, Info,
+  ChevronLeft, ChevronRight, Search, Sparkles, ClipboardCheck, ShieldCheck
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 
@@ -159,6 +159,12 @@ function AdminInfracoes() {
     else api.defaults.headers.Authorization = `Bearer ${adminToken}`;
   }, [navigate]);
 
+  useEffect(() => {
+    if (erro) {
+      document.querySelector('[data-ait-feedback]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [erro]);
+
   // Função para lidar com alteração no código CTB e preenchimento automático
   const handleCodigoCTBChange = async (val) => {
     setCodigoInfracao(val);
@@ -207,7 +213,7 @@ function AdminInfracoes() {
             recalculateSpeed(val.trim(), medicaoAferida);
           }
         }
-      } catch (err) {
+      } catch {
         // Ignora se não localizado no banco
       }
     }
@@ -346,12 +352,7 @@ function AdminInfracoes() {
 
     const aferida = parseFloat(aferidaVal);
     if (isSpeedLimitInfraction(codigo)) {
-      let considerada = 0;
-      if (aferida <= 100) {
-        considerada = aferida - 7;
-      } else {
-        considerada = Math.round(aferida * 0.93);
-      }
+      const considerada = aferida <= 100 ? aferida - 7 : Math.round(aferida * 0.93);
       setMedicaoConsiderada(Math.max(0, considerada).toString());
     }
   };
@@ -364,18 +365,11 @@ function AdminInfracoes() {
     const excesso = cons - reg;
     const pct = (excesso / reg) * 100;
 
-    let enquadramentoSugerido = '';
-    let codigoSugerido = '';
-    if (pct <= 20) {
-      enquadramentoSugerido = 'até 20% acima do limite (Infração Média)';
-      codigoSugerido = '74550';
-    } else if (pct <= 50) {
-      enquadramentoSugerido = 'de 20% a 50% acima do limite (Infração Grave)';
-      codigoSugerido = '74630';
-    } else {
-      enquadramentoSugerido = 'mais de 50% acima do limite (Infração Gravíssima)';
-      codigoSugerido = '74710';
-    }
+    const { enquadramentoSugerido, codigoSugerido } = pct <= 20
+      ? { enquadramentoSugerido: 'até 20% acima do limite (Infração Média)', codigoSugerido: '74550' }
+      : pct <= 50
+        ? { enquadramentoSugerido: 'de 20% a 50% acima do limite (Infração Grave)', codigoSugerido: '74630' }
+        : { enquadramentoSugerido: 'mais de 50% acima do limite (Infração Gravíssima)', codigoSugerido: '74710' };
 
     return {
       pct: pct.toFixed(1),
@@ -397,29 +391,6 @@ function AdminInfracoes() {
     if (upper.includes('AMARELA') || upper.includes('AMARELO')) return '#FFFF00';
     if (upper.includes('MARROM')) return '#8B4513';
     return '#CBD5E1';
-  };
-
-  const handleGerarDadosBoleto = () => {
-    if (!placa) {
-      setErro('Preencha a placa na primeira etapa antes de gerar dados de boleto.');
-      return;
-    }
-
-    const nossoNum = nossoNumero || `84${Math.floor(10000000 + Math.random() * 90000000)}`;
-    setNossoNumero(nossoNum);
-
-    const valFormatado = parseFloat(valor || 0).toFixed(2).replace('.', '');
-    const valPad = valFormatado.padStart(10, '0');
-    const linhaFicticia = `34191.79${Math.floor(100 + Math.random() * 900)} ${Math.floor(10000 + Math.random() * 90000)}.${Math.floor(100000 + Math.random() * 900000)} ${Math.floor(10000 + Math.random() * 90000)}.${Math.floor(100000 + Math.random() * 900000)} ${Math.floor(1 + Math.random() * 9)} ${valPad}`;
-
-    setLinhaDigitavel(linhaFicticia);
-
-    const dataBase = dataHora ? new Date(dataHora) : new Date();
-    const vctBoleto = new Date(dataBase);
-    vctBoleto.setDate(vctBoleto.getDate() + 45);
-    setDataVencimentoBoleto(vctBoleto.toISOString().split('T')[0]);
-
-    setMensagem('Dados de pagamento e boleto gerados com sucesso!');
   };
 
   const nextStep = () => {
@@ -468,7 +439,7 @@ function AdminInfracoes() {
 
     setErro('');
     setMensagem('');
-    setStep(prev => Math.min(prev + 1, 5));
+    setStep(prev => Math.min(prev + 1, 4));
   };
 
   const prevStep = () => {
@@ -536,54 +507,62 @@ function AdminInfracoes() {
     }
   };
 
+  const etapas = [
+    { num: 1, label: 'Ocorrência', shortLabel: 'Veículo', icon: Car, hint: 'Veículo, data e local' },
+    { num: 2, label: 'Enquadramento', shortLabel: 'Infração', icon: FileDigit, hint: 'Código CTB e penalidade' },
+    { num: 3, label: 'Medição e controle', shortLabel: 'Controle', icon: Clock, hint: 'Aparelho, número do auto e expedição' },
+    { num: 4, label: 'Conferência', shortLabel: 'Revisão', icon: ClipboardCheck, hint: 'Revisar e registrar' }
+  ];
+
+  const etapaAtual = etapas[step - 1];
+
   return (
-    <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
+    <div className="admin-shell flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
 
       {/* Sidebar */}
       <AdminSidebar activeItem="lancar-infracao" />
 
       {/* ÁREA PRINCIPAL DO FORMULÁRIO */}
-      <main className="flex-1 overflow-y-auto p-6 md:p-10">
-        <header className="mb-8">
-          <span className="text-primary-600 font-semibold text-xs font-bold tracking-wider uppercase bg-blue-100 px-3 py-1 rounded-full mb-3 inline-block">Operacional</span>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Lançamento de AIT</h1>
-          <p className="text-gray-500 text-sm">Registre os Autos de Infração com todos os dados legais necessários para notificação.</p>
+      <main className="ait-page flex-1 overflow-y-auto p-6 md:p-10">
+        <header className="ait-header mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <span className="text-[#9b6a00] text-[11px] font-bold tracking-[0.16em] uppercase mb-2 inline-block">Operação de trânsito</span>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Novo Auto de Infração</h1>
+            <p className="text-gray-500 text-sm">Preencha apenas os dados desta etapa. A conferência completa acontece antes do registro.</p>
+          </div>
+          <div className="text-left md:text-right shrink-0">
+            <span className="text-[11px] uppercase tracking-[0.12em] font-bold text-slate-500">Progresso</span>
+            <p className="text-sm font-bold text-[#071b36] mt-1">Etapa {step} de 4 · {step * 25}%</p>
+          </div>
         </header>
 
-        <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-8 w-full relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
+        <div className="ait-workspace bg-white rounded-2xl shadow-soft border border-gray-100 p-8 w-full relative overflow-hidden">
 
           {mensagem && (
-            <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium animate-fadeIn">
+            <div data-ait-feedback className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium animate-fadeIn">
               <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
               {mensagem}
             </div>
           )}
           {erro && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 border border-red-200 flex items-start gap-3 font-medium animate-fadeIn">
+            <div data-ait-feedback role="alert" className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 border border-red-200 flex items-start gap-3 font-medium animate-fadeIn">
               <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
               {erro}
             </div>
           )}
 
           {/* Stepper progress bar */}
-          <div className="mb-10">
-            <div className="flex justify-between items-center max-w-xl mx-auto relative text-center">
+          <div className="ait-stepper mb-10" aria-label="Etapas do lançamento do AIT">
+            <div className="flex justify-between items-center max-w-4xl mx-auto relative text-center">
               {/* Background Bar */}
               <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 transform -translate-y-1/2 -z-10 rounded-full"></div>
               {/* Active Progress Bar */}
               <div
                 className="absolute top-1/2 left-0 h-1 bg-primary-600 transform -translate-y-1/2 -z-10 transition-all duration-300 rounded-full"
-                style={{ width: `${((step - 1) / 4) * 100}%` }}
+                style={{ width: `${((step - 1) / 3) * 100}%` }}
               ></div>
 
-              {[
-                { num: 1, label: "Veículo", icon: Car },
-                { num: 2, label: "CTB", icon: FileDigit },
-                { num: 3, label: "Medição", icon: Clock },
-                { num: 4, label: "Controle", icon: Info },
-                { num: 5, label: "Revisão", icon: ClipboardCheck }
-              ].map((s) => {
+              {etapas.map((s) => {
                 const IconComp = s.icon;
                 const isCompleted = step > s.num;
                 const isActive = step === s.num;
@@ -601,14 +580,16 @@ function AdminInfracoes() {
                           : isActive
                             ? 'bg-white border-primary-600 text-primary-600 font-bold scale-110 ring-4 ring-primary-100'
                             : 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
+                      }`}
                       disabled={s.num > step}
+                      aria-current={isActive ? 'step' : undefined}
+                      title={`${s.label}: ${s.hint}`}
                     >
                       {isCompleted ? <CheckCircle className="w-5 h-5 text-secondary-500" /> : <IconComp className="w-5 h-5" />}
                     </button>
                     <span className={`text-[10px] font-bold tracking-wide mt-2 uppercase transition-all duration-200 ${isActive ? 'text-primary-600 font-extrabold' : isCompleted ? 'text-primary-800' : 'text-gray-400'
                       }`}>
-                      {s.label}
+                      {s.shortLabel}
                     </span>
                   </div>
                 );
@@ -616,7 +597,21 @@ function AdminInfracoes() {
             </div>
           </div>
 
-          <form onSubmit={handleRegistrarMulta} className="space-y-6">
+          <div className="ait-layout">
+            <aside className="ait-context" aria-label="Resumo do lançamento">
+              <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-500">Etapa atual</p>
+              <h2 className="text-lg font-bold text-[#071b36] mt-1">{etapaAtual.label}</h2>
+              <p className="text-xs text-slate-500 mt-1 leading-5">{etapaAtual.hint}</p>
+              <div className="h-1 bg-slate-200 mt-5"><div className="h-full bg-[#0b4f9c] transition-all" style={{ width: `${step * 25}%` }}></div></div>
+              <dl className="mt-6 space-y-4 text-xs">
+                <div><dt className="text-slate-400 uppercase tracking-wide font-bold">Placa</dt><dd className="text-slate-800 font-bold mt-1 font-mono">{placa || 'Ainda não informada'}</dd></div>
+                <div><dt className="text-slate-400 uppercase tracking-wide font-bold">Código CTB</dt><dd className="text-slate-800 font-bold mt-1">{codigoInfracao || 'Aguardando enquadramento'}</dd></div>
+                <div><dt className="text-slate-400 uppercase tracking-wide font-bold">Local</dt><dd className="text-slate-600 mt-1 leading-4 line-clamp-3">{local || 'Ainda não informado'}</dd></div>
+              </dl>
+              <p className="mt-7 pt-5 border-t border-slate-200 text-[11px] text-slate-500 leading-4"><strong className="text-slate-700">Campos com *</strong> são obrigatórios para avançar.</p>
+            </aside>
+
+          <form onSubmit={handleRegistrarMulta} className="ait-form space-y-6">
 
             {/* ETAPA 1: VEÍCULO E LOCAL */}
             {step === 1 && (
@@ -968,7 +963,7 @@ function AdminInfracoes() {
               </div>
             )}
 
-            {/* ETAPA 3: MEDIÇÕES DE TRÂNSITO */}
+            {/* ETAPA 3: MEDIÇÕES E CONTROLE */}
             {step === 3 && (
               <div className="space-y-6 animate-fadeIn">
                 <div className="border-b border-gray-100 pb-3 flex items-center gap-2">
@@ -976,8 +971,8 @@ function AdminInfracoes() {
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-primary-950">3. Medições e Equipamentos (Radar/Bafômetro)</h3>
-                    <p className="text-xs text-gray-400">Preencha dados aferidos por aparelhos. Margens do CONTRAN são estimadas automaticamente.</p>
+                    <h3 className="font-bold text-lg text-primary-950">3. Medição e controle do auto</h3>
+                    <p className="text-xs text-gray-400">Informe dados do aparelho quando houver. Campos de medição são opcionais para as demais infrações.</p>
                   </div>
                 </div>
 
@@ -1112,16 +1107,16 @@ function AdminInfracoes() {
               </div>
             )}
 
-            {/* ETAPA 4: DADOS FISCAIS E PRAZOS */}
-            {step === 4 && (
+            {/* CONTROLE LEGAL INTEGRADO À ETAPA 3 */}
+            {step === 3 && (
               <div className="space-y-6 animate-fadeIn">
                 <div className="border-b border-gray-100 pb-3 flex items-center gap-2">
                   <div className="p-1.5 bg-primary-50 rounded-lg text-primary-600">
                     <Info className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-primary-950">4. Dados Fiscais e Controle Legal</h3>
-                    <p className="text-xs text-gray-400">Preencha o número do auto de infração (AIT) e a data de expedição.</p>
+                    <h3 className="font-bold text-lg text-primary-950">Dados de controle</h3>
+                    <p className="text-xs text-gray-400">O número do AIT pode ser informado agora ou gerado automaticamente pelo sistema.</p>
                   </div>
                 </div>
 
@@ -1157,16 +1152,16 @@ function AdminInfracoes() {
               </div>
             )}
 
-            {/* ETAPA 5: REVISÃO E CONFIRMAÇÃO (GUIA DE TICKET PREVIEW) */}
-            {step === 5 && (
+            {/* ETAPA 4: REVISÃO E CONFIRMAÇÃO */}
+            {step === 4 && (
               <div className="space-y-6 animate-fadeIn">
                 <div className="border-b border-gray-100 pb-3 flex items-center gap-2">
                   <div className="p-1.5 bg-primary-50 rounded-lg text-primary-600">
                     <ClipboardCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-primary-950">5. Revisão da Notificação e Gravação</h3>
-                    <p className="text-xs text-gray-400">Verifique os dados na guia oficial simulada do Auto de Infração antes de assinar digitalmente.</p>
+                    <h3 className="font-bold text-lg text-primary-950">4. Conferência e registro</h3>
+                    <p className="text-xs text-gray-400">Revise os dados essenciais antes de registrar o auto. Você ainda pode voltar e corrigir qualquer etapa.</p>
                   </div>
                 </div>
 
@@ -1325,7 +1320,7 @@ function AdminInfracoes() {
             )}
 
             {/* BOTÕES DE NAVEGAÇÃO DA ETAPA */}
-            <div className="flex justify-between items-center pt-6 border-t border-gray-100 mt-8">
+            <div className="ait-actions flex justify-between items-center pt-6 border-t border-gray-100 mt-8">
               {step > 1 ? (
                 <button
                   type="button"
@@ -1339,13 +1334,13 @@ function AdminInfracoes() {
                 <div></div>
               )}
 
-              {step < 5 ? (
+              {step < 4 ? (
                 <button
                   type="button"
                   onClick={nextStep}
                   className="px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors flex items-center gap-1.5 ml-auto"
                 >
-                  Próximo
+                  Continuar
                   <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
@@ -1354,6 +1349,7 @@ function AdminInfracoes() {
             </div>
 
           </form>
+          </div>
         </div>
       </main>
     </div>

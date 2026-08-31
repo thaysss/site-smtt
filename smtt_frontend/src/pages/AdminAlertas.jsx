@@ -173,7 +173,7 @@ function AdminAlertas() {
 
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
+    <div className="admin-shell flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
       
       {/* Sidebar */}
       <AdminSidebar activeItem="alertas" />
@@ -181,7 +181,7 @@ function AdminAlertas() {
       {/* ÁREA PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-6 md:p-10">
         <header className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Comunicação Interdição de via</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Interdições e avisos viários</h1>
           <p className="text-gray-500">Publique alertas de interdição, obras e acidentes que aparecerão no portal público.</p>
         </header>
 
