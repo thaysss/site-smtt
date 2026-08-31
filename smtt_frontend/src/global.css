@@ -259,7 +259,7 @@ body.alto-contraste .text-gray-900 {
 .admin-shell > main > section,
 .admin-shell > main > div {
   width: 100%;
-  max-width: 1200px;
+  max-width: none;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1184,10 +1184,20 @@ body.alto-contraste .text-gray-900 {
 }
 
 .admin-shell > main > .dashboard-content {
-  width: min(100%, 1280px);
-  max-width: 1280px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
   padding: 40px;
+}
+
+/* O conteúdo administrativo acompanha toda a área útil da janela. */
+.admin-shell > main > header,
+.admin-shell > main > section,
+.admin-shell > main > div,
+.admin-shell .ait-header,
+.admin-shell .ait-workspace {
+  width: 100%;
+  max-width: none !important;
 }
 
 .dashboard-welcome {
@@ -1722,5 +1732,516 @@ body.alto-contraste .text-gray-900 {
 
   .dashboard-activity-copy small {
     white-space: normal;
+  }
+}
+
+/* ===========================================================================
+   RESPONSIVIDADE GLOBAL DO AMBIENTE ADMINISTRATIVO
+   ========================================================================== */
+.admin-shell,
+.admin-shell * {
+  box-sizing: border-box;
+}
+
+.admin-shell {
+  width: 100%;
+  max-width: 100vw;
+  height: 100dvh !important;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.admin-shell > main {
+  width: 0;
+  min-width: 0;
+  max-width: 100%;
+  overscroll-behavior: contain;
+}
+
+.admin-shell main .flex-1,
+.admin-shell main form,
+.admin-shell main section,
+.admin-shell main article,
+.admin-shell main header,
+.admin-shell main fieldset {
+  min-width: 0;
+}
+
+.admin-shell main img,
+.admin-shell main video,
+.admin-shell main canvas,
+.admin-shell main svg:not([width]) {
+  max-width: 100%;
+}
+
+.admin-shell main p,
+.admin-shell main h1,
+.admin-shell main h2,
+.admin-shell main h3,
+.admin-shell main h4,
+.admin-shell main dd,
+.admin-shell main td,
+.admin-shell main th,
+.admin-shell main a,
+.admin-shell main button {
+  overflow-wrap: anywhere;
+}
+
+.admin-shell main [class*="overflow-x-auto"] {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-shell main table {
+  width: 100%;
+}
+
+.admin-shell main input,
+.admin-shell main select,
+.admin-shell main textarea,
+.admin-shell main button {
+  max-width: 100%;
+}
+
+.admin-shell main input[type="file"] {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-shell [class*="fixed"][class*="inset-0"] > div {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.admin-sidebar,
+.admin-mobile-bar {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  .admin-shell > main {
+    padding: 32px !important;
+  }
+
+  .admin-shell > main > header,
+  .admin-shell > main > section,
+  .admin-shell > main > div {
+    max-width: 100%;
+  }
+
+  .ait-layout {
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .ait-context {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-shell {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .admin-shell > main {
+    width: 100%;
+    min-height: calc(100dvh - 64px);
+    overflow-x: hidden;
+  }
+
+  .admin-shell > main > header,
+  .admin-shell > main > section,
+  .admin-shell > main > div {
+    max-width: 100%;
+  }
+
+  .admin-shell .md\:grid-cols-2,
+  .admin-shell .md\:grid-cols-3,
+  .admin-shell .md\:grid-cols-5,
+  .admin-shell .md\:grid-cols-12 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .admin-shell .md\:col-span-2,
+  .admin-shell .md\:col-span-3,
+  .admin-shell .md\:col-span-4,
+  .admin-shell .md\:col-span-5,
+  .admin-shell .md\:col-span-6,
+  .admin-shell .md\:col-span-7,
+  .admin-shell .md\:col-span-8,
+  .admin-shell .md\:col-span-9,
+  .admin-shell .md\:col-span-10,
+  .admin-shell .md\:col-span-11,
+  .admin-shell .md\:col-span-12 {
+    grid-column: auto !important;
+  }
+
+  .admin-shell .sm\:grid-cols-4,
+  .admin-shell .sm\:grid-cols-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .admin-shell header.flex,
+  .admin-shell header[class*="flex"] {
+    align-items: flex-start;
+  }
+
+  .admin-shell .max-w-lg,
+  .admin-shell .max-w-xl,
+  .admin-shell .max-w-2xl,
+  .admin-shell .max-w-3xl,
+  .admin-shell .max-w-4xl {
+    max-width: 100% !important;
+  }
+
+  .admin-shell [class*="fixed"][class*="inset-0"] {
+    align-items: flex-start !important;
+    padding: 16px !important;
+    overflow-y: auto;
+  }
+
+  .admin-shell [class*="fixed"][class*="inset-0"] > div {
+    margin: auto 0;
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-shell > main {
+    padding: 22px 14px !important;
+  }
+
+  .admin-shell > main.dashboard-main {
+    padding: 0 !important;
+  }
+
+  .admin-shell main header.mb-10,
+  .admin-shell main header.mb-8 {
+    margin-bottom: 24px !important;
+  }
+
+  .admin-shell main h1 {
+    font-size: 1.5rem !important;
+    line-height: 1.25;
+  }
+
+  .admin-shell main h2 {
+    line-height: 1.3;
+  }
+
+  .admin-shell main .p-8 {
+    padding: 20px !important;
+  }
+
+  .admin-shell main .p-6 {
+    padding: 18px !important;
+  }
+
+  .admin-shell main .p-5 {
+    padding: 16px !important;
+  }
+
+  .admin-shell main .gap-8 {
+    gap: 20px !important;
+  }
+
+  .admin-shell main .gap-6,
+  .admin-shell main .gap-5 {
+    gap: 16px !important;
+  }
+
+  .admin-shell .grid-cols-2,
+  .admin-shell .grid-cols-3,
+  .admin-shell .sm\:grid-cols-2,
+  .admin-shell .sm\:grid-cols-3,
+  .admin-shell .sm\:grid-cols-4,
+  .admin-shell .sm\:grid-cols-5 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .admin-shell main [class*="overflow-x-auto"] {
+    margin-inline: -4px;
+    padding-inline: 4px;
+    scroll-padding-inline: 4px;
+  }
+
+  .admin-shell main [class*="overflow-x-auto"] button,
+  .admin-shell main [class*="overflow-x-auto"] a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .admin-shell main form > .flex,
+  .admin-shell main form > div > .flex.flex-wrap,
+  .admin-shell main .border-t > .flex.gap-3 {
+    flex-wrap: wrap;
+  }
+
+  .admin-shell main form > .flex > button,
+  .admin-shell main .border-t > .flex.gap-3 > button {
+    min-width: min(100%, 180px);
+    flex: 1 1 160px;
+  }
+
+  .admin-shell main .flex.flex-col.sm\:flex-row {
+    align-items: stretch !important;
+  }
+
+  .admin-shell main .flex.flex-col.sm\:flex-row > div:last-child {
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .admin-shell main a[class*="max-w-"] {
+    max-width: 100% !important;
+  }
+
+  .ait-header {
+    gap: 12px !important;
+  }
+
+  .ait-workspace {
+    padding: 18px !important;
+    overflow: visible !important;
+  }
+
+  .ait-stepper {
+    margin-inline: -4px;
+    overflow-x: auto;
+    padding: 4px 4px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ait-stepper > div {
+    min-width: 300px;
+  }
+
+  .ait-context {
+    padding: 18px;
+  }
+
+  .ait-form .relative.flex.gap-2 {
+    flex-wrap: wrap;
+  }
+
+  .ait-form .relative.flex.gap-2 > button {
+    min-height: 44px;
+    flex: 1 1 100%;
+  }
+
+  .admin-shell [class*="fixed"][class*="inset-0"] {
+    padding: 10px !important;
+  }
+
+  .admin-shell [class*="fixed"][class*="inset-0"] > div {
+    width: 100%;
+    margin-block: 0;
+    border-radius: 12px !important;
+  }
+
+  .admin-shell [class*="fixed"][class*="inset-0"] > div > div {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-mobile-bar {
+    padding-inline: 10px;
+  }
+
+  .admin-brand--mobile span {
+    display: none;
+  }
+
+  .admin-brand--mobile img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .admin-shell > main {
+    padding: 18px 10px !important;
+  }
+
+  .admin-shell > main.dashboard-main {
+    padding: 0 !important;
+  }
+
+  .admin-shell main .p-8,
+  .admin-shell main .p-6,
+  .admin-shell main .p-5 {
+    padding: 14px !important;
+  }
+
+  .ait-workspace,
+  .ait-context {
+    padding: 14px !important;
+  }
+
+  .dashboard-main > .dashboard-topbar {
+    padding-inline: 10px;
+  }
+
+  .admin-shell > main > .dashboard-content {
+    padding: 22px 10px;
+  }
+
+  .dashboard-primary-action,
+  .dashboard-stat-card,
+  .dashboard-activity-card,
+  .dashboard-pending-card,
+  .dashboard-chart-card {
+    padding: 16px;
+  }
+}
+
+/* Filtro temporal compartilhado */
+.admin-date-filter {
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admin-date-filter-title {
+  display: flex;
+  min-width: 220px;
+  align-items: center;
+  gap: 11px;
+}
+
+.admin-date-filter-title > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border-radius: 8px;
+  background: #eef5ff;
+  color: var(--admin-action);
+}
+
+.admin-date-filter-title strong,
+.admin-date-filter-title small {
+  display: block;
+}
+
+.admin-date-filter-title strong {
+  color: var(--admin-primary);
+  font-size: 13px;
+}
+
+.admin-date-filter-title small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.admin-date-filter-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.admin-date-filter-controls label {
+  display: block;
+  min-width: 190px;
+}
+
+.admin-date-filter-controls label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #4d535b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-date-filter-controls select,
+.admin-date-filter-controls input {
+  width: 100%;
+  height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--admin-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-date-filter-controls button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-surface-low);
+  color: var(--admin-primary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-date-filter-controls button:hover {
+  border-color: #aeb9c6;
+  background: #e8edf2;
+}
+
+@media (max-width: 900px) {
+  .admin-date-filter {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .admin-date-filter-controls {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .admin-date-filter-controls label {
+    min-width: min(100%, 210px);
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-date-filter {
+    padding: 14px;
+  }
+
+  .admin-date-filter-title {
+    min-width: 0;
+  }
+
+  .admin-date-filter-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-date-filter-controls label,
+  .admin-date-filter-controls button {
+    width: 100%;
+    min-width: 0;
+    flex: none;
   }
 }

@@ -6,6 +6,8 @@ import {
   AlertTriangle, CheckCircle, MapPin, AlignLeft, Trash2, TrafficCone
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
+import AdminDateFilter from '../components/AdminDateFilter';
+import { matchesDateFilter } from '../utils/dateFilters';
 
 function AdminAlertas() {
   const [ruaBairro, setRuaBairro] = useState('');
@@ -14,6 +16,8 @@ function AdminAlertas() {
   const [mensagem, setMensagem] = useState('');
   const [buscaResolvidos, setBuscaResolvidos] = useState('');
   const [pageResolvidos, setPageResolvidos] = useState(1);
+  const [periodMode, setPeriodMode] = useState('all');
+  const [periodValue, setPeriodValue] = useState('');
   const perPageResolvidos = 5;
   const navigate = useNavigate();
   useEffect(() => {
@@ -78,6 +82,7 @@ function AdminAlertas() {
 
   const alertasResolvidosFiltrados = alertas.filter(a => {
     if (a.status !== 'Resolvido') return false;
+    if (!matchesDateFilter(a.data_inicio, periodMode, periodValue)) return false;
     if (buscaResolvidos.trim() !== '') {
       const query = normalizeString(buscaResolvidos);
       const rua = normalizeString(a.rua_bairro);
@@ -92,6 +97,10 @@ function AdminAlertas() {
   const alertasResolvidosPaginados = alertasResolvidosFiltrados.slice(
     (pageResolvidos - 1) * perPageResolvidos,
     pageResolvidos * perPageResolvidos
+  );
+
+  const alertasAtivosFiltrados = alertas.filter((alerta) =>
+    alerta.status === 'Ativo' && matchesDateFilter(alerta.data_inicio, periodMode, periodValue)
   );
 
   const renderPagination = (currentPage, totalItems, itemsPerPage, onPageChange) => {
@@ -185,6 +194,14 @@ function AdminAlertas() {
           <p className="text-gray-500">Publique alertas de interdição, obras e acidentes que aparecerão no portal público.</p>
         </header>
 
+        <AdminDateFilter
+          mode={periodMode}
+          value={periodValue}
+          onModeChange={(mode) => { setPeriodMode(mode); setPeriodValue(''); setPageResolvidos(1); }}
+          onValueChange={(value) => { setPeriodValue(value); setPageResolvidos(1); }}
+          onClear={() => { setPeriodMode('all'); setPeriodValue(''); setPageResolvidos(1); }}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Formulário */}
@@ -227,13 +244,13 @@ function AdminAlertas() {
                 <AlertTriangle className="text-red-500" /> Alertas Ativos
               </h3>
 
-              {alertas.filter(a => a.status === 'Ativo').length === 0 ? (
+              {alertasAtivosFiltrados.length === 0 ? (
                 <div className="text-center py-10 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                   Trânsito livre. Nenhum alerta ativo no momento.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {alertas.filter(a => a.status === 'Ativo').map(alerta => (
+                  {alertasAtivosFiltrados.map(alerta => (
                     <div key={alerta.id} className="p-4 border border-red-200 bg-red-50 rounded-xl flex justify-between items-start gap-4">
                       <div>
                         <h4 className="font-bold text-red-800 text-sm mb-1">{alerta.rua_bairro}</h4>

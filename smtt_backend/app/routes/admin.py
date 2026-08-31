@@ -213,6 +213,7 @@ def listar_recursos():
             "arquivo_recurso_cidadao": r.arquivo_recurso_cidadao,
             "anexos": [{"caminho_arquivo": a.caminho_arquivo, "nome_original": a.nome_original} for a in r.anexos],
             "protocolo": {"numero_protocolo": r.protocolo.numero_protocolo} if r.protocolo else {},
+            "criado_em": r.protocolo.criado_em.strftime("%d/%m/%Y %H:%M") if r.protocolo and r.protocolo.criado_em else None,
             "infracao": {
                 "numero_ait": r.infracao.numero_ait if r.infracao else "N/A",
                 "placa_veiculo": r.infracao.veiculo.placa if r.infracao and r.infracao.veiculo else "N/A"

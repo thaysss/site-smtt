@@ -6,7 +6,9 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
+import AdminDateFilter from '../components/AdminDateFilter';
 import api from '../services/api';
+import { matchesDateFilter } from '../utils/dateFilters';
 
 const parseDateBR = (value) => {
   if (!value) return null;
@@ -46,6 +48,8 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [periodMode, setPeriodMode] = useState('all');
+  const [periodValue, setPeriodValue] = useState('');
 
   const loadDashboard = useCallback(async (silent = false) => {
     if (silent) setRefreshing(true);
@@ -94,16 +98,24 @@ function AdminDashboard() {
     navigate('/admin/painel');
   }, [navigate]);
 
+  const filteredData = useMemo(() => ({
+    infracoes: data.infracoes.filter((item) => matchesDateFilter(item.data_hora_infracao, periodMode, periodValue)),
+    alvaras: data.alvaras.filter((item) => matchesDateFilter(item.criado_em, periodMode, periodValue)),
+    alertas: data.alertas.filter((item) => matchesDateFilter(item.data_inicio, periodMode, periodValue)),
+    recursos: data.recursos.filter((item) => matchesDateFilter(item.criado_em, periodMode, periodValue)),
+    eventos: data.eventos.filter((item) => matchesDateFilter(item.criado_em, periodMode, periodValue)),
+  }), [data, periodMode, periodValue]);
+
   const metrics = useMemo(() => {
     const today = new Date();
     return {
-      todayInfractions: data.infracoes.filter((item) => sameDay(parseDateBR(item.data_hora_infracao), today)).length,
-      pendingPermits: data.alvaras.filter((item) => isPending(item.status)).length,
-      activeAlerts: data.alertas.filter((item) => String(item.status).toLowerCase() === 'ativo').length,
-      pendingAppeals: data.recursos.filter((item) => isPending(item.resultado_julgamento)).length,
-      pendingEvents: data.eventos.filter((item) => isPending(item.status)).length,
+      todayInfractions: filteredData.infracoes.filter((item) => sameDay(parseDateBR(item.data_hora_infracao), today)).length,
+      pendingPermits: filteredData.alvaras.filter((item) => isPending(item.status)).length,
+      activeAlerts: filteredData.alertas.filter((item) => String(item.status).toLowerCase() === 'ativo').length,
+      pendingAppeals: filteredData.recursos.filter((item) => isPending(item.resultado_julgamento)).length,
+      pendingEvents: filteredData.eventos.filter((item) => isPending(item.status)).length,
     };
-  }, [data]);
+  }, [filteredData]);
 
   const weeklyData = useMemo(() => {
     const formatter = new Intl.DateTimeFormat('pt-BR', { weekday: 'short' });
@@ -114,16 +126,16 @@ function AdminDashboard() {
       return { date, label: formatter.format(date).replace('.', ''), value: 0 };
     });
 
-    data.infracoes.forEach((item) => {
+    filteredData.infracoes.forEach((item) => {
       const date = parseDateBR(item.data_hora_infracao);
       const day = days.find((entry) => sameDay(entry.date, date));
       if (day) day.value += 1;
     });
     return days;
-  }, [data.infracoes]);
+  }, [filteredData.infracoes]);
 
   const activities = useMemo(() => {
-    const infractionActivities = data.infracoes.map((item) => ({
+    const infractionActivities = filteredData.infracoes.map((item) => ({
       id: `inf-${item.id}`,
       kind: 'infraction',
       icon: Gavel,
@@ -133,7 +145,7 @@ function AdminDashboard() {
       originalDate: item.data_hora_infracao,
       action: () => openPanel('infracoes'),
     }));
-    const permitActivities = data.alvaras.map((item) => ({
+    const permitActivities = filteredData.alvaras.map((item) => ({
       id: `alv-${item.id}`,
       kind: 'permit',
       icon: CheckCircle2,
@@ -143,7 +155,7 @@ function AdminDashboard() {
       originalDate: item.criado_em,
       action: () => openPanel('alvaras'),
     }));
-    const alertActivities = data.alertas.map((item) => ({
+    const alertActivities = filteredData.alertas.map((item) => ({
       id: `alt-${item.id}`,
       kind: 'alert',
       icon: AlertTriangle,
@@ -157,7 +169,7 @@ function AdminDashboard() {
     return [...infractionActivities, ...permitActivities, ...alertActivities]
       .sort((first, second) => (second.date?.getTime() || 0) - (first.date?.getTime() || 0))
       .slice(0, 5);
-  }, [data.alertas, data.alvaras, data.infracoes, navigate, openPanel]);
+  }, [filteredData.alertas, filteredData.alvaras, filteredData.infracoes, navigate, openPanel]);
 
   const maxWeeklyValue = Math.max(...weeklyData.map((day) => day.value), 1);
 
@@ -186,6 +198,14 @@ function AdminDashboard() {
             </div>
           </header>
 
+          <AdminDateFilter
+            mode={periodMode}
+            value={periodValue}
+            onModeChange={(mode) => { setPeriodMode(mode); setPeriodValue(''); }}
+            onValueChange={setPeriodValue}
+            onClear={() => { setPeriodMode('all'); setPeriodValue(''); }}
+          />
+
           {loadError && (
             <div className="dashboard-warning" role="status">
               <ShieldAlert size={19} />
@@ -208,7 +228,7 @@ function AdminDashboard() {
                 <button type="button" className="dashboard-stat-card" onClick={() => openPanel('infracoes')}>
                   <div><span>Infrações hoje</span><Gavel size={22} /></div>
                   <strong>{metrics.todayInfractions.toString().padStart(2, '0')}</strong>
-                  <small><TrendingUp size={15} /> {data.infracoes.length} registros no total</small>
+                  <small><TrendingUp size={15} /> {filteredData.infracoes.length} registros no período</small>
                 </button>
 
                 <button type="button" className="dashboard-stat-card" onClick={() => openPanel('alvaras')}>
