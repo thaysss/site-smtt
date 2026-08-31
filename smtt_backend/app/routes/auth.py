@@ -50,13 +50,24 @@ def cadastro_admin():
     claims = get_jwt()
     if claims.get("role") != "admin":
         return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
-        
-    dados = request.get_json()
-    if Servidor.query.filter_by(matricula=dados['matricula']).first():
+
+    dados = request.get_json(silent=True) or {}
+    nome = str(dados.get('nome', '')).strip()
+    matricula = str(dados.get('matricula', '')).strip()
+    cargo = str(dados.get('cargo', '')).strip() or 'Analista'
+    senha = dados.get('senha', '')
+
+    if not nome or not matricula or not senha:
+        return jsonify({"erro": "Nome, matrícula e senha são obrigatórios."}), 400
+    if len(nome) > 150 or len(matricula) > 20 or len(cargo) > 50:
+        return jsonify({"erro": "Um ou mais campos excedem o tamanho permitido."}), 400
+    if not isinstance(senha, str) or len(senha) < 8:
+        return jsonify({"erro": "A senha deve ter pelo menos 8 caracteres."}), 400
+    if Servidor.query.filter_by(matricula=matricula).first():
         return jsonify({"erro": "Matrícula já cadastrada"}), 400
-        
-    novo_servidor = Servidor(nome=dados['nome'], matricula=dados['matricula'], cargo=dados.get('cargo', 'Analista'))
-    novo_servidor.set_senha(dados['senha'])
+
+    novo_servidor = Servidor(nome=nome, matricula=matricula, cargo=cargo)
+    novo_servidor.set_senha(senha)
     db.session.add(novo_servidor)
     db.session.commit()
     return jsonify({"mensagem": "Servidor cadastrado com sucesso"}), 201

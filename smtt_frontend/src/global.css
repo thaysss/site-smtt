@@ -652,6 +652,55 @@ body.alto-contraste .text-gray-900 {
   display: none;
 }
 
+/* Cadastro de administradores */
+.admin-users-shell { display: flex; min-height: 100vh; }
+.admin-users-main { width: 100%; padding: 42px; }
+.admin-users-header { display: flex; gap: 16px; align-items: flex-start; max-width: 1040px; margin: 0 auto 28px; }
+.admin-users-heading-icon { display: grid; place-items: center; width: 52px; height: 52px; flex: 0 0 auto; border-radius: 12px; color: var(--admin-action); background: #eaf2fc; }
+.admin-users-header span { color: var(--admin-action); font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.admin-users-header h1 { margin: 4px 0; }
+.admin-users-header p, .admin-users-card-title p { margin: 0; color: var(--admin-muted); }
+.admin-users-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 24px; max-width: 1040px; margin: auto; align-items: start; }
+.admin-users-form, .admin-users-info { border: 1px solid var(--admin-border); border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(0, 33, 71, .06); }
+.admin-users-form { padding: 28px; }
+.admin-users-card-title { padding-bottom: 20px; margin-bottom: 24px; border-bottom: 1px solid var(--admin-border); }
+.admin-users-card-title h2 { margin: 0 0 5px; font-size: 1.15rem; }
+.admin-users-card-title p { font-size: .85rem; }
+.admin-users-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.admin-users-fields label { display: grid; gap: 8px; color: #303841; font-size: .78rem; font-weight: 800; letter-spacing: .025em; text-transform: uppercase; }
+.admin-users-fields input { width: 100%; min-height: 46px; padding: 0 13px; border: 1px solid var(--admin-border); border-radius: 9px; font: inherit; font-weight: 500; letter-spacing: normal; text-transform: none; }
+.admin-users-full-field { grid-column: 1 / -1; }
+.admin-users-password { position: relative; display: block; }
+.admin-users-password input { padding-right: 46px; }
+.admin-users-password button { position: absolute; top: 50%; right: 7px; display: grid; place-items: center; padding: 7px; border: 0; color: var(--admin-muted); background: transparent; transform: translateY(-50%); cursor: pointer; }
+.admin-users-actions { display: flex; justify-content: flex-end; margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--admin-border); }
+.admin-users-actions button { display: flex; gap: 9px; align-items: center; padding: 12px 18px; border: 0; border-radius: 9px; color: #fff; background: var(--admin-action); font-weight: 750; cursor: pointer; }
+.admin-users-actions button:hover { background: var(--admin-action-hover); }
+.admin-users-actions button:disabled { opacity: .65; cursor: wait; }
+.admin-users-message { display: flex; gap: 8px; align-items: center; margin-bottom: 20px; padding: 12px 14px; border: 1px solid; border-radius: 9px; font-size: .9rem; }
+.admin-users-message.success { color: #166534; border-color: #bbf7d0; background: #f0fdf4; }
+.admin-users-message.error { color: #991b1b; border-color: #fecaca; background: #fef2f2; }
+.admin-users-info { padding: 26px; color: #dce8f5; background: var(--admin-primary); }
+.admin-users-info > svg { color: var(--admin-accent); }
+.admin-users-info h2 { margin: 15px 0 8px; color: #fff; font-size: 1.1rem; }
+.admin-users-info p, .admin-users-info li { font-size: .88rem; line-height: 1.6; }
+.admin-users-info ul { padding-left: 20px; margin-bottom: 0; }
+
+@media (max-width: 900px) {
+  .admin-users-shell { display: block; padding-top: 64px; }
+  .admin-users-main { padding: 24px 18px; }
+  .admin-users-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .admin-users-header { align-items: center; }
+  .admin-users-heading-icon { width: 44px; height: 44px; }
+  .admin-users-fields { grid-template-columns: 1fr; }
+  .admin-users-full-field { grid-column: auto; }
+  .admin-users-form { padding: 20px; }
+  .admin-users-actions button { width: 100%; justify-content: center; }
+}
+
 /* Fluxo de cadastro de AIT */
 .ait-workspace {
   padding: 32px !important;
