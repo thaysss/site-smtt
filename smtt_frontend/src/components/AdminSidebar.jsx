@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BellRing, CalendarDays, ChartNoAxesCombined, ChevronLeft, ChevronRight,
   FilePenLine, FolderOpen, IdCard, ListChecks, LogOut, Menu, Newspaper,
-  Search, X, LayoutDashboard,
+  Search, X, LayoutDashboard, UserPlus,
 } from 'lucide-react';
 
 const menuItems = [
@@ -16,6 +16,7 @@ const menuItems = [
   { id: 'estatisticas', label: 'Estatísticas', icon: ChartNoAxesCombined, isTab: true },
   { id: 'lancar-infracao', label: 'Lançar AIT', icon: FilePenLine, isTab: false },
   { id: 'alertas', label: 'Avisos de interdição', icon: BellRing, isTab: false },
+  { id: 'usuarios', label: 'Administradores', icon: UserPlus, isTab: false },
 ];
 
 function AdminSidebar({ activeItem, onTabChange }) {
@@ -51,6 +52,8 @@ function AdminSidebar({ activeItem, onTabChange }) {
       navigate('/admin/infracoes');
     } else if (item.id === 'alertas') {
       navigate('/admin/alertas');
+    } else if (item.id === 'usuarios') {
+      navigate('/admin/usuarios');
     }
     setIsMobileOpen(false);
   };
