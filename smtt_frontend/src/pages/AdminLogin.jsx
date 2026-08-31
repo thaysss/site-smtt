@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { UserRound, LockKeyhole, ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { UserRound, LockKeyhole, Eye, EyeOff, ShieldCheck, UsersRound, LogIn, Globe2, Building2 } from 'lucide-react';
 
 function AdminLogin() {
   const location = useLocation();
@@ -43,15 +43,15 @@ function AdminLogin() {
     <main className="admin-login">
       <section className="admin-login-brand" aria-label="Identificação institucional">
         <div className="admin-login-brand-content">
-          <div className="admin-login-logo-box">
-            <img src="/SMTT.png" alt="SMTT Propriá" />
-          </div>
+          <img className="admin-login-logo" src="/SMTT.png" alt="SMTT Propriá" />
           <p className="admin-login-eyebrow">Superintendência Municipal</p>
           <h1>SMTT Propriá</h1>
+          <span className="admin-login-accent" aria-hidden="true" />
           <p className="admin-login-subtitle">Ambiente interno monitorado</p>
-          <div className="admin-login-security">
-            <ShieldCheck size={20} />
-            <span>Acesso restrito a servidores autorizados</span>
+          <div className="admin-login-benefits">
+            <div><span><ShieldCheck /></span><strong>Acesso seguro</strong><small>Seus dados protegidos</small></div>
+            <div><span><UsersRound /></span><strong>Uso exclusivo</strong><small>Servidores autorizados</small></div>
+            <div><span><LockKeyhole /></span><strong>Conexão segura</strong><small>Protegido por criptografia</small></div>
           </div>
         </div>
       </section>
@@ -65,6 +65,7 @@ function AdminLogin() {
           </div>
 
           <div className="admin-login-heading">
+            <span className="admin-login-heading-icon"><LockKeyhole size={23} /></span>
             <span>Portal do servidor</span>
             <h2>Acesso ao sistema</h2>
             <p>Insira suas credenciais para continuar.</p>
@@ -92,15 +93,23 @@ function AdminLogin() {
               </div>
             </div>
 
-            <button type="submit" className="admin-login-submit">Entrar no sistema</button>
+            <div className="admin-login-options">
+              <label><input type="checkbox" /> <span>Lembrar meu acesso</span></label>
+              <button type="button">Esqueci minha senha</button>
+            </div>
+            <button type="submit" className="admin-login-submit"><LogIn size={19} /> Entrar no sistema</button>
+            <div className="admin-login-divider"><span>ou</span></div>
             <button type="button" onClick={() => navigate('/')} className="admin-login-back">
-              <ArrowLeft size={18} /> Voltar ao Portal Público
+              <Globe2 size={19} /> Acessar Portal Público
             </button>
           </form>
-
-          <p className="admin-login-footer">© 2026 SMTT Propriá. Todos os direitos reservados.</p>
         </div>
       </section>
+      <footer className="admin-login-footer">
+        <div className="admin-login-footer-brand"><Building2 /><span><strong>SMTT Propriá</strong><small>Superintendência Municipal de<br />Trânsito e Transporte de Propriá - SE</small></span></div>
+        <p>© 2026 SMTT Propriá.<br />Todos os direitos reservados.</p>
+        <ShieldCheck />
+      </footer>
     </main>
   );
 }
