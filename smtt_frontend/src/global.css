@@ -654,7 +654,11 @@ body.alto-contraste .text-gray-900 {
 
 /* Cadastro de administradores */
 .admin-users-shell { display: flex; min-height: 100vh; }
-.admin-users-main { width: 100%; padding: 42px; }
+.admin-shell > main.admin-users-main {
+  flex: 1 1 0;
+  width: auto;
+  padding: 42px;
+}
 .admin-users-header { display: flex; gap: 16px; align-items: flex-start; max-width: 1040px; margin: 0 auto 28px; }
 .admin-users-heading-icon { display: grid; place-items: center; width: 52px; height: 52px; flex: 0 0 auto; border-radius: 12px; color: var(--admin-action); background: #eaf2fc; }
 .admin-users-header span { color: var(--admin-action); font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
