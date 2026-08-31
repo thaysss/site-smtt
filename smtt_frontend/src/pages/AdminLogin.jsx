@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { User, Lock, ArrowLeft } from 'lucide-react';
+import { UserRound, LockKeyhole, ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 
 function AdminLogin() {
   const location = useLocation();
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('message') === 'session_expired') {
@@ -32,64 +33,75 @@ function AdminLogin() {
       const response = await api.post('/auth/admin/login', { usuario, senha });
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminNome', response.data.nome);
-      navigate('/admin/infracoes');
+      navigate('/admin/dashboard');
     } catch (error) {
       setErro(error.response?.data?.erro || 'Credenciais inválidas.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-primary-900 font-sans text-gray-800 flex flex-col justify-center items-center selection:bg-secondary-500 selection:text-primary-950 p-4 relative overflow-hidden">
+    <main className="admin-login">
+      <section className="admin-login-brand" aria-label="Identificação institucional">
+        <div className="admin-login-brand-content">
+          <div className="admin-login-logo-box">
+            <img src="/SMTT.png" alt="SMTT Propriá" />
+          </div>
+          <p className="admin-login-eyebrow">Superintendência Municipal</p>
+          <h1>SMTT Propriá</h1>
+          <p className="admin-login-subtitle">Ambiente interno monitorado</p>
+          <div className="admin-login-security">
+            <ShieldCheck size={20} />
+            <span>Acesso restrito a servidores autorizados</span>
+          </div>
+        </div>
+      </section>
 
-      {/* Padrão de Fundo Institucional */}
-      <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
-
-      <div className="w-full max-w-md relative z-10">
-
-        {/* Botão Voltar */}
-        <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white flex items-center gap-2 text-sm font-medium mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Voltar ao Portal Público
-        </button>
-
-        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-10 border-t-4 border-secondary-500 relative overflow-hidden">
-
-          <div className="text-center mb-8">
-            <img src="/logo.png" alt="Logo SMTT" className="w-20 h-20 object-contain mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900">Acesso Restrito</h2>
-            <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-bold">Portal do Servidor SMTT</p>
+      <section className="admin-login-panel">
+        <div className="admin-login-form-wrap">
+          <div className="admin-login-mobile-brand">
+            <img src="/SMTT.png" alt="SMTT Propriá" />
+            <strong>SMTT Propriá</strong>
+            <span>Ambiente interno monitorado</span>
           </div>
 
-          {erro && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm mb-6 text-center border border-red-100 font-medium">{erro}</div>}
+          <div className="admin-login-heading">
+            <span>Portal do servidor</span>
+            <h2>Acesso ao sistema</h2>
+            <p>Insira suas credenciais para continuar.</p>
+          </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          {erro && <div className="admin-login-error" role="alert">{erro}</div>}
+
+          <form onSubmit={handleLogin} className="admin-login-form">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Usuário / Matrícula</label>
-              <div className="relative">
-                <User className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input type="text" value={usuario} onChange={(e) => setUsuario(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="Digite seu usuário" required />
+              <label htmlFor="admin-usuario">Usuário ou matrícula</label>
+              <div className="admin-login-field">
+                <UserRound size={20} />
+                <input id="admin-usuario" type="text" value={usuario} onChange={(e) => setUsuario(e.target.value)} placeholder="Ex: 123456" autoComplete="username" required />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Senha</label>
-              <div className="relative">
-                <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" placeholder="Sua senha de acesso" required />
+              <label htmlFor="admin-senha">Senha</label>
+              <div className="admin-login-field">
+                <LockKeyhole size={20} />
+                <input id="admin-senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Digite sua senha" autoComplete="current-password" required />
+                <button type="button" onClick={() => setMostrarSenha((value) => !value)} aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>
+                  {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 
-            <button type="submit" className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all mt-2">
-              Autenticar
+            <button type="submit" className="admin-login-submit">Entrar no sistema</button>
+            <button type="button" onClick={() => navigate('/')} className="admin-login-back">
+              <ArrowLeft size={18} /> Voltar ao Portal Público
             </button>
           </form>
 
+          <p className="admin-login-footer">© 2026 SMTT Propriá. Todos os direitos reservados.</p>
         </div>
-
-        <div className="text-center mt-6 text-gray-400 text-xs">
-          Sistema de Gestão de Trânsito © 2026<br />Acesso exclusivo para agentes autorizados.
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
 

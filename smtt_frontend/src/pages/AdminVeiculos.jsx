@@ -33,7 +33,7 @@ function AdminVeiculos() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
+    <div className="admin-shell flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
       
       {/* Sidebar */}
       <AdminSidebar activeItem="veiculos" />
