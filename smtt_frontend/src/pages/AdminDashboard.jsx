@@ -180,7 +180,7 @@ function AdminDashboard() {
       <main className="dashboard-main flex-1 overflow-y-auto">
         <div className="dashboard-topbar">
           <div>
-            <span>Ambiente administrativo</span>
+            
             <strong>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date())}</strong>
           </div>
           <button type="button" onClick={() => loadDashboard(true)} disabled={refreshing}>
