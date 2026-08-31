@@ -7,6 +7,8 @@ import {
   Layers, Calendar
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
+import AdminDateFilter from '../components/AdminDateFilter';
+import { matchesDateFilter } from '../utils/dateFilters';
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const montarUrlArquivo = (caminho) => {
@@ -53,6 +55,9 @@ function AdminPainel() {
   const [noticiaFiltroCategoria, setNoticiaFiltroCategoria] = useState('Todos');
   const [noticiaPage, setNoticiaPage] = useState(1);
   const noticiaPerPage = 5;
+
+  const [periodMode, setPeriodMode] = useState('all');
+  const [periodValue, setPeriodValue] = useState('');
 
   // NOVOS ESTADOS PARA EVENTOS E INFRAÇÕES
   const [menuAtivo, setMenuAtivo] = useState(() => localStorage.getItem('adminMenuAtivo') || 'recursos'); // 'recursos', 'eventos' ou 'infracoes'
@@ -111,6 +116,41 @@ function AdminPainel() {
     localStorage.setItem('adminMenuAtivo', aba);
   };
 
+  const resetPeriodPages = () => {
+    setRecursoPage(1);
+    setEventoPage(1);
+    setAlvaraPage(1);
+    setInfracaoPage(1);
+    setNoticiaPage(1);
+  };
+
+  const handlePeriodModeChange = (mode) => {
+    setPeriodMode(mode);
+    setPeriodValue('');
+    resetPeriodPages();
+  };
+
+  const handlePeriodValueChange = (value) => {
+    setPeriodValue(value);
+    resetPeriodPages();
+  };
+
+  const clearPeriodFilter = () => {
+    setPeriodMode('all');
+    setPeriodValue('');
+    resetPeriodPages();
+  };
+
+  const dateFilterControl = (
+    <AdminDateFilter
+      mode={periodMode}
+      value={periodValue}
+      onModeChange={handlePeriodModeChange}
+      onValueChange={handlePeriodValueChange}
+      onClear={clearPeriodFilter}
+    />
+  );
+
   const tiposRecurso = ['Todos', 'Defesa Prévia', 'Recurso JARI', 'Indicação de Real Infrator'];
 
   const normalizeString = (str) => {
@@ -124,16 +164,18 @@ function AdminPainel() {
   };
 
   const countRecursos = (tipo) => {
+    const recursosNoPeriodo = recursos.filter((rec) => matchesDateFilter(rec.criado_em, periodMode, periodValue));
     if (tipo === 'Todos') {
-      return recursos.length;
+      return recursosNoPeriodo.length;
     }
     const normalizedTipo = normalizeString(tipo);
-    return recursos.filter(
+    return recursosNoPeriodo.filter(
       (rec) => normalizeString(rec.tipo_recurso || 'Defesa Prévia') === normalizedTipo
     ).length;
   };
 
   const recursosFiltrados = recursos.filter((rec) => {
+    if (!matchesDateFilter(rec.criado_em, periodMode, periodValue)) return false;
     if (filtroTipo !== 'Todos' && normalizeString(rec.tipo_recurso || 'Defesa Prévia') !== normalizeString(filtroTipo)) {
       return false;
     }
@@ -158,6 +200,7 @@ function AdminPainel() {
   );
 
   const eventosFiltrados = eventos.filter((eve) => {
+    if (!matchesDateFilter(eve.criado_em, periodMode, periodValue)) return false;
     if (eventoStatus !== 'Todos' && eve.status !== eventoStatus) {
       return false;
     }
@@ -179,6 +222,7 @@ function AdminPainel() {
   );
 
   const alvarasFiltrados = alvaras.filter((alv) => {
+    if (!matchesDateFilter(alv.criado_em, periodMode, periodValue)) return false;
     if (alvaraStatus !== 'Todos' && alv.status !== alvaraStatus) {
       return false;
     }
@@ -212,6 +256,7 @@ function AdminPainel() {
   );
 
   const infracoesFiltradas = infracoes.filter((inf) => {
+    if (!matchesDateFilter(inf.data_hora_infracao, periodMode, periodValue)) return false;
     if (filtroInfracao) {
       const busca = normalizePlacaOuAit(filtroInfracao);
       const placaInf = normalizePlacaOuAit(inf.veiculo?.placa);
@@ -235,6 +280,7 @@ function AdminPainel() {
   );
 
   const noticiasFiltradas = noticias.filter((item) => {
+    if (!matchesDateFilter(item.criado_em, periodMode, periodValue)) return false;
     if (noticiaFiltroCategoria !== 'Todos' && item.categoria !== noticiaFiltroCategoria) {
       return false;
     }
@@ -705,6 +751,8 @@ function AdminPainel() {
               <p className="text-gray-500">Analise os anexos e julgue os recursos de multas enviados pelos cidadãos.</p>
             </header>
 
+            {dateFilterControl}
+
             {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
 
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
@@ -921,6 +969,8 @@ function AdminPainel() {
               <p className="text-gray-500">Analise os pedidos de interdição de via e emita a resposta técnica da SMTT.</p>
             </header>
 
+            {dateFilterControl}
+
             {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
 
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
@@ -1051,6 +1101,8 @@ function AdminPainel() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Solicitações de Alvarás e Permissionários</h1>
               <p className="text-gray-500">Analise os requerimentos de emissão/renovação de alvará e inclusão de permissionários.</p>
             </header>
+
+            {dateFilterControl}
 
             {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
 
@@ -1338,6 +1390,8 @@ function AdminPainel() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Infrações Lançadas</h1>
               <p className="text-gray-500">Visualize e filtre todas as autuações de trânsito registradas no município.</p>
             </header>
+
+            {dateFilterControl}
 
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
               
@@ -1636,6 +1690,8 @@ function AdminPainel() {
                 </button>
               )}
             </header>
+
+            {dateFilterControl}
 
             {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
 
