@@ -39,13 +39,13 @@ function AdminVeiculos() {
       <AdminSidebar activeItem="veiculos" />
 
       {/* ÁREA PRINCIPAL */}
-      <main className="flex-1 overflow-y-auto p-6 md:p-10">
-        <header className="mb-10">
+      <main className="admin-standard-page admin-vehicles-main flex-1 overflow-y-auto p-6 md:p-10">
+        <header className="admin-standard-header mb-10">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Detran Municipal</h1>
           <p className="text-gray-500">Alimente a frota municipal para permitir autuações mais precisas.</p>
         </header>
 
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8 max-w-lg relative overflow-hidden">
+        <div className="admin-standard-form-card bg-white rounded-2xl shadow-md border border-gray-100 p-8 max-w-lg relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
 
           {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}

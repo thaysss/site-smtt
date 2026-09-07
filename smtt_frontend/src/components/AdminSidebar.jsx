@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
+  { id: 'registros', label: 'Editar e excluir', icon: FilePenLine, isTab: true },
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, isTab: false },
   { id: 'recursos', label: 'Recursos', icon: FolderOpen, isTab: true },
   { id: 'eventos', label: 'Eventos', icon: CalendarDays, isTab: true },

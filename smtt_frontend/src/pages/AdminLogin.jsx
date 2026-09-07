@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { UserRound, LockKeyhole, Eye, EyeOff, ShieldCheck, UsersRound, LogIn, Globe2, Building2 } from 'lucide-react';
+import { UserRound, LockKeyhole, Eye, EyeOff, ShieldCheck, LogIn, Globe2, Building2 } from 'lucide-react';
 
 function AdminLogin() {
   const location = useLocation();
@@ -47,12 +47,8 @@ function AdminLogin() {
           <p className="admin-login-eyebrow">Superintendência Municipal</p>
           <h1>SMTT Propriá</h1>
           <span className="admin-login-accent" aria-hidden="true" />
-          <p className="admin-login-subtitle">Ambiente interno monitorado</p>
-          <div className="admin-login-benefits">
-            <div><span><ShieldCheck /></span><strong>Acesso seguro</strong><small>Seus dados protegidos</small></div>
-            <div><span><UsersRound /></span><strong>Uso exclusivo</strong><small>Servidores autorizados</small></div>
-            <div><span><LockKeyhole /></span><strong>Conexão segura</strong><small>Protegido por criptografia</small></div>
-          </div>
+          
+          
         </div>
       </section>
 

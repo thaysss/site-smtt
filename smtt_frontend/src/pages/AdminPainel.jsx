@@ -1,13 +1,19 @@
+import AdminCountBadge from '../components/AdminCountBadge';
 // src/pages/AdminPainel.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
   CheckCircle, XCircle, FileText, Paperclip, Upload,
-  Layers, Calendar
+  Calendar, Search, Clock3, SlidersHorizontal,
+  Home, ChevronRight, Filter, MapPin, RefreshCw, Download,
+  ArrowUpDown, ChevronDown, ChevronUp, ShieldAlert
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
+import AdminRegistrosSection from '../components/AdminRegistrosSection';
+import AdminRegistroActions from '../components/AdminRegistroActions';
 import AdminDateFilter from '../components/AdminDateFilter';
+import AdminAlvarasSection from '../components/AdminAlvarasSection';
 import { matchesDateFilter } from '../utils/dateFilters';
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
@@ -17,11 +23,12 @@ const montarUrlArquivo = (caminho) => {
   return `${apiBaseUrl}${caminho}`;
 };
 
-function AdminPainel() {
+function AdminPainel({ defaultTab }) {
   const [recursos, setRecursos] = useState([]);
   const [mensagem, setMensagem] = useState('');
   const [justificativaJari, setJustificativaJari] = useState('');
   const [recursoFoco, setRecursoFoco] = useState(null);
+  const [recursoSalvando, setRecursoSalvando] = useState(false);
   
   // Novo estado para guardar o arquivo de resposta do agente
   const [arquivoResposta, setArquivoResposta] = useState(null);
@@ -40,15 +47,10 @@ function AdminPainel() {
   const [eventoPage, setEventoPage] = useState(1);
   const eventoPerPage = 5;
 
-  const [alvaraBusca, setAlvaraBusca] = useState('');
-  const [alvaraStatus, setAlvaraStatus] = useState('Todos');
-  const [alvaraTipo, setAlvaraTipo] = useState('Todos');
-  const [alvaraPage, setAlvaraPage] = useState(1);
-  const alvaraPerPage = 5;
-
   const [infracaoGravidade, setInfracaoGravidade] = useState('Todos');
   const [infracaoFase, setInfracaoFase] = useState('Todos');
   const [infracaoPage, setInfracaoPage] = useState(1);
+  const [infracaoOrdenacao, setInfracaoOrdenacao] = useState({ campo: 'data_hora_infracao', direcao: 'desc' });
   const infracaoPerPage = 5;
 
   const [noticiaBusca, setNoticiaBusca] = useState('');
@@ -59,8 +61,8 @@ function AdminPainel() {
   const [periodMode, setPeriodMode] = useState('all');
   const [periodValue, setPeriodValue] = useState('');
 
-  // NOVOS ESTADOS PARA EVENTOS E INFRAÇÕES
-  const [menuAtivo, setMenuAtivo] = useState(() => localStorage.getItem('adminMenuAtivo') || 'recursos'); // 'recursos', 'eventos' ou 'infracoes'
+  // NOVOS ESTADOS PARA EVENTOS, INFRAÇÕES E ALVARÁS
+  const [menuAtivo, setMenuAtivo] = useState(() => defaultTab || localStorage.getItem('adminMenuAtivo') || 'recursos');
   const [eventos, setEventos] = useState([]);
   const [eventoFoco, setEventoFoco] = useState(null);
   const [justificativaEvento, setJustificativaEvento] = useState('');
@@ -68,9 +70,6 @@ function AdminPainel() {
   const [filtroInfracao, setFiltroInfracao] = useState('');
   const [infracaoAberta, setInfracaoAberta] = useState(null);
   const [alvaras, setAlvaras] = useState([]);
-  const [justificativaAlvara, setJustificativaAlvara] = useState('');
-  const [alvaraFoco, setAlvaraFoco] = useState(null);
-  const [alvaraArquivoEmitido, setAlvaraArquivoEmitido] = useState(null);
 
   // ESTADOS DO SISTEMA DE NOTÍCIAS
   const [noticias, setNoticias] = useState([]);
@@ -80,7 +79,10 @@ function AdminPainel() {
   const [conteudoNews, setConteudoNews] = useState('');
   const [categoriaNews, setCategoriaNews] = useState('Geral');
   const [imagemNews, setImagemNews] = useState(null);
+  const [imagemPreviewNews, setImagemPreviewNews] = useState('');
+  const [previewNoticiaAberta, setPreviewNoticiaAberta] = useState(false);
   const [modoEdicaoNews, setModoEdicaoNews] = useState(false);
+  const conteudoNewsRef = useRef(null);
   const [exibindoFormNews, setExibindoFormNews] = useState(false);
 
   // ESTADOS DO SISTEMA DE ESTATÍSTICAS
@@ -119,7 +121,6 @@ function AdminPainel() {
   const resetPeriodPages = () => {
     setRecursoPage(1);
     setEventoPage(1);
-    setAlvaraPage(1);
     setInfracaoPage(1);
     setNoticiaPage(1);
   };
@@ -199,6 +200,22 @@ function AdminPainel() {
     recursoPage * recursoPerPage
   );
 
+  const recursosNoPeriodo = recursos.filter((rec) => matchesDateFilter(rec.criado_em, periodMode, periodValue));
+  const recursoStats = {
+    total: recursosNoPeriodo.length,
+    analise: recursosNoPeriodo.filter((rec) => rec.resultado_julgamento === 'Em Análise').length,
+    deferidos: recursosNoPeriodo.filter((rec) => rec.resultado_julgamento === 'Deferido').length,
+    indeferidos: recursosNoPeriodo.filter((rec) => rec.resultado_julgamento === 'Indeferido').length,
+  };
+
+  const limparFiltrosRecursos = () => {
+    setFiltroTipo('Todos');
+    setRecursoBusca('');
+    setRecursoStatus('Todos');
+    clearPeriodFilter();
+    setRecursoPage(1);
+  };
+
   const eventosFiltrados = eventos.filter((eve) => {
     if (!matchesDateFilter(eve.criado_em, periodMode, periodValue)) return false;
     if (eventoStatus !== 'Todos' && eve.status !== eventoStatus) {
@@ -221,63 +238,95 @@ function AdminPainel() {
     eventoPage * eventoPerPage
   );
 
-  const alvarasFiltrados = alvaras.filter((alv) => {
-    if (!matchesDateFilter(alv.criado_em, periodMode, periodValue)) return false;
-    if (alvaraStatus !== 'Todos' && alv.status !== alvaraStatus) {
-      return false;
-    }
-    if (alvaraTipo !== 'Todos' && alv.tipo_servico !== alvaraTipo) {
-      return false;
-    }
-    if (alvaraBusca.trim() !== '') {
-      const query = normalizeString(alvaraBusca);
-      const protocolo = normalizeString(alv.numero_protocolo || '');
-      const solicitante = normalizeString(alv.nome_solicitante || '');
-      
-      const cpf = alv.cpf ? alv.cpf.replace(/\D/g, '') : '';
-      const queryCpf = alvaraBusca.replace(/\D/g, '');
-      const placa = alv.placa_veiculo ? normalizePlacaOuAit(alv.placa_veiculo) : '';
-      const queryPlaca = normalizePlacaOuAit(alvaraBusca);
+  const totalEventos = eventos.length;
+  const eventosAguardando = eventos.filter((eve) => ['Pendente', 'Recebido', 'Aguardando Análise'].includes(eve.status)).length;
+  const eventosEmAnalise = eventos.filter((eve) => eve.status === 'Em Análise').length;
 
-      const matchesProtocoloOrSolicitante = protocolo.includes(query) || solicitante.includes(query);
-      const matchesCpf = queryCpf !== '' && cpf.includes(queryCpf);
-      const matchesPlaca = queryPlaca !== '' && placa.includes(queryPlaca);
+  const infracaoCancelada = (inf) => {
+    const fase = normalizeString(inf.fase_atual || '');
+    return fase.includes('deferida') || fase.includes('cancelada') || fase.includes('anulada');
+  };
 
-      if (!matchesProtocoloOrSolicitante && !matchesCpf && !matchesPlaca) {
-        return false;
+  const parseInfracaoDate = (value) => {
+    const match = String(value || '').match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+    if (!match) return 0;
+    return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]), Number(match[4] || 0), Number(match[5] || 0)).getTime();
+  };
+
+  const infracoesFiltradas = infracoes
+    .filter((inf) => {
+      if (!matchesDateFilter(inf.data_hora_infracao, periodMode, periodValue)) return false;
+      if (filtroInfracao) {
+        const busca = normalizePlacaOuAit(filtroInfracao);
+        const placaInf = normalizePlacaOuAit(inf.veiculo?.placa);
+        const aitInf = normalizePlacaOuAit(inf.numero_ait);
+        const modeloInf = normalizePlacaOuAit(inf.veiculo?.marca_modelo);
+        if (!placaInf.includes(busca) && !aitInf.includes(busca) && !modeloInf.includes(busca)) return false;
       }
-    }
-    return true;
-  });
-
-  const alvarasPaginados = alvarasFiltrados.slice(
-    (alvaraPage - 1) * alvaraPerPage,
-    alvaraPage * alvaraPerPage
-  );
-
-  const infracoesFiltradas = infracoes.filter((inf) => {
-    if (!matchesDateFilter(inf.data_hora_infracao, periodMode, periodValue)) return false;
-    if (filtroInfracao) {
-      const busca = normalizePlacaOuAit(filtroInfracao);
-      const placaInf = normalizePlacaOuAit(inf.veiculo?.placa);
-      const aitInf = normalizePlacaOuAit(inf.numero_ait);
-      if (!placaInf.includes(busca) && !aitInf.includes(busca)) {
-        return false;
+      if (infracaoGravidade !== 'Todos' && inf.tipo_infracao?.gravidade !== infracaoGravidade) return false;
+      if (infracaoFase === 'Ativas' && infracaoCancelada(inf)) return false;
+      if (infracaoFase === 'Canceladas' && !infracaoCancelada(inf)) return false;
+      return true;
+    })
+    .sort((first, second) => {
+      let firstValue;
+      let secondValue;
+      if (infracaoOrdenacao.campo === 'data_hora_infracao') {
+        firstValue = parseInfracaoDate(first.data_hora_infracao);
+        secondValue = parseInfracaoDate(second.data_hora_infracao);
+      } else if (infracaoOrdenacao.campo === 'gravidade') {
+        const peso = { 'Leve': 1, 'Média': 2, 'Grave': 3, 'Gravíssima': 4 };
+        firstValue = peso[first.tipo_infracao?.gravidade] || 0;
+        secondValue = peso[second.tipo_infracao?.gravidade] || 0;
+      } else {
+        firstValue = Number(first.valor_final || 0);
+        secondValue = Number(second.valor_final || 0);
       }
-    }
-    if (infracaoGravidade !== 'Todos' && inf.tipo_infracao?.gravidade !== infracaoGravidade) {
-      return false;
-    }
-    if (infracaoFase !== 'Todos' && (inf.fase_atual || 'Autuação') !== infracaoFase) {
-      return false;
-    }
-    return true;
-  });
+      return infracaoOrdenacao.direcao === 'asc' ? firstValue - secondValue : secondValue - firstValue;
+    });
 
   const infracoesPaginadas = infracoesFiltradas.slice(
     (infracaoPage - 1) * infracaoPerPage,
     infracaoPage * infracaoPerPage
   );
+
+  const infracaoStats = {
+    total: infracoes.length,
+    ativas: infracoes.filter((item) => !infracaoCancelada(item)).length,
+    canceladas: infracoes.filter(infracaoCancelada).length,
+    pontos: infracoes.reduce((total, item) => total + (infracaoCancelada(item) ? 0 : Number(item.tipo_infracao?.pontos || 0)), 0),
+  };
+
+  const ordenarInfracoes = (campo) => {
+    setInfracaoOrdenacao((atual) => ({
+      campo,
+      direcao: atual.campo === campo && atual.direcao === 'desc' ? 'asc' : 'desc',
+    }));
+    setInfracaoPage(1);
+  };
+
+  const exportarInfracoes = () => {
+    const cabecalho = ['AIT', 'Placa', 'Data', 'Local', 'Fase', 'Gravidade', 'Pontos', 'Valor'];
+    const linhas = infracoesFiltradas.map((item) => [
+      item.numero_ait,
+      item.veiculo?.placa || '',
+      item.data_hora_infracao || '',
+      item.local_cometimento || '',
+      item.fase_atual || 'Autuação',
+      item.tipo_infracao?.gravidade || '',
+      item.tipo_infracao?.pontos || 0,
+      Number(item.valor_final || 0).toFixed(2),
+    ]);
+    const escapar = (valor) => '"' + String(valor ?? '').replace(/"/g, '""') + '"';
+    const csv = [cabecalho, ...linhas].map((linha) => linha.map(escapar).join(';')).join('\n');
+    const arquivo = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'infracoes-smtt.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const noticiasFiltradas = noticias.filter((item) => {
     if (!matchesDateFilter(item.criado_em, periodMode, periodValue)) return false;
@@ -390,7 +439,7 @@ function AdminPainel() {
     carregarInfracoes();
     carregarNoticias();
     carregarEstatisticas();
-  }, [navigate]);
+  }, [navigate, menuAtivo]);
 
   async function carregarRecursos() {
     try {
@@ -585,29 +634,46 @@ function AdminPainel() {
     }
   };
 
+  const abrirRecurso = (recurso) => {
+    const finalizado = recurso.resultado_julgamento !== 'Em Análise';
+    setRecursoFoco(recurso.id);
+    setJustificativaJari(finalizado ? (recurso.justificativa_julgamento || '') : '');
+    setArquivoResposta(null);
+  };
+
+  const fecharRecurso = () => {
+    if (recursoSalvando) return;
+    setRecursoFoco(null);
+    setJustificativaJari('');
+    setArquivoResposta(null);
+  };
+
   const julgarRecurso = async (id, decisao) => {
-    if (!justificativaJari) {
+    if (!justificativaJari.trim()) {
       alert("Digite o parecer técnico antes de julgar.");
       return;
     }
     
+    setRecursoSalvando(true);
     try {
       const formData = new FormData();
       formData.append('decisao', decisao);
-      formData.append('justificativa_jari', justificativaJari);
+      formData.append('justificativa_jari', justificativaJari.trim());
       if (arquivoResposta) {
         formData.append('arquivo_resposta', arquivoResposta);
       }
 
       await api.put(`/admin/recursos/${id}/julgar`, formData);
-      
-      setMensagem(`Recurso ${decisao} com sucesso! O cidadão já pode ver a resposta.`);
+      setMensagem(`Recurso ${decisao.toLowerCase()} com sucesso. O parecer já está disponível ao cidadão.`);
       setJustificativaJari('');
-      setArquivoResposta(null); // Limpa o arquivo selecionado
+      setArquivoResposta(null);
       setRecursoFoco(null);
-      carregarRecursos();
-    } catch {
-      alert("Erro ao julgar recurso.");
+      await carregarRecursos();
+    } catch (error) {
+      console.error('Erro ao julgar recurso', error);
+      alert(error.response?.data?.erro || "Erro ao julgar recurso.");
+    } finally {
+      setRecursoSalvando(false);
     }
   };
 
@@ -632,61 +698,100 @@ function AdminPainel() {
     }
   };
 
-  const julgarAlvara = async (id, decisao) => {
-    if (!justificativaAlvara) {
-      alert("Digite o parecer técnico antes de decidir.");
-      return;
-    }
-
-    if (decisao === 'Aprovado' && !alvaraArquivoEmitido) {
-      alert("Por favor, anexe o documento do Alvará Emitido antes de aprovar.");
-      return;
-    }
-    
-    try {
-      const formData = new FormData();
-      formData.append('decisao', decisao);
-      formData.append('justificativa_jari', justificativaAlvara);
-      if (alvaraArquivoEmitido) {
-        formData.append('arquivo_alvara', alvaraArquivoEmitido);
-      }
-
-      await api.put(`/admin/alvaras/${id}/julgar`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      
-      setMensagem(`Solicitação de alvará/permissionário ${decisao === 'Aprovado' ? 'aprovada' : 'negada'} com sucesso!`);
-      setJustificativaAlvara('');
-      setAlvaraArquivoEmitido(null);
-      setAlvaraFoco(null);
-      carregarAlvaras();
-    } catch {
-      alert("Erro ao julgar solicitação de alvará.");
+  const liberarPreviewImagemNews = () => {
+    if (imagemPreviewNews.startsWith('blob:')) {
+      URL.revokeObjectURL(imagemPreviewNews);
     }
   };
 
   const limparFormNoticia = () => {
+    liberarPreviewImagemNews();
     setNoticiaFoco(null);
     setTituloNews('');
     setSubtituloNews('');
     setConteudoNews('');
     setCategoriaNews('Geral');
     setImagemNews(null);
+    setImagemPreviewNews('');
+    setPreviewNoticiaAberta(false);
     setModoEdicaoNews(false);
     setExibindoFormNews(false);
   };
 
+  const prepararNovaNoticia = () => {
+    liberarPreviewImagemNews();
+    let rascunho = null;
+    try {
+      rascunho = JSON.parse(localStorage.getItem('smtt-noticia-rascunho') || 'null');
+    } catch {
+      localStorage.removeItem('smtt-noticia-rascunho');
+    }
+
+    setNoticiaFoco(null);
+    setTituloNews(rascunho?.titulo || '');
+    setSubtituloNews(rascunho?.subtitulo || '');
+    setConteudoNews(rascunho?.conteudo || '');
+    setCategoriaNews(rascunho?.categoria || 'Geral');
+    setImagemNews(null);
+    setImagemPreviewNews('');
+    setModoEdicaoNews(false);
+    setExibindoFormNews(true);
+    if (rascunho) setMensagem('Rascunho local recuperado.');
+  };
+
   const prepararEdicaoNoticia = (n) => {
+    liberarPreviewImagemNews();
     setNoticiaFoco(n);
     setTituloNews(n.titulo);
     setSubtituloNews(n.subtitulo || '');
     setConteudoNews(n.conteudo);
     setCategoriaNews(n.categoria || 'Geral');
     setImagemNews(null);
+    setImagemPreviewNews(n.imagem_url ? montarUrlArquivo(n.imagem_url) : '');
     setModoEdicaoNews(true);
     setExibindoFormNews(true);
+  };
+
+  const selecionarImagemNews = (e) => {
+    const arquivo = e.target.files?.[0] || null;
+    if (arquivo && !['image/png', 'image/jpeg', 'image/webp'].includes(arquivo.type)) {
+      alert('Selecione uma imagem PNG, JPG ou WebP.');
+      e.target.value = '';
+      return;
+    }
+    if (arquivo && arquivo.size > 5 * 1024 * 1024) {
+      alert('A imagem deve ter no máximo 5 MB.');
+      e.target.value = '';
+      return;
+    }
+    liberarPreviewImagemNews();
+    setImagemNews(arquivo);
+    setImagemPreviewNews(arquivo ? URL.createObjectURL(arquivo) : '');
+  };
+
+  const salvarRascunhoNoticia = () => {
+    localStorage.setItem('smtt-noticia-rascunho', JSON.stringify({
+      titulo: tituloNews,
+      subtitulo: subtituloNews,
+      conteudo: conteudoNews,
+      categoria: categoriaNews
+    }));
+    setMensagem('Rascunho salvo neste dispositivo. A imagem deverá ser selecionada novamente.');
+  };
+
+  const aplicarFormatoNoticia = (inicio, fim = inicio, textoPadrao = '') => {
+    const editor = conteudoNewsRef.current;
+    if (!editor) return;
+    const selecaoInicio = editor.selectionStart;
+    const selecaoFim = editor.selectionEnd;
+    const selecionado = conteudoNews.slice(selecaoInicio, selecaoFim) || textoPadrao;
+    const novoConteudo = `${conteudoNews.slice(0, selecaoInicio)}${inicio}${selecionado}${fim}${conteudoNews.slice(selecaoFim)}`;
+    setConteudoNews(novoConteudo);
+    requestAnimationFrame(() => {
+      editor.focus();
+      const cursor = selecaoInicio + inicio.length + selecionado.length + fim.length;
+      editor.setSelectionRange(cursor, cursor);
+    });
   };
 
   const salvarNoticia = async (e) => {
@@ -714,6 +819,7 @@ function AdminPainel() {
         setMensagem("Notícia publicada com sucesso!");
       }
 
+      localStorage.removeItem('smtt-noticia-rascunho');
       limparFormNoticia();
       carregarNoticias();
     } catch (error) {
@@ -743,987 +849,744 @@ function AdminPainel() {
       <AdminSidebar activeItem={menuAtivo} onTabChange={handleMenuClick} />
 
       {/* ÁREA PRINCIPAL */}
-      <main className="flex-1 overflow-y-auto p-6 md:p-10">
-        {menuAtivo === 'recursos' ? (
-          <>
-            <header className="mb-10">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Julgamento de Recursos</h1>
-              <p className="text-gray-500">Analise os anexos e julgue os recursos de multas enviados pelos cidadãos.</p>
+      <main className="admin-panel-main flex-1 overflow-y-auto p-6 md:p-10">
+        {menuAtivo === 'registros' ? (<AdminRegistrosSection />) : menuAtivo === 'recursos' ? (
+          <div className="recursos-admin">
+            <nav className="recursos-breadcrumb" aria-label="Navegação estrutural">
+              <Home size={14} /><ChevronRight size={13} /><strong>Julgamento de Recursos</strong>
+            </nav>
+
+            <header className="recursos-page-header">
+              <div>
+                <h1>Julgamento de Recursos</h1>
+                <p>Analise os documentos e registre decisões fundamentadas para os recursos de multas.</p>
+              </div>
             </header>
 
-            {dateFilterControl}
+            {mensagem && (
+              <div className="recursos-feedback" role="status">
+                <CheckCircle size={20} />
+                <span>{mensagem}</span>
+                <button type="button" aria-label="Fechar mensagem" onClick={() => setMensagem('')}><XCircle size={18} /></button>
+              </div>
+            )}
 
-            {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
+            <section className="admin-count-grid" aria-label="Resumo dos recursos">
+              <AdminCountBadge icon={FileText} label="Total no período" value={recursoStats.total} tone="blue" />
+              <AdminCountBadge icon={Clock3} label="Aguardando análise" value={recursoStats.analise} tone="amber" />
+              <AdminCountBadge icon={CheckCircle} label="Deferidos" value={recursoStats.deferidos} tone="green" />
+              <AdminCountBadge icon={XCircle} label="Indeferidos" value={recursoStats.indeferidos} tone="red" />
+            </section>
 
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-              
-              {/* ABAS DE CATEGORIA */}
-              <div className="flex border-b border-gray-100 pb-4 mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 gap-2">
-                {tiposRecurso.map((tipo) => {
-                  const ativo = filtroTipo === tipo;
-                  const fontPeso = ativo ? 'font-bold' : 'font-semibold';
-                  const total = countRecursos(tipo);
-                  return (
-                    <button
-                      key={tipo}
-                      onClick={() => setFiltroTipo(tipo)}
-                      className={`flex items-center gap-2.5 px-4 py-2.5 text-sm rounded-xl transition-all duration-200 shrink-0 ${fontPeso} ${
-                        ativo 
-                          ? 'bg-blue-50 text-primary-600 border border-blue-100 shadow-sm' 
-                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/70 border border-transparent'
-                      }`}
-                    >
-                      <Layers className={`w-4 h-4 transition-transform duration-200 ${ativo ? 'text-primary-600 scale-110' : 'text-gray-400'}`} />
-                      <span>{tipo}</span>
-                      {total > 0 ? (
-                        <span className={`flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full text-[10px] font-extrabold shadow-sm ${
-                          ativo 
-                            ? 'bg-primary-600 text-white' 
-                            : 'bg-gray-200 text-gray-700'
-                        }`}>
-                          {total}
-                        </span>
-                      ) : (
-                        <span className="flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 text-[10px] font-bold">
-                          0
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+            <section className="recursos-filter-card" aria-label="Filtros de recursos">
+              <div className="recursos-type-tabs" role="tablist" aria-label="Tipos de recurso">
+                {tiposRecurso.map((tipo) => (
+                  <button
+                    key={tipo}
+                    type="button"
+                    role="tab"
+                    aria-selected={filtroTipo === tipo}
+                    className={filtroTipo === tipo ? 'is-active' : ''}
+                    onClick={() => { setFiltroTipo(tipo); setRecursoPage(1); }}
+                  >
+                    {tipo}<span>{countRecursos(tipo)}</span>
+                  </button>
+                ))}
               </div>
 
-              {/* FILTROS E BUSCA */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Processo</label>
-                  <div className="relative">
-                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input
-                      type="text"
-                      placeholder="Buscar por Protocolo, número do AIT ou Placa..."
-                      value={recursoBusca}
-                      onChange={(e) => {
-                        setRecursoBusca(e.target.value);
-                        setRecursoPage(1);
-                      }}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Resultado / Status</label>
-                  <select
-                    value={recursoStatus}
-                    onChange={(e) => {
-                      setRecursoStatus(e.target.value);
-                      setRecursoPage(1);
-                    }}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
-                  >
-                    <option value="Todos">Todos os Status</option>
-                    <option value="Em Análise">Em Análise</option>
+              <div className="recursos-filter-grid">
+                <label className="recursos-field is-search">
+                  <span>Buscar processo</span>
+                  <div><Search size={17} /><input type="text" placeholder="Protocolo, número do AIT ou placa" value={recursoBusca} onChange={(e) => { setRecursoBusca(e.target.value); setRecursoPage(1); }} /></div>
+                </label>
+                <label className="recursos-field">
+                  <span>Status</span>
+                  <select value={recursoStatus} onChange={(e) => { setRecursoStatus(e.target.value); setRecursoPage(1); }}>
+                    <option value="Todos">Todos os status</option>
+                    <option value="Em Análise">Aguardando análise</option>
                     <option value="Deferido">Deferido</option>
                     <option value="Indeferido">Indeferido</option>
                   </select>
-                </div>
+                </label>
+                <label className="recursos-field">
+                  <span>Período</span>
+                  <select value={periodMode} onChange={(e) => handlePeriodModeChange(e.target.value)}>
+                    <option value="all">Todos os períodos</option>
+                    <option value="day">Dia específico</option>
+                    <option value="month">Mês</option>
+                    <option value="year">Ano</option>
+                  </select>
+                </label>
+                {periodMode !== 'all' && (
+                  <label className="recursos-field is-period-value">
+                    <span>{periodMode === 'day' ? 'Data' : periodMode === 'month' ? 'Mês' : 'Ano'}</span>
+                    <input type={periodMode === 'day' ? 'date' : periodMode === 'month' ? 'month' : 'number'} min={periodMode === 'year' ? '2000' : undefined} max={periodMode === 'year' ? '2100' : undefined} value={periodValue} onChange={(e) => handlePeriodValueChange(e.target.value)} />
+                  </label>
+                )}
+                <button type="button" className="recursos-clear-button" onClick={limparFiltrosRecursos}><SlidersHorizontal size={17} /> Limpar filtros</button>
               </div>
+            </section>
+
+            <section className="recursos-results-card">
+              <header>
+                <div><h2>Recursos</h2><span>{recursosFiltrados.length} {recursosFiltrados.length === 1 ? 'resultado' : 'resultados'}</span></div>
+                <small>Selecione um processo para consultar os documentos e registrar o parecer.</small>
+              </header>
 
               {recursosFiltrados.length === 0 ? (
-                <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
-                  <FileText className="w-12 h-12 mb-3 text-gray-300 stroke-[1.5]" />
-                  <p className="font-bold text-base text-gray-600 mb-1">Nenhum processo localizado</p>
-                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos que correspondam aos filtros aplicados.</p>
+                <div className="recursos-empty-state">
+                  <span><FileText size={42} /><Search size={18} /></span>
+                  <h3>Nenhum processo localizado</h3>
+                  <p>Não há recursos que correspondam aos filtros selecionados.</p>
+                  <button type="button" onClick={limparFiltrosRecursos}><SlidersHorizontal size={17} /> Limpar filtros</button>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {recursosPaginados.map((rec) => (
-                    <div key={rec.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
-                      
-                      <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
-                        <div>
-                          <div className="flex items-center gap-2.5 flex-wrap">
-                            <h3 className="font-bold text-lg text-primary-900">Protocolo: <span className="text-primary-600">{rec.protocolo?.numero_protocolo}</span></h3>
-                            <span className="text-[10px] bg-blue-50 text-primary-600 border border-blue-100 font-extrabold px-2.5 py-0.5 rounded-lg uppercase tracking-wide">
-                              {rec.tipo_recurso || 'Defesa Prévia'}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">AIT: <strong>{rec.infracao?.numero_ait}</strong> | Placa: <strong>{rec.infracao?.placa_veiculo}</strong></p>
-                        </div>
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                          rec.resultado_julgamento === 'Deferido'
-                            ? 'bg-green-100 text-green-800 border-green-200'
-                            : rec.resultado_julgamento === 'Indeferido'
-                            ? 'bg-red-100 text-red-800 border-red-200'
-                            : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                        }`}>
-                          {rec.resultado_julgamento}
-                        </span>
-                      </div>
+                <>
+                  <div className="recursos-table-scroll">
+                    <table className="recursos-table">
+                      <thead>
+                        <tr>
+                          <th>Protocolo</th>
+                          <th>Tipo</th>
+                          <th>AIT / Placa</th>
+                          <th>Documentos</th>
+                          <th>Recebido em</th>
+                          <th>Status</th>
+                          <th>Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recursosPaginados.map((rec) => {
+                          const finalizado = rec.resultado_julgamento !== 'Em Análise';
+                          const documentos = (rec.arquivo_recurso_cidadao ? 1 : 0) + (rec.anexos?.length || 0);
+                          const tipoClass = normalizeString(rec.tipo_recurso || '').includes('jari') ? 'is-jari' : normalizeString(rec.tipo_recurso || '').includes('infrator') ? 'is-driver' : 'is-defense';
+                          return (
+                            <tr key={rec.id}>
+                              <td className="recursos-protocol">{rec.protocolo?.numero_protocolo || `REC-${rec.id}`}</td>
+                              <td><span className={`recursos-type ${tipoClass}`}>{rec.tipo_recurso || 'Defesa Prévia'}</span></td>
+                              <td><strong>{rec.infracao?.numero_ait || 'N/A'}</strong><small>{rec.infracao?.placa_veiculo || 'N/A'}</small></td>
+                              <td><span className="recursos-doc-count"><Paperclip size={15} /> {documentos} {documentos === 1 ? 'arquivo' : 'arquivos'}</span></td>
+                              <td>{rec.criado_em?.split(' ')[0] || 'Não informado'}</td>
+                              <td><span className={`recursos-status ${rec.resultado_julgamento === 'Deferido' ? 'is-approved' : rec.resultado_julgamento === 'Indeferido' ? 'is-denied' : 'is-review'}`}>{rec.resultado_julgamento === 'Em Análise' ? 'Aguardando análise' : rec.resultado_julgamento}</span></td>
+                              <td><button type="button" className="recursos-table-action" onClick={() => abrirRecurso(rec)}>{finalizado ? 'Visualizar' : 'Analisar'}</button><AdminRegistroActions category="recursos" id={rec.id} onSaved={carregarRecursos} /></td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="recursos-table-footer">
+                    <span>Mostrando {(recursoPage - 1) * recursoPerPage + 1}–{Math.min(recursoPage * recursoPerPage, recursosFiltrados.length)} de {recursosFiltrados.length} recursos</span>
+                    {renderPagination(recursoPage, recursosFiltrados.length, recursoPerPage, setRecursoPage)}
+                  </div>
+                </>
+              )}
+            </section>
 
-                      <div className="bg-white p-5 rounded-xl border border-gray-200 mb-4 space-y-3">
-                        <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-1">Documentos Anexados pelo Cidadão</p>
-                        
-                        <div className="flex flex-col gap-2.5">
-                          {rec.arquivo_recurso_cidadao ? (
-                            <a 
-                              href={montarUrlArquivo(rec.arquivo_recurso_cidadao)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-between p-3 rounded-xl border text-primary-600 bg-blue-50/40 hover:bg-blue-50 border-blue-200 transition-all text-sm font-bold shadow-sm"
-                            >
-                              <span className="flex items-center gap-2.5">
-                                <FileText className="w-4 h-4 text-primary-600" />
-                                Formulário Principal do Recurso
-                              </span>
-                              <span className="text-[10px] bg-primary-600 text-white px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Principal</span>
+            {recursoFoco && (() => {
+              const recursoSelecionado = recursos.find((item) => item.id === recursoFoco);
+              if (!recursoSelecionado) return null;
+              const finalizado = recursoSelecionado.resultado_julgamento !== 'Em Análise';
+              const documentos = (recursoSelecionado.arquivo_recurso_cidadao ? 1 : 0) + (recursoSelecionado.anexos?.length || 0);
+              return (
+                <div className="recurso-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) fecharRecurso(); }}>
+                  <section className="recurso-modal" role="dialog" aria-modal="true" aria-labelledby="recurso-modal-title">
+                    <header className="recurso-modal-header">
+                      <div>
+                        <span>Processo administrativo</span>
+                        <h2 id="recurso-modal-title">{recursoSelecionado.protocolo?.numero_protocolo || `Recurso ${recursoSelecionado.id}`}</h2>
+                      </div>
+                      <div className="recurso-modal-header-actions">
+                        <span className={`recursos-status ${recursoSelecionado.resultado_julgamento === 'Deferido' ? 'is-approved' : recursoSelecionado.resultado_julgamento === 'Indeferido' ? 'is-denied' : 'is-review'}`}>{recursoSelecionado.resultado_julgamento === 'Em Análise' ? 'Aguardando análise' : recursoSelecionado.resultado_julgamento}</span>
+                        <button type="button" onClick={fecharRecurso} aria-label="Fechar detalhes"><XCircle size={22} /></button>
+                      </div>
+                    </header>
+
+                    <div className="recurso-modal-body">
+                      <section className="recurso-overview">
+                        <div><span>Tipo de recurso</span><strong>{recursoSelecionado.tipo_recurso || 'Defesa Prévia'}</strong></div>
+                        <div><span>Número do AIT</span><strong>{recursoSelecionado.infracao?.numero_ait || 'N/A'}</strong></div>
+                        <div><span>Placa do veículo</span><strong>{recursoSelecionado.infracao?.placa_veiculo || 'N/A'}</strong></div>
+                        <div><span>Recebido em</span><strong>{recursoSelecionado.criado_em || 'Não informado'}</strong></div>
+                      </section>
+
+                      <section className="recurso-modal-section">
+                        <div className="recurso-section-heading">
+                          <div><Paperclip size={18} /><h3>Documentos do processo</h3></div>
+                          <span>{documentos} {documentos === 1 ? 'arquivo' : 'arquivos'}</span>
+                        </div>
+                        <div className="recurso-documents-grid">
+                          {recursoSelecionado.arquivo_recurso_cidadao ? (
+                            <a className="recurso-document is-primary" href={montarUrlArquivo(recursoSelecionado.arquivo_recurso_cidadao)} target="_blank" rel="noopener noreferrer">
+                              <span><FileText size={19} /></span><div><strong>Formulário principal do recurso</strong><small>Documento enviado pelo cidadão</small></div><i className="fa-solid fa-arrow-up-right-from-square" />
                             </a>
                           ) : (
-                            <div className="p-3 bg-gray-50 border border-gray-200 text-gray-400 rounded-xl text-sm font-medium italic flex items-center gap-2">
-                              <XCircle className="w-4 h-4 text-red-400" /> Nenhum formulário principal anexado
-                            </div>
+                            <div className="recurso-document is-missing"><span><XCircle size={19} /></span><div><strong>Formulário principal indisponível</strong><small>Nenhum arquivo foi anexado</small></div></div>
                           )}
-                          
-                          {rec.anexos && rec.anexos.length > 0 && (
-                            <div className="mt-1 space-y-2">
-                              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Documentos Adicionais ({rec.anexos.length})</p>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {rec.anexos.map((anexo, idx) => (
-                                  <a 
-                                    key={idx}
-                                    href={montarUrlArquivo(anexo.caminho_arquivo)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-between p-3 rounded-xl border text-gray-700 bg-gray-50/50 hover:bg-gray-50 border-gray-200 hover:border-gray-300 transition-all text-xs font-semibold shadow-sm truncate"
-                                  >
-                                    <span className="flex items-center gap-2 text-gray-700 truncate max-w-[200px]">
-                                      <Paperclip className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                      {anexo.nome_original || `Documento Anexo ${idx + 1}`}
-                                    </span>
-                                    <span className="text-[10px] text-primary-600 font-bold hover:underline shrink-0">Visualizar</span>
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          {recursoSelecionado.anexos?.map((anexo, idx) => (
+                            <a key={`${anexo.caminho_arquivo}-${idx}`} className="recurso-document" href={montarUrlArquivo(anexo.caminho_arquivo)} target="_blank" rel="noopener noreferrer">
+                              <span><Paperclip size={18} /></span><div><strong>{anexo.nome_original || `Documento adicional ${idx + 1}`}</strong><small>Anexo complementar</small></div><i className="fa-solid fa-arrow-up-right-from-square" />
+                            </a>
+                          ))}
                         </div>
-                      </div>
+                      </section>
 
-                      {rec.resultado_julgamento === 'Em Análise' && (
-                        <div className="border-t border-gray-200 pt-5 mt-4">
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Parecer Técnico da JARI *</label>
-                          <textarea 
-                            rows="3" 
-                            placeholder="Digite o embasamento legal para a decisão..."
-                            value={recursoFoco === rec.id ? justificativaJari : ''}
-                            onChange={(e) => { setJustificativaJari(e.target.value); setRecursoFoco(rec.id); }}
-                            className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all mb-4 resize-none text-sm"
-                          />
+                      {finalizado ? (
+                        <section className="recurso-decision-readonly">
+                          <div className="recurso-section-heading"><div><CheckCircle size={18} /><h3>Decisão registrada</h3></div><span>{recursoSelecionado.data_julgamento || 'Data não informada'}</span></div>
+                          <blockquote>{recursoSelecionado.justificativa_julgamento || 'Nenhum parecer técnico foi registrado.'}</blockquote>
+                          {recursoSelecionado.anexo_resposta_jari && (
+                            <a href={montarUrlArquivo(recursoSelecionado.anexo_resposta_jari)} target="_blank" rel="noopener noreferrer"><FileText size={17} /> Visualizar ofício de resposta <i className="fa-solid fa-arrow-up-right-from-square" /></a>
+                          )}
+                        </section>
+                      ) : (
+                        <section className="recurso-decision-form">
+                          <div className="recurso-section-heading"><div><ShieldAlert size={18} /><h3>Parecer e decisão</h3></div><span>Obrigatório</span></div>
+                          <label htmlFor="recurso-parecer">Parecer técnico fundamentado</label>
+                          <textarea id="recurso-parecer" rows="6" placeholder="Descreva a análise dos documentos, a fundamentação legal e a conclusão..." value={justificativaJari} onChange={(e) => setJustificativaJari(e.target.value)} />
+                          <div className="recurso-parecer-meta"><span>{justificativaJari.length} caracteres</span><small>O cidadão terá acesso integral a este parecer após a decisão.</small></div>
 
-                          <div className="mb-5">
-                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-2">
-                              <Upload className="w-4 h-4 text-gray-500" /> Anexar Ofício de Resposta (Opcional)
-                            </label>
-                            <input 
-                              type="file" 
-                              onChange={(e) => setArquivoResposta(e.target.files[0])}
-                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 border border-gray-200 rounded-xl p-2 bg-white transition-all cursor-pointer"
-                            />
+                          <label htmlFor="recurso-oficio"><Upload size={16} /> Ofício de resposta <small>(opcional)</small></label>
+                          <div className="recurso-upload-row">
+                            <input id="recurso-oficio" type="file" accept=".pdf,.doc,.docx,image/*" onChange={(e) => setArquivoResposta(e.target.files?.[0] || null)} />
+                            {arquivoResposta && <span><CheckCircle size={15} /> {arquivoResposta.name}</span>}
                           </div>
 
-                          <div className="flex gap-3">
-                            <button onClick={() => julgarRecurso(rec.id, 'Deferido')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
-                              <CheckCircle className="w-5 h-5" /> Deferir (Aceitar Defesa)
-                            </button>
-                            <button onClick={() => julgarRecurso(rec.id, 'Indeferido')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
-                              <XCircle className="w-5 h-5" /> Indeferir (Manter Multa)
-                            </button>
+                          <div className="recurso-decision-note"><ShieldAlert size={17} /><p><strong>Confira o parecer antes de concluir.</strong> A decisão altera a situação da infração e ficará disponível na consulta pública.</p></div>
+                          <div className="recurso-decision-actions">
+                            <button type="button" className="is-approved" disabled={recursoSalvando || !justificativaJari.trim()} onClick={() => julgarRecurso(recursoSelecionado.id, 'Deferido')}><CheckCircle size={19} /> {recursoSalvando ? 'Registrando...' : 'Deferir recurso'}</button>
+                            <button type="button" className="is-denied" disabled={recursoSalvando || !justificativaJari.trim()} onClick={() => julgarRecurso(recursoSelecionado.id, 'Indeferido')}><XCircle size={19} /> {recursoSalvando ? 'Registrando...' : 'Indeferir recurso'}</button>
                           </div>
-                        </div>
+                        </section>
                       )}
-
-                      {rec.resultado_julgamento !== 'Em Análise' && rec.resposta_analise && (
-                        <div className="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-600 bg-gray-100/50 p-4 rounded-xl space-y-2">
-                          <div><strong>Parecer da JARI:</strong> <span className="italic">"{rec.resposta_analise}"</span></div>
-                          {rec.caminho_oficio_resposta && (
-                            <div className="pt-2">
-                              <a href={montarUrlArquivo(rec.caminho_oficio_resposta)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 rounded-lg border border-green-200 transition-all">
-                                <FileText className="w-3.5 h-3.5" /> Visualizar Ofício de Resposta
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
                     </div>
-                  ))}
+                  </section>
                 </div>
-              )}
-              {renderPagination(recursoPage, recursosFiltrados.length, recursoPerPage, setRecursoPage)}
-            </div>
-          </>
+              );
+            })()}
+          </div>
         ) : menuAtivo === 'eventos' ? (
-          <>
-            <header className="mb-10">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Solicitações de Eventos</h1>
-              <p className="text-gray-500">Analise os pedidos de interdição de via e emita a resposta técnica da SMTT.</p>
+          <div className="eventos-consulta eventos-consulta--table">
+            <nav className="eventos-breadcrumb" aria-label="Navegação estrutural">
+              <Home size={14} /><ChevronRight size={13} /><strong>Solicitações de Eventos</strong>
+            </nav>
+
+            <header className="eventos-page-header">
+              <div>
+                <h1>Solicitações de Eventos</h1>
+                <p>Analise e acompanhe os pedidos de interdição de vias para eventos.</p>
+              </div>
             </header>
 
-            {dateFilterControl}
+            <section className="admin-count-grid" aria-label="Resumo das solicitações">
+              <AdminCountBadge icon={FileText} label="Total de solicitações" value={totalEventos} tone="blue" />
+              <AdminCountBadge icon={Clock3} label="Aguardando análise" value={eventosAguardando + eventosEmAnalise} tone="amber" />
+              <AdminCountBadge icon={CheckCircle} label="Aprovadas" value={eventos.filter((eve) => eve.status === 'Aprovado').length} tone="green" />
+              <AdminCountBadge icon={XCircle} label="Negadas" value={eventos.filter((eve) => eve.status === 'Negado').length} tone="red" />
+            </section>
 
             {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
 
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-              {/* FILTROS E BUSCA */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Evento</label>
-                  <div className="relative">
-                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input
-                      type="text"
-                      placeholder="Buscar por Protocolo, Solicitante ou Local..."
-                      value={eventoBusca}
-                      onChange={(e) => {
-                        setEventoBusca(e.target.value);
-                        setEventoPage(1);
-                      }}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                    />
+            <section className="eventos-filter-card" aria-label="Filtros de eventos">
+              <div className="eventos-filter-grid">
+                <div className="eventos-field eventos-field--search">
+                  <label htmlFor="evento-busca">Buscar solicitação</label>
+                  <div className="eventos-control-wrap">
+                    <Search size={18} aria-hidden="true" />
+                    <input id="evento-busca" type="text" placeholder="Protocolo, responsável ou local" value={eventoBusca} onChange={(event) => { setEventoBusca(event.target.value); setEventoPage(1); }} />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Status do Pedido</label>
-                  <select
-                    value={eventoStatus}
-                    onChange={(e) => {
-                      setEventoStatus(e.target.value);
-                      setEventoPage(1);
-                    }}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
-                  >
-                    <option value="Todos">Todos os Status</option>
-                    <option value="Em Análise">Em Análise</option>
-                    <option value="Aprovado">Aprovado</option>
-                    <option value="Negado">Negado</option>
+                <div className="eventos-field">
+                  <label htmlFor="evento-status">Status</label>
+                  <select id="evento-status" value={eventoStatus} onChange={(event) => { setEventoStatus(event.target.value); setEventoPage(1); }}>
+                    <option value="Todos">Todos</option>
+                    <option value="Em Análise">Aguardando análise</option>
+                    <option value="Aprovado">Aprovada</option>
+                    <option value="Negado">Negada</option>
                   </select>
                 </div>
+                <div className="eventos-field">
+                  <label htmlFor="evento-periodo">Período</label>
+                  <select id="evento-periodo" value={periodMode} onChange={(event) => handlePeriodModeChange(event.target.value)}>
+                    <option value="all">Todos os períodos</option>
+                    <option value="day">Dia específico</option>
+                    <option value="month">Mês</option>
+                    <option value="year">Ano</option>
+                  </select>
+                </div>
+                {periodMode !== 'all' && (
+                  <div className="eventos-field eventos-field--period-value">
+                    <label htmlFor="evento-periodo-valor">{periodMode === 'day' ? 'Data' : periodMode === 'month' ? 'Mês' : 'Ano'}</label>
+                    <input id="evento-periodo-valor" type={periodMode === 'day' ? 'date' : periodMode === 'month' ? 'month' : 'number'} min={periodMode === 'year' ? '2000' : undefined} max={periodMode === 'year' ? '2100' : undefined} value={periodValue} onChange={(event) => handlePeriodValueChange(event.target.value)} />
+                  </div>
+                )}
+                <button type="button" className="eventos-clear-button" onClick={() => { setEventoBusca(''); setEventoStatus('Todos'); clearPeriodFilter(); }}>
+                  <SlidersHorizontal size={17} /> Limpar filtros
+                </button>
               </div>
+            </section>
+
+            <section className="eventos-results-card eventos-table-card">
+              <header>
+                <h2>Solicitações <span>{eventosFiltrados.length} {eventosFiltrados.length === 1 ? 'resultado' : 'resultados'}</span></h2>
+              </header>
 
               {eventosFiltrados.length === 0 ? (
-                <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
-                  <Calendar className="w-12 h-12 mb-3 text-gray-300 stroke-[1.5]" />
-                  <p className="font-bold text-base text-gray-600 mb-1">Nenhum evento localizado</p>
-                  <p className="text-xs text-gray-400 font-medium">Não há solicitações de interdição que correspondam aos filtros aplicados.</p>
+                <div className="eventos-empty-state">
+                  <span className="eventos-empty-icon"><Calendar size={44} /><XCircle size={19} /></span>
+                  <h3>Nenhum evento localizado</h3>
+                  <p>Não há solicitações que correspondam aos filtros aplicados.</p>
+                  <button type="button" onClick={() => { setEventoBusca(''); setEventoStatus('Todos'); clearPeriodFilter(); }}>
+                    <SlidersHorizontal size={17} /> Limpar filtros
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {eventosPaginados.map((eve) => (
-                    <div key={eve.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
-                      <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
-                        <div>
-                          <div className="flex items-center gap-2.5 flex-wrap">
-                            <h3 className="font-bold text-lg text-primary-900">Protocolo: <span className="text-primary-600">{eve.numero_protocolo}</span></h3>
-                            <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-100 font-extrabold px-2.5 py-0.5 rounded-lg uppercase tracking-wide">
-                              Evento
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">Solicitante: <strong>{eve.nome_solicitante}</strong> | CPF/CNPJ: <strong>{eve.cpf_cnpj}</strong> | Tel: <strong>{eve.telefone}</strong></p>
-                          <p className="text-sm text-gray-600">E-mail: <strong>{eve.email}</strong></p>
-                        </div>
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                          eve.status === 'Aprovado' 
-                            ? 'bg-green-100 text-green-800 border-green-200' 
-                            : eve.status === 'Negado'
-                            ? 'bg-red-100 text-red-800 border-red-200'
-                            : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                        }`}>
-                          {eve.status}
-                        </span>
-                      </div>
+                <>
+                  <div className="eventos-table-scroll">
+                    <table className="eventos-table">
+                      <thead>
+                        <tr>
+                          <th>Protocolo</th>
+                          <th>Responsável</th>
+                          <th>Data do evento</th>
+                          <th>Local</th>
+                          <th>Status</th>
+                          <th>Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {eventosPaginados.map((eve) => {
+                          const finalizado = eve.status === 'Aprovado' || eve.status === 'Negado';
+                          const aguardando = ['Pendente', 'Recebido', 'Aguardando Análise'].includes(eve.status);
+                          return (
+                            <tr key={eve.id}>
+                              <td className="eventos-protocolo">{eve.numero_protocolo}</td>
+                              <td>{eve.nome_solicitante || 'Não informado'}</td>
+                              <td>{eve.data_evento || 'Não informada'}</td>
+                              <td>{eve.local_evento || 'Não informado'}</td>
+                              <td>
+                                <span className={'eventos-status ' + (eve.status === 'Aprovado' ? 'is-approved' : eve.status === 'Negado' ? 'is-denied' : aguardando ? 'is-waiting' : 'is-review')}>
+                                  {eve.status === 'Aprovado' ? 'Aprovada' : eve.status === 'Negado' ? 'Negada' : aguardando ? 'Aguardando análise' : 'Em análise'}
+                                </span>
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="evento-table-action"
+                                  onClick={() => {
+                                    setEventoFoco(eve.id);
+                                    setJustificativaEvento(finalizado ? (eve.resposta_analise || '') : '');
+                                  }}
+                                >
+                                  {finalizado ? 'Visualizar' : aguardando ? 'Analisar' : 'Continuar análise'}
+                                </button>
+                                <AdminRegistroActions category="eventos" id={eve.id} onSaved={carregarEventos} />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="eventos-table-pagination">
+                    <span>Mostrando {(eventoPage - 1) * eventoPerPage + 1}–{Math.min(eventoPage * eventoPerPage, eventosFiltrados.length)} de {eventosFiltrados.length} solicitações</span>
+                    {renderPagination(eventoPage, eventosFiltrados.length, eventoPerPage, setEventoPage)}
+                  </div>
+                </>
+              )}
+            </section>
 
-                      <div className="bg-white p-5 rounded-xl border border-gray-200 mb-4 space-y-3">
-                        <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-1">Dados da Interdição</p>
-                        <p className="text-sm text-gray-800">Data e Horário: <strong>{eve.data_evento}</strong></p>
-                        <p className="text-sm text-gray-800">Local e Vias: <strong>{eve.local_evento || 'Não informado'}</strong></p>
-                        {eve.descricao && <p className="text-sm text-gray-700 mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">"{eve.descricao}"</p>}
-                        
-                        <div className="pt-2">
-                          <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-1">Requerimento Anexo</p>
-                          <a 
-                            href={montarUrlArquivo(eve.caminho_arquivo)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-between p-3 rounded-xl border text-primary-600 bg-blue-50/40 hover:bg-blue-50 border-blue-200 transition-all text-sm font-bold shadow-sm"
-                          >
-                            <span className="flex items-center gap-2.5">
-                              <FileText className="w-4 h-4 text-primary-600" />
-                              Visualizar PDF do Requerimento
-                            </span>
+            {eventoFoco && (() => {
+              const eventoSelecionado = eventos.find((item) => item.id === eventoFoco);
+              if (!eventoSelecionado) return null;
+              const finalizado = eventoSelecionado.status === 'Aprovado' || eventoSelecionado.status === 'Negado';
+
+              return (
+                <div className="evento-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEventoFoco(null); }}>
+                  <section className="evento-modal" role="dialog" aria-modal="true" aria-labelledby="evento-modal-title">
+                    <header className="evento-modal-header">
+                      <div>
+                        <span>Solicitação de evento</span>
+                        <h2 id="evento-modal-title">{eventoSelecionado.numero_protocolo}</h2>
+                      </div>
+                      <button type="button" onClick={() => setEventoFoco(null)} aria-label="Fechar detalhes"><XCircle size={22} /></button>
+                    </header>
+
+                    <div className="evento-modal-body">
+                      <section className="evento-modal-section">
+                        <h3>Dados do responsável</h3>
+                        <dl className="evento-modal-grid">
+                          <div><dt>Nome</dt><dd>{eventoSelecionado.nome_solicitante || 'Não informado'}</dd></div>
+                          <div><dt>CPF/CNPJ</dt><dd>{eventoSelecionado.cpf_cnpj || 'Não informado'}</dd></div>
+                          <div><dt>Telefone</dt><dd>{eventoSelecionado.telefone || 'Não informado'}</dd></div>
+                          <div><dt>E-mail</dt><dd>{eventoSelecionado.email || 'Não informado'}</dd></div>
+                        </dl>
+                      </section>
+
+                      <section className="evento-modal-section">
+                        <h3>Dados do evento e da interdição</h3>
+                        <dl className="evento-modal-grid">
+                          <div><dt>Data e horário</dt><dd>{eventoSelecionado.data_evento || 'Não informado'}</dd></div>
+                          <div><dt>Local e vias</dt><dd>{eventoSelecionado.local_evento || 'Não informado'}</dd></div>
+                        </dl>
+                        {eventoSelecionado.descricao && <div className="evento-modal-description"><span>Descrição</span><p>{eventoSelecionado.descricao}</p></div>}
+                        {eventoSelecionado.caminho_arquivo && (
+                          <a className="evento-modal-file" href={montarUrlArquivo(eventoSelecionado.caminho_arquivo)} target="_blank" rel="noopener noreferrer">
+                            <FileText size={18} /><span><strong>Requerimento anexado</strong><small>Visualizar documento enviado</small></span>
                           </a>
-                        </div>
-                      </div>
-
-                      {eve.status === 'Em Análise' ? (
-                        <div className="border-t border-gray-200 pt-5 mt-4">
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Parecer Técnico SMTT *</label>
-                          <textarea 
-                            rows="3" 
-                            placeholder="Escreva o parecer técnico sobre a autorização de trânsito para o evento..."
-                            value={eventoFoco === eve.id ? justificativaEvento : ''}
-                            onChange={(e) => { setJustificativaEvento(e.target.value); setEventoFoco(eve.id); }}
-                            className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all mb-4 resize-none text-sm"
-                          />
-                          <div className="flex gap-3">
-                            <button onClick={() => julgarEvento(eve.id, 'Aprovado')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
-                              <CheckCircle className="w-5 h-5" /> Autorizar / Aprovar Pedido
-                            </button>
-                            <button onClick={() => julgarEvento(eve.id, 'Negado')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
-                              <XCircle className="w-5 h-5" /> Negar Pedido
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-600 bg-gray-100/50 p-4 rounded-xl">
-                          <strong>Parecer Técnico:</strong> <span className="italic">"{eve.resposta_analise}"</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              {renderPagination(eventoPage, eventosFiltrados.length, eventoPerPage, setEventoPage)}
-            </div>
-          </>
-        ) : menuAtivo === 'alvaras' ? (
-          <>
-            <header className="mb-10">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Solicitações de Alvarás e Permissionários</h1>
-              <p className="text-gray-500">Analise os requerimentos de emissão/renovação de alvará e inclusão de permissionários.</p>
-            </header>
-
-            {dateFilterControl}
-
-            {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
-
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-              {/* FILTROS E BUSCA */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Requerimento</label>
-                  <div className="relative">
-                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input
-                      type="text"
-                      placeholder="Buscar por Protocolo, Nome, CPF ou Placa..."
-                      value={alvaraBusca}
-                      onChange={(e) => {
-                        setAlvaraBusca(e.target.value);
-                        setAlvaraPage(1);
-                      }}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Tipo de Serviço</label>
-                  <select
-                    value={alvaraTipo}
-                    onChange={(e) => {
-                      setAlvaraTipo(e.target.value);
-                      setAlvaraPage(1);
-                    }}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
-                  >
-                    <option value="Todos">Todos os Serviços</option>
-                    <option value="Autorização de Permissionário">Autorização de Permissionário</option>
-                    <option value="Renovação de Alvará">Renovação de Alvará</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Status do Pedido</label>
-                  <select
-                    value={alvaraStatus}
-                    onChange={(e) => {
-                      setAlvaraStatus(e.target.value);
-                      setAlvaraPage(1);
-                    }}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
-                  >
-                    <option value="Todos">Todos os Status</option>
-                    <option value="Em Análise">Em Análise</option>
-                    <option value="Aprovado">Aprovado</option>
-                    <option value="Negado">Negado</option>
-                  </select>
-                </div>
-              </div>
-
-              {alvarasFiltrados.length === 0 ? (
-                <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
-                  <FileText className="w-12 h-12 mb-3 text-gray-300 stroke-[1.5]" />
-                  <p className="font-bold text-base text-gray-600 mb-1">Nenhum requerimento localizado</p>
-                  <p className="text-xs text-gray-400 font-medium">Não há requerimentos de alvará/permissionário que correspondam aos filtros aplicados.</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {alvarasPaginados.map((alv) => (
-                    <div key={alv.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
-                      <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
-                        <div>
-                          <div className="flex items-center gap-2.5 flex-wrap">
-                            <h3 className="font-bold text-lg text-primary-900">Protocolo: <span className="text-primary-600">{alv.numero_protocolo}</span></h3>
-                            <span className={`text-[10px] border font-extrabold px-2.5 py-0.5 rounded-lg uppercase tracking-wide ${
-                              alv.tipo_servico === 'Renovação de Alvará'
-                                ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                : 'bg-teal-50 text-teal-700 border-teal-100'
-                            }`}>
-                              {alv.tipo_servico}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">Requerente: <strong>{alv.nome_solicitante}</strong> | CPF: <strong>{alv.cpf}</strong> | Tel: <strong>{alv.telefone}</strong></p>
-                          <p className="text-sm text-gray-600">E-mail: <strong>{alv.email}</strong> | Placa: <strong>{alv.placa_veiculo || 'Não informada'}</strong> | Fator RH: <strong>{alv.fator_rh || 'Não informado'}</strong></p>
-                        </div>
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                          alv.status === 'Aprovado' 
-                            ? 'bg-green-100 text-green-800 border-green-200' 
-                            : alv.status === 'Negado'
-                            ? 'bg-red-100 text-red-800 border-red-200'
-                            : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                        }`}>
-                          {alv.status}
-                        </span>
-                      </div>
-
-                      {alv.tem_auxiliar && (
-                        <div className="bg-blue-50/40 p-4 rounded-xl border border-blue-100 mb-4">
-                          <p className="text-xs uppercase tracking-wider text-blue-600 font-bold mb-1.5"><i className="fa-solid fa-user-shield"></i> Condutor Auxiliar (Defensor)</p>
-                          <p className="text-sm text-gray-800">Nome: <strong>{alv.nome_auxiliar}</strong> | CPF: <strong>{alv.cpf_auxiliar}</strong></p>
-                        </div>
-                      )}
-
-                      <div className="bg-white p-5 rounded-xl border border-gray-200 mb-4 space-y-4">
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-2">Documentos do Permissionário</p>
-                          <div className="flex flex-wrap gap-2">
-                            {alv.caminho_requerimento && (
-                              <a href={montarUrlArquivo(alv.caminho_requerimento)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Requerimento
-                              </a>
-                            )}
-                            {alv.caminho_cnh && (
-                              <a href={montarUrlArquivo(alv.caminho_cnh)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> CNH
-                              </a>
-                            )}
-                            {alv.caminho_crlv && (
-                              <a href={montarUrlArquivo(alv.caminho_crlv)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> CRLV
-                              </a>
-                            )}
-                            {alv.caminho_titulo_eleitoral && (
-                              <a href={montarUrlArquivo(alv.caminho_titulo_eleitoral)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Título Eleitoral
-                              </a>
-                            )}
-                            {alv.caminho_certidao_eleitoral && (
-                              <a href={montarUrlArquivo(alv.caminho_certidao_eleitoral)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Certidão Eleitoral
-                              </a>
-                            )}
-                            {alv.caminho_antecedentes_criminais && (
-                              <a href={montarUrlArquivo(alv.caminho_antecedentes_criminais)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Antecedentes Criminais
-                              </a>
-                            )}
-                            {alv.caminho_comprovante_endereco && (
-                              <a href={montarUrlArquivo(alv.caminho_comprovante_endereco)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Comprovante Endereço
-                              </a>
-                            )}
-                            {alv.caminho_certificado_curso && (
-                              <a href={montarUrlArquivo(alv.caminho_certificado_curso)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Certificado Curso
-                              </a>
-                            )}
-                            {alv.caminho_cadastro_cnis && (
-                              <a href={montarUrlArquivo(alv.caminho_cadastro_cnis)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Cadastro CNIS
-                              </a>
-                            )}
-                            {alv.caminho_regularidade_cnis && (
-                              <a href={montarUrlArquivo(alv.caminho_regularidade_cnis)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Regularidade CNIS
-                              </a>
-                            )}
-                            {alv.caminho_foto && (
-                              <a href={montarUrlArquivo(alv.caminho_foto)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Foto 3/4
-                              </a>
-                            )}
-                            {alv.caminho_fator_rh && (
-                              <a href={montarUrlArquivo(alv.caminho_fator_rh)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg border transition-all">
-                                <FileText className="w-3.5 h-3.5 text-primary-600" /> Comprovante Sangue/RH
-                              </a>
-                            )}
-                          </div>
-                        </div>
-
-                        {alv.tem_auxiliar && (
-                          <div>
-                            <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-2">Documentos do Auxiliar</p>
-                            <div className="flex flex-wrap gap-2">
-                              {alv.caminho_cnh_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_cnh_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> CNH Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_crlv_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_crlv_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> CRLV Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_titulo_eleitoral_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_titulo_eleitoral_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Título Eleitoral Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_certidao_eleitoral_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_certidao_eleitoral_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Certidão Eleitoral Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_antecedentes_criminais_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_antecedentes_criminais_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Antecedentes Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_comprovante_endereco_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_comprovante_endereco_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Endereço Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_certificado_curso_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_certificado_curso_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Certificado Curso Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_cadastro_cnis_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_cadastro_cnis_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Cadastro CNIS Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_regularidade_cnis_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_regularidade_cnis_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Regularidade CNIS Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_foto_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_foto_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Foto Auxiliar
-                                </a>
-                              )}
-                              {alv.caminho_fator_rh_auxiliar && (
-                                <a href={montarUrlArquivo(alv.caminho_fator_rh_auxiliar)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gray-50 text-gray-600 hover:bg-gray-150 rounded-lg border transition-all">
-                                  <FileText className="w-3.5 h-3.5 text-blue-600" /> Fator RH Auxiliar
-                                </a>
-                              )}
-                            </div>
-                          </div>
                         )}
-                      </div>
+                      </section>
 
-                      {alv.status === 'Em Análise' ? (
-                        <div className="border-t border-gray-200 pt-5 mt-4">
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Parecer Técnico SMTT *</label>
-                          <textarea 
-                            rows="3" 
-                            placeholder="Escreva o parecer técnico sobre a autorização de alvará/permissionário..."
-                            value={alvaraFoco === alv.id ? justificativaAlvara : ''}
-                            onChange={(e) => { setJustificativaAlvara(e.target.value); setAlvaraFoco(alv.id); }}
-                            className="w-full p-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all mb-4 resize-none text-sm"
-                          />
-
-                          <div className="mb-5">
-                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-2">
-                              <Upload className="w-4 h-4 text-gray-500" /> Anexar Alvará Digital Emitido (Obrigatório para Aprovação)
-                            </label>
-                            <input 
-                              type="file" 
-                              accept=".pdf,image/*"
-                              onChange={(e) => { setAlvaraArquivoEmitido(e.target.files[0]); setAlvaraFoco(alv.id); }}
-                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 border border-gray-200 rounded-xl p-2 bg-white transition-all cursor-pointer"
+                      <section className="evento-modal-section evento-modal-opinion">
+                        <h3>Parecer técnico da SMTT</h3>
+                        {finalizado ? (
+                          <div className="evento-modal-final-opinion">
+                            <span className={'eventos-status ' + (eventoSelecionado.status === 'Aprovado' ? 'is-approved' : 'is-denied')}>
+                              {eventoSelecionado.status === 'Aprovado' ? 'Aprovada' : 'Negada'}
+                            </span>
+                            <p>{eventoSelecionado.resposta_analise || 'Nenhum parecer registrado.'}</p>
+                          </div>
+                        ) : (
+                          <>
+                            <label htmlFor="parecer-evento-modal">Parecer técnico *</label>
+                            <textarea
+                              id="parecer-evento-modal"
+                              rows="5"
+                              placeholder="Descreva a análise técnica e a justificativa para a decisão..."
+                              value={justificativaEvento}
+                              onChange={(event) => setJustificativaEvento(event.target.value)}
+                              autoFocus
                             />
-                          </div>
-
-                          <div className="flex gap-3">
-                            <button onClick={() => julgarAlvara(alv.id, 'Aprovado')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
-                              <CheckCircle className="w-5 h-5" /> Emitir / Aprovar Pedido
-                            </button>
-                            <button onClick={() => julgarAlvara(alv.id, 'Negado')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
-                              <XCircle className="w-5 h-5" /> Negar Pedido
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-600 bg-gray-100/50 p-4 rounded-xl space-y-2">
-                          <div><strong>Parecer Técnico:</strong> <span className="italic">"{alv.resposta_analise}"</span></div>
-                          {alv.caminho_alvara_emitido && (
-                            <div className="pt-2">
-                              <a href={montarUrlArquivo(alv.caminho_alvara_emitido)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 rounded-lg border border-green-200 transition-all">
-                                <FileText className="w-3.5 h-3.5" /> Visualizar Alvará Emitido
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                          </>
+                        )}
+                      </section>
                     </div>
-                  ))}
+
+                    <footer className="evento-modal-footer">
+                      <button type="button" className="evento-modal-cancel" onClick={() => setEventoFoco(null)}>{finalizado ? 'Fechar' : 'Cancelar'}</button>
+                      {!finalizado && (
+                        <>
+                          <button type="button" className="evento-modal-deny" onClick={() => julgarEvento(eventoSelecionado.id, 'Negado')}><XCircle size={18} /> Negar solicitação</button>
+                          <button type="button" className="evento-modal-approve" onClick={() => julgarEvento(eventoSelecionado.id, 'Aprovado')}><CheckCircle size={18} /> Aprovar solicitação</button>
+                        </>
+                      )}
+                    </footer>
+                  </section>
                 </div>
-              )}
-              {renderPagination(alvaraPage, alvarasFiltrados.length, alvaraPerPage, setAlvaraPage)}
-            </div>
-          </>
+              );
+            })()}
+          </div>
+        ) : menuAtivo === 'alvaras' ? (
+          <AdminAlvarasSection
+            alvaras={alvaras}
+            carregarAlvaras={carregarAlvaras}
+            dateFilterControl={dateFilterControl}
+            periodMode={periodMode}
+            periodValue={periodValue}
+            onPeriodModeChange={handlePeriodModeChange}
+            onPeriodValueChange={handlePeriodValueChange}
+            onClearPeriod={clearPeriodFilter}
+            matchesDateFilter={matchesDateFilter}
+            mensagem={mensagem}
+            setMensagem={setMensagem}
+          />
         ) : menuAtivo === 'infracoes' ? (
-          <>
-            {/* Infrações View */}
-            <header className="mb-10">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Infrações Lançadas</h1>
-              <p className="text-gray-500">Visualize e filtre todas as autuações de trânsito registradas no município.</p>
+          <div className="infracoes-auditoria">
+            <header className="infracoes-page-header">
+              <div>
+                
+                <h1>Infrações Lançadas</h1>
+                <p>Consulte, filtre e audite todas as autuações de trânsito registradas no município.</p>
+              </div>
+              <div className="infracoes-header-actions">
+                <button type="button" className="infracoes-refresh" onClick={carregarInfracoes} title="Atualizar dados" aria-label="Atualizar dados"><RefreshCw size={17} /></button>
+                <button type="button" className="infracoes-export" onClick={exportarInfracoes}><Download size={16} /> Exportar relatório</button>
+              </div>
             </header>
 
-            {dateFilterControl}
+            <section className="admin-count-grid" aria-label="Resumo das infrações">
+              <AdminCountBadge icon={FileText} label="Total registrado" value={infracaoStats.total} description="Autos" />
+              <AdminCountBadge icon={CheckCircle} label="Defesas deferidas" value={infracaoStats.canceladas} tone="green" description="Anulados" />
+              <AdminCountBadge icon={XCircle} label="Multas ativas" value={infracaoStats.ativas} tone="red" description="Em cobrança" />
+              <AdminCountBadge icon={FileText} label="Pontuação gerada" value={infracaoStats.pontos} description="Pontos na CNH" />
+            </section>
 
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-              
-              {/* FILTROS E BUSCA */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Autuação</label>
-                  <div className="relative">
-                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input
-                      type="text"
-                      placeholder="Placa ou número do AIT..."
-                      value={filtroInfracao}
-                      onChange={(e) => {
-                        setFiltroInfracao(e.target.value);
-                        setInfracaoPage(1);
-                      }}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                    />
+            <section className="infracoes-filter-card">
+              <header><Filter size={18} /><h2>Filtragem e auditoria avançada</h2></header>
+              <div className="infracoes-filter-grid">
+                <label>
+                  <span>Buscar autuação</span>
+                  <div className="infracoes-search-control">
+                    <Search size={16} />
+                    <input type="text" placeholder="Placa, número do AIT ou modelo..." value={filtroInfracao} onChange={(event) => { setFiltroInfracao(event.target.value); setInfracaoPage(1); }} />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Gravidade da Infração</label>
-                  <select
-                    value={infracaoGravidade}
-                    onChange={(e) => {
-                      setInfracaoGravidade(e.target.value);
-                      setInfracaoPage(1);
-                    }}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
-                  >
-                    <option value="Todos">Todas as Gravidades</option>
-                    <option value="Leve">Leve</option>
-                    <option value="Média">Média</option>
-                    <option value="Grave">Grave</option>
-                    <option value="Gravíssima">Gravíssima</option>
+                </label>
+                <label>
+                  <span>Gravidade</span>
+                  <select value={infracaoGravidade} onChange={(event) => { setInfracaoGravidade(event.target.value); setInfracaoPage(1); }}>
+                    <option value="Todos">Todas as gravidades</option><option value="Leve">Leve</option><option value="Média">Média</option><option value="Grave">Grave</option><option value="Gravíssima">Gravíssima</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Fase Atual</label>
-                  <select
-                    value={infracaoFase}
-                    onChange={(e) => {
-                      setInfracaoFase(e.target.value);
-                      setInfracaoPage(1);
-                    }}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
-                  >
-                    <option value="Todos">Todas as Fases</option>
-                    <option value="Autuação">Autuação</option>
-                    <option value="Penalidade">Penalidade</option>
-                    <option value="Recurso">Recurso</option>
+                </label>
+                <label>
+                  <span>Fase atual</span>
+                  <select value={infracaoFase} onChange={(event) => { setInfracaoFase(event.target.value); setInfracaoPage(1); }}>
+                    <option value="Todos">Todas as fases</option><option value="Ativas">Ativas (com cobrança)</option><option value="Canceladas">Canceladas (deferidas)</option>
                   </select>
-                </div>
+                </label>
+                <label>
+                  <span>Período de registro</span>
+                  <select value={periodMode} onChange={(event) => handlePeriodModeChange(event.target.value)}>
+                    <option value="all">Todos os períodos</option><option value="day">Dia específico</option><option value="month">Mês</option><option value="year">Ano</option>
+                  </select>
+                </label>
+                {periodMode !== 'all' && (
+                  <label className="infracoes-period-value">
+                    <span>{periodMode === 'day' ? 'Data' : periodMode === 'month' ? 'Mês' : 'Ano'}</span>
+                    <input type={periodMode === 'day' ? 'date' : periodMode === 'month' ? 'month' : 'number'} min={periodMode === 'year' ? '2000' : undefined} max={periodMode === 'year' ? '2100' : undefined} value={periodValue} onChange={(event) => handlePeriodValueChange(event.target.value)} />
+                  </label>
+                )}
+                <button type="button" className="infracoes-clear" onClick={() => { setFiltroInfracao(''); setInfracaoGravidade('Todos'); setInfracaoFase('Todos'); clearPeriodFilter(); }}>
+                  <SlidersHorizontal size={16} /> Limpar filtros
+                </button>
               </div>
+            </section>
+
+            <section className="infracoes-results">
+              <header>
+                <span>Resultados: <strong>{infracoesFiltradas.length}</strong> encontrados</span>
+                <div>
+                  <button type="button" className={infracaoOrdenacao.campo === 'data_hora_infracao' ? 'is-active' : ''} onClick={() => ordenarInfracoes('data_hora_infracao')}>Data <ArrowUpDown size={12} /></button>
+                  <button type="button" className={infracaoOrdenacao.campo === 'gravidade' ? 'is-active' : ''} onClick={() => ordenarInfracoes('gravidade')}>Gravidade <ArrowUpDown size={12} /></button>
+                  <button type="button" className={infracaoOrdenacao.campo === 'valor_final' ? 'is-active' : ''} onClick={() => ordenarInfracoes('valor_final')}>Valor <ArrowUpDown size={12} /></button>
+                </div>
+              </header>
 
               {infracoesFiltradas.length === 0 ? (
-                <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
-                  <i className="fa-solid fa-file-invoice-dollar text-4xl mb-3 text-gray-300"></i>
-                  <p className="font-bold text-base text-gray-600 mb-1">Nenhuma infração localizada</p>
-                  <p className="text-xs text-gray-400 font-medium">Não há autos de infração que correspondam aos critérios de busca.</p>
+                <div className="infracoes-empty">
+                  <ShieldAlert size={43} />
+                  <strong>Nenhum registro de autuação localizado.</strong>
+                  <span>Altere os filtros de busca para recomeçar.</span>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="infracoes-list">
                   {infracoesPaginadas.map((inf) => {
                     const estaAberto = infracaoAberta === inf.id;
-                    const gravidadeCores = {
-                      'Leve': 'bg-green-50 text-green-700 border-green-200',
-                      'Média': 'bg-yellow-50 text-yellow-800 border-yellow-200',
-                      'Grave': 'bg-orange-50 text-orange-800 border-orange-200',
-                      'Gravíssima': 'bg-red-50 text-red-700 border-red-200',
-                    };
-                    const corGravidade = gravidadeCores[inf.tipo_infracao?.gravidade || 'Média'] || 'bg-gray-50 text-gray-700 border-gray-200';
+                    const cancelada = infracaoCancelada(inf);
+                    const gravidade = inf.tipo_infracao?.gravidade || 'Não informada';
+                    const historico = [
+                      { titulo: 'Autuação registrada', data: inf.data_hora_infracao },
+                      ...(inf.numero_nait ? [{ titulo: 'NAIT vinculada: ' + inf.numero_nait, data: inf.data_expedicao || 'Data não informada' }] : []),
+                      ...(inf.numero_nip ? [{ titulo: 'NIP vinculada: ' + inf.numero_nip, data: inf.data_vencimento_boleto ? 'Vencimento em ' + inf.data_vencimento_boleto : 'Vencimento não informado' }] : []),
+                    ];
 
                     return (
-                      <div key={inf.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-gray-50">
-                        {/* Cabeçalho do Card */}
-                        <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
-                          <div>
-                            <div className="flex items-center gap-2.5 flex-wrap">
-                              <h3 className="font-bold text-lg text-primary-900">
-                                AIT: <span className="text-primary-600">{inf.numero_ait}</span>
-                              </h3>
-                              <span className="text-[10px] bg-blue-50 text-primary-600 border border-blue-100 font-extrabold px-2.5 py-0.5 rounded-lg uppercase tracking-wide">
-                                Fase: {inf.fase_atual || 'Autuação'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                              <i className="fa-regular fa-calendar"></i>
-                              <span className="ml-1">{inf.data_hora_infracao}</span>
-                              <span className="mx-1.5">•</span>
-                              <i className="fa-solid fa-location-dot"></i>
-                              <span className="ml-1 truncate max-w-xs">{inf.local_cometimento}</span>
-                            </div>
+                      <article key={inf.id} className={'infracao-audit-card ' + (cancelada ? 'is-cancelled' : '')}>
+                        <button type="button" className="infracao-card-summary" onClick={() => setInfracaoAberta(estaAberto ? null : inf.id)} aria-expanded={estaAberto}>
+                          <div className="infracao-plate">
+                            <span><i>BRASIL</i><i>{inf.veiculo?.uf || 'SE'}</i></span>
+                            <strong>{inf.veiculo?.placa || 'SEM PLACA'}</strong>
                           </div>
-                          <div className="text-right">
-                            <span className="text-xs text-gray-400 font-bold block uppercase tracking-wide">Valor da Multa</span>
-                            <span className="text-lg font-extrabold text-primary-900">
-                              {inf.valor_final 
-                                ? `R$ ${parseFloat(inf.valor_final).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                : 'R$ 0,00'
-                              }
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Corpo Principal (Veículo & Infração) */}
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 bg-white p-5 rounded-xl border border-gray-200">
-                          {/* Coluna Veículo */}
-                          <div className="md:col-span-4 flex items-start gap-4 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0">
-                            {/* Desenho da Placa Mercosul */}
-                            <div className="inline-flex flex-col border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm font-sans w-24 shrink-0">
-                              <div className="bg-blue-600 h-1.5 flex items-center justify-center">
-                                <span className="text-[4px] text-white font-bold leading-none scale-75">BRASIL</span>
-                              </div>
-                              <div className="py-1 px-1.5 font-bold text-xs tracking-wider text-gray-900 text-center uppercase">
-                                {inf.veiculo?.placa || 'SEM PLACA'}
-                              </div>
-                            </div>
+                          <div className="infracao-summary-copy">
                             <div>
-                              <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-0.5">Veículo</p>
-                              <p className="text-sm font-bold text-gray-800 leading-snug">
-                                {inf.veiculo?.marca_modelo || 'Marca/Modelo não informado'}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                Cor: <strong>{inf.veiculo?.cor || 'Não informada'}</strong>
-                                {inf.veiculo?.ano_fabricacao && ` | Ano: ${inf.veiculo.ano_fabricacao}`}
-                              </p>
+                              <h3>AIT <strong>{inf.numero_ait}</strong></h3>
+                              <span className={'infracao-fase ' + (cancelada ? 'is-cancelled' : (inf.fase_atual || '').includes('Penalidade') ? 'is-penalty' : '')}>{inf.fase_atual || 'Autuação'}</span>
+                              <span className={'infracao-gravidade is-' + normalizeString(gravidade).replace('í', 'i')}>{gravidade}</span>
                             </div>
+                            <p><Calendar size={14} /> {inf.data_hora_infracao || 'Data não informada'}</p>
+                            <p><MapPin size={14} /> {inf.local_cometimento || 'Local não informado'}</p>
                           </div>
-
-                          {/* Coluna Infração */}
-                          <div className="md:col-span-8 flex flex-col justify-between">
-                            <div>
-                              <p className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-1">Enquadramento CTB</p>
-                              <p className="text-sm font-bold text-gray-800 leading-snug">
-                                <span className="bg-secondary-500 text-primary-950 px-2 py-0.5 rounded text-xs font-extrabold mr-2 uppercase tracking-wide">
-                                  {inf.tipo_infracao?.codigo_infracao || 'Código'}
-                                </span>
-                                {inf.tipo_infracao?.descricao || 'Descrição da infração cometida'}
-                              </p>
-                              {inf.tipo_infracao?.amparo_legal && (
-                                <p className="text-xs text-gray-500 italic mt-1.5">
-                                  Amparo Legal: <strong>{inf.tipo_infracao.amparo_legal}</strong>
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-3 mt-4 flex-wrap">
-                              <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${corGravidade}`}>
-                                Gravidade: {inf.tipo_infracao?.gravidade || 'Não informada'}
-                              </span>
-                              <span className="text-xs bg-gray-100 text-gray-600 border border-gray-200 font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                                <i className="fa-solid fa-circle-exclamation text-gray-400 text-[10px]"></i>
-                                {inf.tipo_infracao?.pontos || 0} Pontos na CNH
-                              </span>
-                            </div>
+                          <div className="infracao-summary-value">
+                            <small>Valor da multa</small>
+                            <strong className={cancelada ? 'is-cancelled' : ''}>{Number(inf.valor_final || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                            <span>{estaAberto ? <ChevronUp size={16} /> : <ChevronDown size={16} />}{estaAberto ? 'Recolher' : 'Detalhes'}</span>
                           </div>
-                        </div>
+                        </button>
 
-                        {/* Botão Acordeão de Detalhes Legais */}
-                        <div className="mt-4 pt-3 border-t border-gray-200/60 flex justify-end">
-                          <button
-                            onClick={() => setInfracaoAberta(estaAberto ? null : inf.id)}
-                            className="text-xs text-primary-600 hover:text-primary-800 font-bold flex items-center gap-1.5 transition-colors focus:outline-none"
-                          >
-                            <span>{estaAberto ? 'Ocultar Detalhes Fiscais' : 'Ver Detalhes Fiscais e Legais'}</span>
-                            <i className={`fa-solid fa-chevron-${estaAberto ? 'up' : 'down'} text-[10px]`}></i>
-                          </button>
-                        </div>
+                        <div className="px-5 pb-3 flex justify-end"><AdminRegistroActions category="infracoes" id={inf.id} onSaved={carregarInfracoes} /></div>
 
-                        {/* Conteúdo Expansível do Acordeão */}
                         {estaAberto && (
-                          <div className="mt-4 bg-white p-5 rounded-xl border border-gray-200/80 shadow-inner grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Agente / Aparelho Autuador</p>
-                              <p className="font-semibold text-gray-700">{inf.agente_aparelho || 'Não informado'}</p>
+                          <div className="infracao-card-details">
+                            <div className="infracao-details-grid">
+                              <section>
+                                <h4>Veículo cadastrado</h4>
+                                <dl>
+                                  <div><dt>Marca / Modelo</dt><dd>{inf.veiculo?.marca_modelo || 'Não informado'}</dd></div>
+                                  <div><dt>Cor oficial</dt><dd>{inf.veiculo?.cor || 'Não informada'}</dd></div>
+                                  <div><dt>Ano de fabricação</dt><dd>{inf.veiculo?.ano_fabricacao || 'Não informado'}</dd></div>
+                                  <div><dt>UF do registro</dt><dd>{inf.veiculo?.uf || 'SE'}</dd></div>
+                                  <div><dt>Renavam</dt><dd>{inf.veiculo?.renavam || 'Não informado'}</dd></div>
+                                </dl>
+                              </section>
+
+                              <section>
+                                <h4>Enquadramento e amparo CTB</h4>
+                                <dl>
+                                  <div><dt>Código</dt><dd>{inf.tipo_infracao?.codigo_infracao || 'Não informado'}</dd></div>
+                                  <div><dt>Amparo legal</dt><dd>{inf.tipo_infracao?.amparo_legal || 'Não informado'}</dd></div>
+                                  <div className="is-full"><dt>Descrição</dt><dd>{inf.tipo_infracao?.descricao || 'Não informada'}</dd></div>
+                                  <div><dt>Gravidade</dt><dd>{gravidade}</dd></div>
+                                  <div><dt>Pontuação</dt><dd>{inf.tipo_infracao?.pontos || 0} pontos</dd></div>
+                                </dl>
+                              </section>
+
+                              <section>
+                                <h4>Dados operacionais e medições</h4>
+                                <dl>
+                                  <div><dt>Agente / Aparelho</dt><dd>{inf.agente_aparelho || 'Não informado'}</dd></div>
+                                  <div><dt>Desdobramento</dt><dd>{inf.desdobramento || '1'}</dd></div>
+                                  <div><dt>Medição regulamentada</dt><dd>{inf.medicao_regulamentada || 'Não informada'}</dd></div>
+                                  <div><dt>Medição aferida</dt><dd>{inf.medicao_aferida || 'Não informada'}</dd></div>
+                                  <div><dt>Medição considerada</dt><dd>{inf.medicao_considerada || 'Não informada'}</dd></div>
+                                  <div><dt>Código Renainf</dt><dd>{inf.codigo_renainf || 'Não informado'}</dd></div>
+                                </dl>
+                              </section>
                             </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Desdobramento</p>
-                              <p className="font-semibold text-gray-700">{inf.desdobramento || '1'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Código Renainf</p>
-                              <p className="font-semibold text-gray-700">{inf.codigo_renainf || 'Não informado'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Medição Aferida</p>
-                              <p className="font-semibold text-gray-700">{inf.medicao_aferida || 'Não aferida'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Medição Considerada</p>
-                              <p className="font-semibold text-gray-700">{inf.medicao_considerada || 'Não considerada'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Medição Regulamentada</p>
-                              <p className="font-semibold text-gray-700">{inf.medicao_regulamentada || 'Não regulamentada'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Número da NAIT</p>
-                              <p className="font-semibold text-gray-700">{inf.numero_nait || 'Não gerado'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Número da NIP</p>
-                              <p className="font-semibold text-gray-700">{inf.numero_nip || 'Não gerado'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Data Expedição Notificação</p>
-                              <p className="font-semibold text-gray-700">{inf.data_expedicao || 'Não expedida'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Vencimento da Defesa Prévia</p>
-                              <p className="font-semibold text-gray-700 text-amber-700">{inf.data_vencimento_defesa || 'Não cadastrado'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Nosso Número (Boleto)</p>
-                              <p className="font-semibold text-gray-700">{inf.nosso_numero || 'Não gerado'}</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Vencimento do Boleto</p>
-                              <p className="font-semibold text-gray-700">{inf.data_vencimento_boleto || 'Não cadastrado'}</p>
-                            </div>
-                            {inf.linha_digitavel && (
-                              <div className="sm:col-span-2 md:col-span-3 pt-2 border-t border-gray-100">
-                                <p className="text-gray-400 font-bold uppercase tracking-wider mb-0.5">Linha Digitável</p>
-                                <code className="bg-gray-50 px-2 py-1 rounded text-gray-600 block break-all font-mono">
-                                  {inf.linha_digitavel}
-                                </code>
+
+                            <section className="infracao-process">
+                              <h4><Clock3 size={14} /> Histórico legal da autuação</h4>
+                              <ol>
+                                {historico.map((item, index) => <li key={item.titulo + index}><span /><div><strong>{item.titulo}</strong><small>{item.data}</small></div></li>)}
+                              </ol>
+                            </section>
+
+                            <section className="infracao-fiscal">
+                              <div><span>NAIT</span><strong>{inf.numero_nait || 'Não vinculada'}</strong><small>{inf.data_expedicao ? 'Expedida em ' + inf.data_expedicao : 'Sem data de expedição'}</small></div>
+                              <div><span>NIP</span><strong>{inf.numero_nip || 'Não vinculada'}</strong><small>{inf.data_vencimento_boleto ? 'Vence em ' + inf.data_vencimento_boleto : 'Sem vencimento'}</small></div>
+                              <div><span>Defesa prévia</span><strong>{inf.data_vencimento_defesa || 'Sem vencimento'}</strong><small>Prazo cadastrado</small></div>
+                              <div className="infracao-fiscal-actions">
+                                <button type="button" onClick={() => abrirModalNait(inf)}>{inf.numero_nait ? 'Editar NAIT' : 'Vincular NAIT'}</button>
+                                {inf.numero_nait && <button type="button" className="is-nip" onClick={() => abrirModalNip(inf)}>{inf.numero_nip ? 'Editar NIP' : 'Vincular NIP'}</button>}
                               </div>
-                            )}
-
-                            {/* Ações de Controle (NAIT/NIP) */}
-                            <div className="sm:col-span-2 md:col-span-3 pt-4 border-t border-gray-100 flex flex-wrap gap-3">
-                              {!inf.numero_nait ? (
-                                <button
-                                  onClick={() => abrirModalNait(inf)}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
-                                >
-                                  <i className="fa-solid fa-file-signature"></i>
-                                  Vincular NAIT
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => abrirModalNait(inf)}
-                                  className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5"
-                                >
-                                  <i className="fa-solid fa-pen-to-square"></i>
-                                  Editar NAIT ({inf.numero_nait})
-                                </button>
-                              )}
-
-                              {inf.numero_nait && !inf.numero_nip && (
-                                <button
-                                  onClick={() => abrirModalNip(inf)}
-                                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
-                                >
-                                  <i className="fa-solid fa-file-invoice-dollar"></i>
-                                  Vincular NIP (Penalidade)
-                                </button>
-                              )}
-
-                              {inf.numero_nip && (
-                                <button
-                                  onClick={() => abrirModalNip(inf)}
-                                  className="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5"
-                                >
-                                  <i className="fa-solid fa-pen-to-square"></i>
-                                  Editar NIP ({inf.numero_nip})
-                                </button>
-                              )}
-                            </div>
+                              {inf.linha_digitavel && <code>{inf.linha_digitavel}</code>}
+                            </section>
                           </div>
                         )}
-                      </div>
+                      </article>
                     );
                   })}
+                  {renderPagination(infracaoPage, infracoesFiltradas.length, infracaoPerPage, setInfracaoPage)}
                 </div>
               )}
-              {renderPagination(infracaoPage, infracoesFiltradas.length, infracaoPerPage, setInfracaoPage)}
-            </div>
-          </>
+            </section>
+          </div>
         ) : menuAtivo === 'noticias' ? (
-          <>
-            {/* Notícias View */}
-            <header className="mb-10 flex flex-wrap justify-between items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestão de Notícias</h1>
-                <p className="text-gray-500">Publique, edite e organize as matérias e comunicados oficiais no portal público.</p>
-              </div>
-              {!exibindoFormNews && (
+          <div className="noticias-admin">
+            <header className="news-page-header">
+              <nav className="news-breadcrumb" aria-label="Navegação estrutural">
+                <button type="button" onClick={() => handleMenuClick('recursos')}>Início</button>
+                <ChevronRight size={14} />
+                <span>Gestão de Notícias</span>
+              </nav>
+              <div className="news-title-row">
+                <div>
+                  <h1>Gestão de Notícias</h1>
+                  <p>Publique, edite e organize as matérias e comunicados oficiais do portal público.</p>
+                </div>
                 <button
-                  onClick={() => { setExibindoFormNews(true); setModoEdicaoNews(false); }}
-                  className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
+                  type="button"
+                  className={exibindoFormNews ? 'news-button news-button-outline' : 'news-button news-button-primary'}
+                  onClick={exibindoFormNews ? limparFormNoticia : prepararNovaNoticia}
                 >
-                  <i className="fa-solid fa-plus text-xs"></i> Cadastrar Notícia
+                  <i className={exibindoFormNews ? 'fa-solid fa-list' : 'fa-solid fa-plus'} />
+                  {exibindoFormNews ? 'Ver notícias publicadas' : 'Cadastrar notícia'}
                 </button>
-              )}
+              </div>
             </header>
 
-            {dateFilterControl}
-
-            {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
+            {mensagem && (
+              <div className="news-feedback" role="status">
+                <CheckCircle size={19} />
+                <span>{mensagem}</span>
+              </div>
+            )}
 
             {exibindoFormNews ? (
-              <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8 max-w-3xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
-                
-                <h3 className="font-bold text-lg text-primary-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-2">
-                  <i className="fa-solid fa-newspaper text-primary-600"></i>
-                  {modoEdicaoNews ? 'Editar Notícia' : 'Publicar Nova Notícia'}
-                </h3>
+              <>
+                <form onSubmit={salvarNoticia} className="news-compose-layout">
+                  <section className="news-compose-card news-content-card">
+                    <div className="news-card-heading">
+                      <span className="news-heading-icon"><FileText size={19} /></span>
+                      <div>
+                        <h2>{modoEdicaoNews ? 'Editar conteúdo da notícia' : 'Conteúdo da notícia'}</h2>
+                        <p>Escreva um título claro e uma matéria fácil de ler.</p>
+                      </div>
+                    </div>
 
-                <form onSubmit={salvarNoticia} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Título da Matéria *</label>
+                    <div className="news-field">
+                      <div className="news-label-row">
+                        <label htmlFor="news-title">Título da matéria <b>*</b></label>
+                        <span>{tituloNews.length}/140</span>
+                      </div>
                       <input
+                        id="news-title"
                         type="text"
                         required
-                        placeholder="Ex: Novos semáforos inteligentes são instalados no Centro"
+                        maxLength="140"
+                        placeholder="Ex.: Novos semáforos inteligentes são instalados no Centro"
                         value={tituloNews}
                         onChange={(e) => setTituloNews(e.target.value)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Categoria *</label>
-                      <select
-                        value={categoriaNews}
-                        onChange={(e) => setCategoriaNews(e.target.value)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold"
-                      >
+
+                    <div className="news-field">
+                      <div className="news-label-row">
+                        <label htmlFor="news-subtitle">Subtítulo ou resumo</label>
+                        <span>{subtituloNews.length}/240</span>
+                      </div>
+                      <small>Opcional · aparece na listagem das notícias.</small>
+                      <input
+                        id="news-subtitle"
+                        type="text"
+                        maxLength="240"
+                        placeholder="Breve resumo que aparece nos cards do portal..."
+                        value={subtituloNews}
+                        onChange={(e) => setSubtituloNews(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="news-field news-editor-field">
+                      <div className="news-label-row">
+                        <label htmlFor="news-content">Conteúdo / matéria completa <b>*</b></label>
+                        <span>{conteudoNews.length} caracteres</span>
+                      </div>
+                      <div className="news-editor-shell">
+                        <div className="news-editor-toolbar" aria-label="Ferramentas de formatação">
+                          <span>Parágrafo</span>
+                          <button type="button" title="Negrito" onClick={() => aplicarFormatoNoticia('**', '**', 'texto')}><b>B</b></button>
+                          <button type="button" title="Itálico" onClick={() => aplicarFormatoNoticia('_', '_', 'texto')}><i>I</i></button>
+                          <button type="button" title="Título" onClick={() => aplicarFormatoNoticia('\n## ', '', 'Título')}>H2</button>
+                          <button type="button" title="Subtítulo" onClick={() => aplicarFormatoNoticia('\n### ', '', 'Subtítulo')}>H3</button>
+                          <span className="news-toolbar-divider" />
+                          <button type="button" title="Lista" onClick={() => aplicarFormatoNoticia('\n- ', '', 'Item da lista')}><i className="fa-solid fa-list-ul" /></button>
+                          <button type="button" title="Link" onClick={() => aplicarFormatoNoticia('[', '](https://)', 'texto do link')}><i className="fa-solid fa-link" /></button>
+                          <button type="button" title="Alinhar à esquerda" onClick={() => conteudoNewsRef.current?.focus()}><i className="fa-solid fa-align-left" /></button>
+                        </div>
+                        <textarea
+                          ref={conteudoNewsRef}
+                          id="news-content"
+                          rows="15"
+                          required
+                          placeholder="Digite o texto da notícia..."
+                          value={conteudoNews}
+                          onChange={(e) => setConteudoNews(e.target.value)}
+                        />
+                      </div>
+                      <small>A barra insere marcações simples que preservam o conteúdo em texto.</small>
+                    </div>
+                  </section>
+
+                  <aside className="news-compose-card news-settings-card">
+                    <div className="news-card-heading">
+                      <span className="news-heading-icon"><SlidersHorizontal size={19} /></span>
+                      <div>
+                        <h2>Configurações da publicação</h2>
+                        <p>Defina a classificação e a apresentação.</p>
+                      </div>
+                    </div>
+
+                    <div className="news-field">
+                      <label htmlFor="news-category">Categoria <b>*</b></label>
+                      <select id="news-category" value={categoriaNews} onChange={(e) => setCategoriaNews(e.target.value)}>
                         <option value="Geral">Geral</option>
                         <option value="Educação">Educação</option>
                         <option value="Mobilidade">Mobilidade</option>
@@ -1731,165 +1594,144 @@ function AdminPainel() {
                         <option value="Comunicados">Comunicados</option>
                       </select>
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Subtítulo ou Resumo (Opcional)</label>
-                    <input
-                      type="text"
-                      placeholder="Breve resumo que aparece na listagem dos cards..."
-                      value={subtituloNews}
-                      onChange={(e) => setSubtituloNews(e.target.value)}
-                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Conteúdo / Matéria Completa *</label>
-                    <textarea
-                      rows="8"
-                      required
-                      placeholder="Digite o texto da notícia. Pressione Enter para criar novos parágrafos..."
-                      value={conteudoNews}
-                      onChange={(e) => setConteudoNews(e.target.value)}
-                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Imagem de Capa (Opcional)</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setImagemNews(e.target.files[0])}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 border border-gray-200 rounded-xl p-2 bg-white transition-all cursor-pointer"
-                    />
-                    {modoEdicaoNews && noticiaFoco?.imagem_url && (
-                      <p className="text-[10px] text-gray-400 mt-1.5">
-                        * Já possui uma imagem cadastrada. Selecione um novo arquivo apenas se quiser substituí-la.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex gap-3 pt-4 border-t border-gray-100">
-                    <button
-                      type="submit"
-                      className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm"
-                    >
-                      <i className="fa-solid fa-cloud-arrow-up"></i>
-                      {modoEdicaoNews ? 'Atualizar Notícia' : 'Publicar Notícia'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={limparFormNoticia}
-                      className="px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all text-sm"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-                {/* FILTROS E BUSCA */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Buscar Matéria</label>
-                    <div className="relative">
-                      <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                      <input
-                        type="text"
-                        placeholder="Buscar por Título, Subtítulo ou Conteúdo..."
-                        value={noticiaBusca}
-                        onChange={(e) => {
-                          setNoticiaBusca(e.target.value);
-                          setNoticiaPage(1);
-                        }}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                      />
+                    <div className="news-field">
+                      <label>Imagem de capa</label>
+                      <small>PNG, JPG ou WebP · máximo recomendado de 5 MB · proporção 1,9:1.</small>
+                      <input id="news-cover-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={selecionarImagemNews} hidden />
+                      <label htmlFor="news-cover-input" className={`news-image-dropzone ${imagemPreviewNews ? 'has-image' : ''}`}>
+                        {imagemPreviewNews ? (
+                          <>
+                            <img src={imagemPreviewNews} alt="Prévia da imagem de capa" />
+                            <span><Upload size={16} /> Clique para substituir a imagem</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="news-upload-icon"><i className="fa-regular fa-image" /></span>
+                            <strong>Clique para selecionar uma imagem</strong>
+                            <small>Recomendado: 1200 × 630 px</small>
+                          </>
+                        )}
+                      </label>
+                      {modoEdicaoNews && noticiaFoco?.imagem_url && !imagemNews && (
+                        <small>A imagem atual será mantida se nenhum novo arquivo for selecionado.</small>
+                      )}
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Categoria</label>
-                    <select
-                      value={noticiaFiltroCategoria}
-                      onChange={(e) => {
-                        setNoticiaFiltroCategoria(e.target.value);
-                        setNoticiaPage(1);
-                      }}
-                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-semibold text-gray-700"
-                    >
-                      <option value="Todos">Todas as Categorias</option>
-                      <option value="Geral">Geral</option>
-                      <option value="Educação">Educação</option>
-                      <option value="Mobilidade">Mobilidade</option>
-                      <option value="Infraestrutura">Infraestrutura</option>
-                      <option value="Comunicados">Comunicados</option>
-                    </select>
-                  </div>
-                </div>
 
-                {noticiasFiltradas.length === 0 ? (
-                  <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
-                    <i className="fa-solid fa-newspaper text-4xl mb-3 text-gray-300"></i>
-                    <p className="font-bold text-base text-gray-600 mb-1">Nenhuma notícia localizada</p>
-                    <p className="text-xs text-gray-400 font-medium">Não há matérias que correspondam aos filtros aplicados.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {noticiasPaginadas.map((item) => (
-                      <div key={item.id} className="border border-gray-200 hover:border-gray-250 rounded-xl p-4 bg-gray-50/40 hover:bg-gray-50 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          {/* Mini Imagem */}
-                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 shrink-0 relative border border-gray-150">
-                            {item.imagem_url ? (
-                              <img
-                                src={montarUrlArquivo(item.imagem_url)}
-                                alt={item.titulo}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                <i className="fa-solid fa-newspaper text-gray-400"></i>
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-bold text-base text-primary-950 leading-snug">{item.titulo}</h4>
-                              <span className="text-[9px] bg-blue-50 text-primary-600 border border-blue-100 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
-                                {item.categoria}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-gray-400 font-bold block mt-1">
-                              <i className="fa-regular fa-calendar mr-1"></i> Publicado em: {item.criado_em}
-                            </span>
-                          </div>
-                        </div>
+                    <div className="news-publication-status">
+                      <span>Status da publicação</span>
+                      <strong><i /> {modoEdicaoNews ? 'Edição não publicada' : 'Rascunho local'}</strong>
+                      <small>A notícia só ficará pública após confirmar a publicação.</small>
+                    </div>
 
-                        {/* Botões de Ação */}
-                        <div className="flex gap-2 shrink-0 self-end sm:self-center">
-                          <button
-                            onClick={() => prepararEdicaoNoticia(item)}
-                            className="bg-blue-50 hover:bg-blue-100 text-primary-600 border border-blue-100 px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
-                          >
-                            <i className="fa-solid fa-pen-to-square"></i> Editar
-                          </button>
-                          <button
-                            onClick={() => deletarNoticia(item.id)}
-                            className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
-                          >
-                            <i className="fa-solid fa-trash"></i> Excluir
-                          </button>
-                        </div>
+                    <div className="news-form-actions">
+                      {!modoEdicaoNews && (
+                        <button type="button" className="news-button news-button-muted" onClick={salvarRascunhoNoticia}>
+                          <i className="fa-regular fa-floppy-disk" /> Salvar rascunho
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="news-button news-button-outline"
+                        disabled={!tituloNews.trim() || !conteudoNews.trim()}
+                        onClick={() => setPreviewNoticiaAberta(true)}
+                      >
+                        <i className="fa-regular fa-eye" /> Pré-visualizar
+                      </button>
+                      <button type="submit" className="news-button news-button-primary">
+                        <i className="fa-regular fa-paper-plane" />
+                        {modoEdicaoNews ? 'Atualizar notícia' : 'Publicar notícia'}
+                      </button>
+                      <button type="button" className="news-cancel-action" onClick={limparFormNoticia}>Cancelar</button>
+                    </div>
+                  </aside>
+                </form>
+
+                <section className="news-published-strip">
+                  <div className="news-strip-title">
+                    <i className="fa-solid fa-list" />
+                    <div><strong>Notícias publicadas</strong><small>{noticias.length} {noticias.length === 1 ? 'matéria cadastrada' : 'matérias cadastradas'}</small></div>
+                  </div>
+                  <div className="news-strip-search"><Search size={16} /><span>Localize e gerencie o conteúdo já publicado</span></div>
+                  <button type="button" className="news-button news-button-outline" onClick={limparFormNoticia}>Ver lista <ChevronRight size={16} /></button>
+                </section>
+
+                {previewNoticiaAberta && (
+                  <div className="news-preview-backdrop" role="presentation" onMouseDown={() => setPreviewNoticiaAberta(false)}>
+                    <article className="news-preview-modal" role="dialog" aria-modal="true" aria-labelledby="news-preview-title" onMouseDown={(e) => e.stopPropagation()}>
+                      <header>
+                        <div><small>Pré-visualização da notícia</small><strong>Como o conteúdo será apresentado</strong></div>
+                        <button type="button" aria-label="Fechar pré-visualização" onClick={() => setPreviewNoticiaAberta(false)}><i className="fa-solid fa-xmark" /></button>
+                      </header>
+                      {imagemPreviewNews && <img className="news-preview-cover" src={imagemPreviewNews} alt="" />}
+                      <div className="news-preview-body">
+                        <span>{categoriaNews}</span>
+                        <h2 id="news-preview-title">{tituloNews}</h2>
+                        {subtituloNews && <p className="news-preview-lead">{subtituloNews}</p>}
+                        <div className="news-preview-copy">{conteudoNews}</div>
                       </div>
-                    ))}
+                    </article>
                   </div>
                 )}
-                {renderPagination(noticiaPage, noticiasFiltradas.length, noticiaPerPage, setNoticiaPage)}
-              </div>
+              </>
+            ) : (
+              <>
+                {dateFilterControl}
+                <section className="news-list-card">
+                  <div className="news-list-heading">
+                    <div><h2>Notícias publicadas</h2><span>{noticiasFiltradas.length} resultados</span></div>
+                    <p>Edite, revise ou remova conteúdos do portal.</p>
+                  </div>
+
+                  <div className="news-list-filters">
+                    <label>
+                      <span>Buscar matéria</span>
+                      <div><Search size={17} /><input type="text" placeholder="Título, subtítulo ou conteúdo..." value={noticiaBusca} onChange={(e) => { setNoticiaBusca(e.target.value); setNoticiaPage(1); }} /></div>
+                    </label>
+                    <label>
+                      <span>Categoria</span>
+                      <select value={noticiaFiltroCategoria} onChange={(e) => { setNoticiaFiltroCategoria(e.target.value); setNoticiaPage(1); }}>
+                        <option value="Todos">Todas as categorias</option>
+                        <option value="Geral">Geral</option>
+                        <option value="Educação">Educação</option>
+                        <option value="Mobilidade">Mobilidade</option>
+                        <option value="Infraestrutura">Infraestrutura</option>
+                        <option value="Comunicados">Comunicados</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  {noticiasFiltradas.length === 0 ? (
+                    <div className="news-empty-state">
+                      <i className="fa-regular fa-newspaper" />
+                      <strong>Nenhuma notícia localizada</strong>
+                      <span>Não há matérias que correspondam aos filtros aplicados.</span>
+                    </div>
+                  ) : (
+                    <div className="news-items-list">
+                      {noticiasPaginadas.map((item) => (
+                        <article key={item.id} className="news-list-item">
+                          <div className="news-list-thumb">
+                            {item.imagem_url ? <img src={montarUrlArquivo(item.imagem_url)} alt="" /> : <i className="fa-regular fa-newspaper" />}
+                          </div>
+                          <div className="news-list-copy">
+                            <div><span>{item.categoria}</span><small><Calendar size={13} /> {item.criado_em}</small></div>
+                            <h3>{item.titulo}</h3>
+                            {item.subtitulo && <p>{item.subtitulo}</p>}
+                          </div>
+                          <div className="news-list-actions">
+                            <button type="button" onClick={() => prepararEdicaoNoticia(item)}><i className="fa-regular fa-pen-to-square" /> Editar</button>
+                            <button type="button" className="is-danger" onClick={() => deletarNoticia(item.id)}><i className="fa-regular fa-trash-can" /> Excluir</button>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                  {renderPagination(noticiaPage, noticiasFiltradas.length, noticiaPerPage, setNoticiaPage)}
+                </section>
+              </>
             )}
-          </>
+          </div>
         ) : (
           <>
             {/* Estatísticas View */}

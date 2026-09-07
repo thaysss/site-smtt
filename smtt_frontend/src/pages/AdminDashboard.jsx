@@ -1,10 +1,10 @@
+import AdminCountBadge from '../components/AdminCountBadge';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, ClipboardList,
   FilePenLine, FileText, Gavel, LoaderCircle, RefreshCw, ShieldAlert,
-  TrendingUp,
-} from 'lucide-react';
+  } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminDateFilter from '../components/AdminDateFilter';
 import api from '../services/api';
@@ -225,23 +225,11 @@ function AdminDashboard() {
                   <ArrowRight size={19} className="dashboard-action-arrow" />
                 </button>
 
-                <button type="button" className="dashboard-stat-card" onClick={() => openPanel('infracoes')}>
-                  <div><span>Infrações hoje</span><Gavel size={22} /></div>
-                  <strong>{metrics.todayInfractions.toString().padStart(2, '0')}</strong>
-                  <small><TrendingUp size={15} /> {filteredData.infracoes.length} registros no período</small>
-                </button>
+                <AdminCountBadge icon={Gavel} label="Infrações hoje" value={metrics.todayInfractions} tone="blue" description={`${filteredData.infracoes.length} registros no período`} onClick={() => openPanel('infracoes')} />
 
-                <button type="button" className="dashboard-stat-card" onClick={() => openPanel('alvaras')}>
-                  <div><span>Alvarás pendentes</span><FileText size={22} /></div>
-                  <strong>{metrics.pendingPermits.toString().padStart(2, '0')}</strong>
-                  <small>Aguardando análise</small>
-                </button>
+                <AdminCountBadge icon={FileText} label="Alvarás pendentes" value={metrics.pendingPermits} tone="amber" description={'Aguardando análise'} onClick={() => openPanel('alvaras')} />
 
-                <button type="button" className="dashboard-stat-card" onClick={() => navigate('/admin/alertas')}>
-                  <div><span>Alertas de interdição</span><AlertTriangle size={22} /></div>
-                  <strong>{metrics.activeAlerts.toString().padStart(2, '0')}</strong>
-                  <small>{metrics.activeAlerts === 1 ? 'Via com alerta ativo' : 'Vias com alerta ativo'}</small>
-                </button>
+                <AdminCountBadge icon={AlertTriangle} label="Alertas de interdição" value={metrics.activeAlerts} tone="red" description={metrics.activeAlerts === 1 ? 'Via com alerta ativo' : 'Vias com alerta ativo'} onClick={() => navigate('/admin/alertas')} />
               </section>
 
               <section className="dashboard-details">

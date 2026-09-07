@@ -84,6 +84,7 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
         <Route path="/admin/painel" element={<AdminProtectedRoute><AdminPainel /></AdminProtectedRoute>} />
+        <Route path="/admin/alvaras" element={<AdminProtectedRoute><AdminPainel defaultTab="alvaras" /></AdminProtectedRoute>} />
         <Route path="/admin/alertas" element={<AdminProtectedRoute><AdminAlertas /></AdminProtectedRoute>} />
         <Route path="/admin/infracoes" element={<AdminProtectedRoute><AdminInfracoes /></AdminProtectedRoute>} />
         <Route path="/admin/veiculos" element={<AdminProtectedRoute><AdminVeiculos /></AdminProtectedRoute>} />

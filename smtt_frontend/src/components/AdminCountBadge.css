@@ -1,0 +1,16 @@
+.admin-count-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 20px; }
+.admin-count-badge { --count-color: #0961cc; --count-background: #deebff; min-width: 0; min-height: 112px; display: flex; align-items: center; gap: 18px; padding: 19px; border: 1px solid #dce3ed; border-radius: 14px; background: #fff; box-shadow: 0 4px 14px rgba(24,47,80,.055); }
+.admin-count-badge--green { --count-color: #0b813b; --count-background: #dff5e6; }
+.admin-count-badge--amber { --count-color: #a56c00; --count-background: #fff1cd; }
+.admin-count-badge--red { --count-color: #cf2637; --count-background: #ffe3e6; }
+.admin-count-badge-icon { width: 58px; height: 58px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 11px; color: var(--count-color); background: var(--count-background); }
+.admin-count-badge-content { display: grid; gap: 5px; min-width: 0; }
+.admin-count-badge-label { color: #5d6b82; font-size: .75rem; font-weight: 750; }
+.admin-count-badge-value { color: var(--count-color); font-size: 1.65rem; line-height: 1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.admin-count-badge-description { color: #6b7d94; font-size: 11px; }
+@media (max-width: 1100px) { .admin-count-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .admin-count-grid { grid-template-columns: 1fr; gap: 10px; } .admin-count-badge { min-height: 100px; padding: 16px; } .admin-count-badge-icon { width: 49px; height: 49px; } }
+
+button.admin-count-badge { width: 100%; text-align: left; font-family: inherit; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+button.admin-count-badge:hover { border-color: var(--count-color); box-shadow: 0 6px 18px rgba(24,47,80,.1); }
+button.admin-count-badge:focus-visible { outline: 3px solid var(--count-color); outline-offset: 3px; }

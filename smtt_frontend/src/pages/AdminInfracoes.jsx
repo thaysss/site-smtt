@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
-  Car, ShieldAlert, CheckCircle,
+  Car, ShieldAlert, CheckCircle, FileText,
   CarFront, MapPin, Calendar, FileDigit, Clock, AlertOctagon, Info,
-  ChevronLeft, ChevronRight, Search, Sparkles, ClipboardCheck, ShieldCheck
+  ChevronLeft, ChevronRight, Search, Sparkles, ClipboardCheck, ShieldCheck, Home
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 
@@ -107,6 +107,46 @@ const INFRACOES_COMUNS_CTB = [
     valor: '2934.70'
   }
 ];
+
+
+function AitStepper({ etapas, etapaAtual, onNavigate }) {
+  return (
+    <nav className="ait-new-stepper" aria-label="Etapas do lançamento do AIT">
+      <div className="ait-new-progress" aria-hidden="true"><span style={{ width: (((etapaAtual - 1) / (etapas.length - 1)) * 100) + '%' }} /></div>
+      <ol>
+        {etapas.map((etapa) => {
+          const Icon = etapa.icon;
+          const concluida = etapaAtual > etapa.num;
+          const ativa = etapaAtual === etapa.num;
+          return (
+            <li key={etapa.num} className={(ativa ? 'is-active ' : '') + (concluida ? 'is-complete' : '')}>
+              <button type="button" disabled={etapa.num > etapaAtual} onClick={() => etapa.num < etapaAtual && onNavigate(etapa.num)} aria-current={ativa ? 'step' : undefined}>
+                <span>{concluida ? <CheckCircle size={17} /> : <Icon size={17} />}</span>
+                <span><strong>{etapa.shortLabel}</strong><small>{etapa.label}</small></span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
+function AitContextPanel({ etapa, etapaAtual, placa, codigoInfracao, local, valor }) {
+  return (
+    <aside className="ait-new-context" aria-label="Resumo do lançamento">
+      <div className="ait-new-context-heading"><span>Etapa {etapaAtual} de 4</span><strong>{etapa.label}</strong><small>{etapa.hint}</small></div>
+      <div className="ait-new-context-progress"><span style={{ width: (etapaAtual * 25) + '%' }} /></div>
+      <dl>
+        <div><dt>Placa</dt><dd className="is-plate">{placa || 'Ainda não informada'}</dd></div>
+        <div><dt>Código CTB</dt><dd>{codigoInfracao || 'Aguardando enquadramento'}</dd></div>
+        <div><dt>Valor estimado</dt><dd>{Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</dd></div>
+        <div><dt>Local</dt><dd>{local || 'Ainda não informado'}</dd></div>
+      </dl>
+      <p><Info size={15} /><span>Os campos marcados com <strong>*</strong> são obrigatórios para avançar.</span></p>
+    </aside>
+  );
+}
 
 function AdminInfracoes() {
   const [step, setStep] = useState(1);
@@ -523,20 +563,21 @@ function AdminInfracoes() {
       <AdminSidebar activeItem="lancar-infracao" />
 
       {/* ÁREA PRINCIPAL DO FORMULÁRIO */}
-      <main className="ait-page flex-1 overflow-y-auto p-6 md:p-10">
-        <header className="ait-header mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <span className="text-[#9b6a00] text-[11px] font-bold tracking-[0.16em] uppercase mb-2 inline-block">Operação de trânsito</span>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Novo Auto de Infração</h1>
-            <p className="text-gray-500 text-sm">Preencha apenas os dados desta etapa. A conferência completa acontece antes do registro.</p>
-          </div>
-          <div className="text-left md:text-right shrink-0">
-            <span className="text-[11px] uppercase tracking-[0.12em] font-bold text-slate-500">Progresso</span>
-            <p className="text-sm font-bold text-[#071b36] mt-1">Etapa {step} de 4 · {step * 25}%</p>
+      <main className="ait-page ait-refactored admin-standard-page flex-1 overflow-y-auto p-6 md:p-10">
+        <nav className="ait-breadcrumb" aria-label="Navegação estrutural">
+          <button type="button" onClick={() => navigate('/admin/dashboard')}><Home size={14} /> Início</button>
+          <ChevronRight size={13} /><span>Fiscalização</span><ChevronRight size={13} /><strong>Novo AIT</strong>
+        </nav>
+
+        <header className="ait-header ait-new-header">
+          <div><span>Operação de trânsito</span><h1>Novo Auto de Infração</h1><p>Registre a ocorrência em etapas e confira todos os dados antes da emissão.</p></div>
+          <div className="ait-new-header-actions">
+            <button type="button" onClick={() => { localStorage.setItem('adminMenuAtivo', 'infracoes'); navigate('/admin/painel'); }}><FileText size={17} /> Consultar autos lançados</button>
+            <div><span>Progresso</span><strong>{step * 25}%</strong></div>
           </div>
         </header>
 
-        <div className="ait-workspace bg-white rounded-2xl shadow-soft border border-gray-100 p-8 w-full relative overflow-hidden">
+        <div className="ait-workspace ait-new-workspace bg-white rounded-2xl shadow-soft border border-gray-100 p-8 w-full relative overflow-hidden">
 
           {mensagem && (
             <div data-ait-feedback className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium animate-fadeIn">
@@ -551,65 +592,10 @@ function AdminInfracoes() {
             </div>
           )}
 
-          {/* Stepper progress bar */}
-          <div className="ait-stepper mb-10" aria-label="Etapas do lançamento do AIT">
-            <div className="flex justify-between items-center max-w-4xl mx-auto relative text-center">
-              {/* Background Bar */}
-              <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 transform -translate-y-1/2 -z-10 rounded-full"></div>
-              {/* Active Progress Bar */}
-              <div
-                className="absolute top-1/2 left-0 h-1 bg-primary-600 transform -translate-y-1/2 -z-10 transition-all duration-300 rounded-full"
-                style={{ width: `${((step - 1) / 3) * 100}%` }}
-              ></div>
-
-              {etapas.map((s) => {
-                const IconComp = s.icon;
-                const isCompleted = step > s.num;
-                const isActive = step === s.num;
-                return (
-                  <div key={s.num} className="flex flex-col items-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (s.num < step) {
-                          setStep(s.num);
-                        }
-                      }}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm ${isCompleted
-                          ? 'bg-primary-600 border-primary-600 text-white hover:bg-primary-700'
-                          : isActive
-                            ? 'bg-white border-primary-600 text-primary-600 font-bold scale-110 ring-4 ring-primary-100'
-                            : 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
-                      disabled={s.num > step}
-                      aria-current={isActive ? 'step' : undefined}
-                      title={`${s.label}: ${s.hint}`}
-                    >
-                      {isCompleted ? <CheckCircle className="w-5 h-5 text-secondary-500" /> : <IconComp className="w-5 h-5" />}
-                    </button>
-                    <span className={`text-[10px] font-bold tracking-wide mt-2 uppercase transition-all duration-200 ${isActive ? 'text-primary-600 font-extrabold' : isCompleted ? 'text-primary-800' : 'text-gray-400'
-                      }`}>
-                      {s.shortLabel}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <AitStepper etapas={etapas} etapaAtual={step} onNavigate={setStep} />
 
           <div className="ait-layout">
-            <aside className="ait-context" aria-label="Resumo do lançamento">
-              <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-slate-500">Etapa atual</p>
-              <h2 className="text-lg font-bold text-[#071b36] mt-1">{etapaAtual.label}</h2>
-              <p className="text-xs text-slate-500 mt-1 leading-5">{etapaAtual.hint}</p>
-              <div className="h-1 bg-slate-200 mt-5"><div className="h-full bg-[#0b4f9c] transition-all" style={{ width: `${step * 25}%` }}></div></div>
-              <dl className="mt-6 space-y-4 text-xs">
-                <div><dt className="text-slate-400 uppercase tracking-wide font-bold">Placa</dt><dd className="text-slate-800 font-bold mt-1 font-mono">{placa || 'Ainda não informada'}</dd></div>
-                <div><dt className="text-slate-400 uppercase tracking-wide font-bold">Código CTB</dt><dd className="text-slate-800 font-bold mt-1">{codigoInfracao || 'Aguardando enquadramento'}</dd></div>
-                <div><dt className="text-slate-400 uppercase tracking-wide font-bold">Local</dt><dd className="text-slate-600 mt-1 leading-4 line-clamp-3">{local || 'Ainda não informado'}</dd></div>
-              </dl>
-              <p className="mt-7 pt-5 border-t border-slate-200 text-[11px] text-slate-500 leading-4"><strong className="text-slate-700">Campos com *</strong> são obrigatórios para avançar.</p>
-            </aside>
+            <AitContextPanel etapa={etapaAtual} etapaAtual={step} placa={placa} codigoInfracao={codigoInfracao} local={local} valor={valor} />
 
           <form onSubmit={handleRegistrarMulta} className="ait-form space-y-6">
 

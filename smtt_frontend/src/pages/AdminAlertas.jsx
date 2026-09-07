@@ -188,8 +188,8 @@ function AdminAlertas() {
       <AdminSidebar activeItem="alertas" />
 
       {/* ÁREA PRINCIPAL */}
-      <main className="flex-1 overflow-y-auto p-6 md:p-10">
-        <header className="mb-10">
+      <main className="admin-standard-page admin-alerts-main flex-1 overflow-y-auto p-6 md:p-10">
+        <header className="admin-standard-header mb-10">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Interdições e avisos viários</h1>
           <p className="text-gray-500">Publique alertas de interdição, obras e acidentes que aparecerão no portal público.</p>
         </header>

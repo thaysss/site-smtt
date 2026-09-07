@@ -11,6 +11,9 @@ import random
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
+from app.routes.admin_registros import registrar_gestao
+registrar_gestao(admin_bp)
+
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
 
 @admin_bp.before_request
@@ -210,6 +213,9 @@ def listar_recursos():
             "id": r.id,
             "tipo_recurso": r.tipo_recurso,
             "resultado_julgamento": r.resultado_julgamento,
+            "justificativa_julgamento": r.justificativa_julgamento,
+            "data_julgamento": r.data_julgamento.strftime("%d/%m/%Y") if r.data_julgamento else None,
+            "anexo_resposta_jari": r.anexo_resposta_jari,
             "arquivo_recurso_cidadao": r.arquivo_recurso_cidadao,
             "anexos": [{"caminho_arquivo": a.caminho_arquivo, "nome_original": a.nome_original} for a in r.anexos],
             "protocolo": {"numero_protocolo": r.protocolo.numero_protocolo} if r.protocolo else {},

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import './Home.css';
 
 function Home() {
   const navigate = useNavigate();
@@ -106,7 +107,7 @@ function Home() {
   };
 
   return (
-    <div id="top" className="font-sans text-gray-800 bg-[#f8fafc] flex flex-col min-h-screen">
+    <div id="top" className="home-page font-sans text-gray-800 bg-[#f8fafc] flex flex-col min-h-screen">
 
       {/* Redesigned Accessibility / Top Bar */}
       <div className="bg-[#0b1c3e] text-white text-xs py-2 px-4 sm:px-6 lg:px-8 flex justify-between items-center border-b border-white/5">
@@ -218,7 +219,7 @@ function Home() {
                   OUTROS <i className="fa-solid fa-chevron-down text-[9px] transition-transform duration-300 group-hover:rotate-180"></i>
                 </button>
                 <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
-                  <button onClick={() => navigate('/login')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-semibold text-secondary-600">Serviços Online</button>
+                  
                   <button onClick={() => setModalConteudo('ouvidoria')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Ouvidoria Digital</button>
                 </div>
               </div>
@@ -277,7 +278,7 @@ function Home() {
 
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center">
-              <button id="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-700 hover:text-primary-600 focus:outline-none focus:bg-primary-50 p-2 rounded-xl transition-colors">
+              <button id="mobile-menu-btn" aria-label="Abrir menu" aria-expanded={isMobileMenuOpen} aria-controls="mobile-menu" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-700 hover:text-primary-600 focus:outline-none focus:bg-primary-50 p-2 rounded-xl transition-colors">
                 <i className={`fa-solid ${isMobileMenuOpen ? 'fa-xmark' : 'fa-bars'} text-2xl`}></i>
               </button>
             </div>
@@ -291,7 +292,7 @@ function Home() {
           {/* Drawer Content */}
           <div className={`absolute top-0 right-0 w-80 max-w-sm h-full bg-white shadow-2xl flex flex-col p-6 transition-transform duration-300 transform ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="flex justify-between items-center pb-6 border-b border-gray-100">
-              <img src="/logo-nome.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
+              <img src="/vc.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-primary-600 p-2 bg-gray-100 hover:bg-primary-50 rounded-full transition-all">
                 <i className="fa-solid fa-xmark text-lg"></i>
               </button>
@@ -349,7 +350,7 @@ function Home() {
       <main id="main-content" className="flex-grow">
 
         {/* Hero Section with slider background */}
-        <section className="relative bg-primary-900 text-white overflow-hidden min-h-[550px] lg:min-h-[620px] flex items-center border-b border-primary-950">
+        <section className="home-hero relative bg-primary-900 text-white overflow-hidden min-h-[550px] lg:min-h-[620px] flex items-center border-b border-primary-950">
 
           {/* Background Slide 1 */}
           <div className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${currentSlide === 0 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 pointer-events-none z-0'}`}>
@@ -368,7 +369,7 @@ function Home() {
             <div className="lg:w-1/2 lg:pr-6 text-center lg:text-left flex flex-col justify-center mb-8 lg:mb-0" key={currentSlide}>
               {currentSlide === 0 ? (
                 <div className="animate-fadeInUp">
-                  <span className="inline-block py-1 px-3.5 rounded-full bg-primary-800/80 text-primary-100 text-xs font-bold mb-6 border border-primary-700 backdrop-blur-sm tracking-wider uppercase">Campanha Maio Amarelo 2026</span>
+                  
                   <h2 className="text-4xl md:text-5xl lg:text-6xl font-sora font-extrabold tracking-tight mb-6 leading-[1.1] text-white">
                     No trânsito,<br />
                     <span className="text-secondary-500">escolha a vida.</span>
@@ -379,7 +380,7 @@ function Home() {
                 </div>
               ) : (
                 <div className="animate-fadeInUp">
-                  <span className="inline-block py-1 px-3.5 rounded-full bg-emerald-950/80 text-emerald-100 text-xs font-bold mb-6 border border-emerald-800 backdrop-blur-sm tracking-wider uppercase">Segurança & Fluidez</span>
+                  
                   <h2 className="text-4xl md:text-5xl lg:text-6xl font-sora font-extrabold tracking-tight mb-6 leading-[1.1] text-white">
                     SMTT Ativa<br />
                     <span className="text-secondary-500">no Trânsito de Propriá.</span>
@@ -400,7 +401,7 @@ function Home() {
             </div>
 
             {/* Quick Info Card: Dynamic Content with Tabs (Consulta de Placa / Avisos Importantes) */}
-            <div className="lg:w-1/2 w-full max-w-md mx-auto z-20">
+            <div className="home-consulta lg:w-1/2 w-full max-w-md mx-auto z-20">
               <div className="bg-white/95 rounded-2xl shadow-xl overflow-hidden text-slate-800 border border-slate-200/85 relative animate-fadeInUp flex flex-col backdrop-blur-md">
                 {/* Custom Glass Header with Tabs */}
                 <div className="bg-slate-50 border-b border-slate-100 flex">
@@ -458,7 +459,7 @@ function Home() {
                               <input
                                 type="text"
                                 maxLength="7"
-                                placeholder="ABC1D23"
+                                placeholder="ABC1D23" aria-label="Placa do veículo"
                                 value={placaBusca}
                                 onChange={(e) => setPlacaBusca(e.target.value.toUpperCase())}
                                 className="w-full text-center text-3xl font-mono font-black tracking-[0.15em] text-slate-900 border-none outline-none focus:ring-0 focus:outline-none placeholder-slate-200 uppercase py-0.5"
@@ -583,14 +584,14 @@ function Home() {
         {/* Serviços (Quick Access) */}
         <section id="servicos" className="py-20 bg-[#f8fafc] relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
+            <div className="home-section-heading mb-12">
               <h2 className="text-3xl font-sora font-extrabold text-slate-900">Portal de Serviços Online</h2>
               <div className="h-1 w-16 bg-secondary-500 mx-auto mt-3.5 rounded-full"></div>
-              <p className="text-sm text-slate-500 mt-3 max-w-md mx-auto">Acesso rápido e desburocratizado para resolver suas demandas de trânsito.</p>
+              <p className="text-sm text-slate-500 mt-3 max-w-md mx-auto">Encontre o serviço que você precisa, sem sair de casa.</p>
             </div>
 
             {/* Grid of Services */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+            <div className="home-services grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
               {/* Service Card 1 */}
               <button onClick={() => navigate('/login')} className="bg-white border border-slate-100 rounded-3xl p-6 flex flex-col items-center justify-between text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-hover hover:border-primary-500/20 group focus:outline-none focus:ring-2 focus:ring-primary-500 relative overflow-hidden h-full shadow-soft">
@@ -780,177 +781,272 @@ function Home() {
           </div>
         </section>
 
-        {/* Numeros / Estatisticas */}
-        <section className="relative py-20 bg-primary-900 text-white border-b-8 border-secondary-500 overflow-hidden">
-          {/* Subtle graphic pattern overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] pointer-events-none"></div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-              {estatisticas.length === 0 ? (
-                Array.from({ length: 5 }).map((_, idx) => (
-                  <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-center items-center animate-pulse h-36">
-                    <div className="h-10 w-24 bg-white/10 rounded-xl mb-3"></div>
-                    <div className="h-4 w-32 bg-white/5 rounded-lg"></div>
-                  </div>
-                ))
-              ) : (
-                estatisticas.slice(0, 4).map((item) => (
-                  <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-center items-center transition-all duration-300 hover:border-secondary-500/30 hover:bg-white/10 hover:-translate-y-1.5 shadow-lg group">
-                    <div className="text-4xl md:text-5xl font-extrabold text-secondary-500 mb-3 flex items-center justify-center gap-3 group-hover:scale-105 transition-transform duration-300">
-                      {item.icone && <i className={`fa-solid ${item.icone} text-2xl text-secondary-500/30 group-hover:text-secondary-500 transition-colors duration-300 shrink-0`}></i>}
-                      <span className="tracking-tight font-sora">{item.valor}</span>
-                    </div>
-                    <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">{item.titulo}</div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
+        
 
         {/* FAQ / Dúvidas Frequentes Section */}
-        <section id="faq" className="py-20 bg-slate-50 border-t border-b border-slate-100 relative z-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <span className="inline-block py-1.5 px-4 rounded-full bg-secondary-50 text-secondary-700 text-xs font-bold mb-3.5 uppercase tracking-wider border border-secondary-200/60">
-                Dúvidas Frequentes
-              </span>
-              <h2 className="text-3xl font-sora font-extrabold text-slate-900">Perguntas Comuns dos Cidadãos</h2>
-              <div className="h-1 w-16 bg-secondary-500 mx-auto mt-4 rounded-full"></div>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                {
-                  q: "Como posso consultar as multas e a situação do meu veículo?",
-                  a: "Você pode consultar de duas formas: usando a busca rápida na aba 'Consulta de Veículo' no topo desta página digitando a placa do veículo, ou fazendo login no 'Painel do Cidadão' com seu CPF/CNPJ e senha para visualizar o extrato completo e emitir boletos."
-                },
-                {
-                  q: "Qual o prazo e como posso apresentar uma Defesa de Autuação (recurso de multa)?",
-                  a: "O prazo limite para apresentar a Defesa da Autuação consta na notificação enviada ao proprietário (geralmente 30 dias a partir da data de postagem ou notificação). Você pode realizar a solicitação de forma digital clicando em 'Defesa de Autuação' no nosso Portal de Serviços e anexando a documentação exigida."
-                },
-                {
-                  q: "Como renovar ou solicitar o Alvará de Permissionários (Táxi, Mototáxi, Escolar)?",
-                  a: "Acesse o serviço 'Alvará & Permissionários' no menu de serviços online. Preencha o formulário eletrônico com os dados do condutor e do veículo e anexe as certidões necessárias. O status da análise poderá ser acompanhado no menu 'Consulta de Protocolo' utilizando o código emitido."
-                },
-                {
-                  q: "Como obter a Credencial de Estacionamento para Idoso ou Pessoa com Deficiência (PCD)?",
-                  a: "Atualmente a credencial deve ser solicitada presencialmente na sede da SMTT Propriá. É necessário apresentar documento de identidade com foto, comprovante de residência atualizado no município e laudo médico recente (para o caso de PCD). Estamos trabalhando para disponibilizar este serviço de forma online em breve."
-                },
-                {
-                  q: "Como solicitar a interdição parcial ou total de uma via pública para a realização de um evento?",
-                  a: "A solicitação deve ser feita com antecedência mínima de 10 dias úteis através do serviço 'Solicitação para Eventos' no portal. Informe o local, data, horários, tipo de evento e anexe uma descrição simples ou croqui do desvio de tráfego proposto para análise técnica."
-                }
-              ].map((faq, index) => (
-                <div key={index} className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                  <button
-                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className="w-full px-6 py-4.5 text-left flex justify-between items-center gap-4 focus:outline-none"
-                  >
-                    <span className="font-bold text-slate-800 text-sm md:text-base leading-snug hover:text-primary-700 transition-colors">
-                      {faq.q}
-                    </span>
-                    <span className={`w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-100 flex-shrink-0 transition-transform duration-300 ${openFaq === index ? 'rotate-180 bg-primary-50 text-primary-600 border-primary-100' : ''}`}>
-                      <i className="fa-solid fa-chevron-down text-[10px]"></i>
-                    </span>
-                  </button>
-                  <div
-                    className={`transition-all duration-300 ease-in-out overflow-hidden ${openFaq === index ? 'max-h-[300px] border-t border-slate-100' : 'max-h-0'}`}
-                  >
-                    <div className="p-6 text-xs md:text-sm text-slate-650 leading-relaxed bg-slate-50/50 font-sans">
-                      {faq.a}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        
 
 
 
       </main>
 
       {/* Footer */}
-      <footer id="contato" className="bg-gray-900 text-white pt-16 pb-8 border-t-[6px] border-secondary-500 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer id="contato" className="home-footer">
+        <div className="home-footer-container">
 
-          {/* FAQ Section Inside Footer (Dark Theme) */}
+          <div className="home-footer-main">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 border-b border-white/5 pb-12">
+            {/* Marca */}
+            <div className="home-footer-brand">
+              <a
+                href="/"
+                className="home-footer-logo"
+                aria-label="SMTT Propriá — início"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/');
+                }}
+              >
+                <img src="/vc.png" alt="SMTT Propriá" />
+              </a>
 
-            {/* Col 1: Sobre a SMTT */}
-            <div>
-
-              <div className="flex items-center gap-3 mb-4">
-                <img src="/SMTT.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
-                <div>
-                  <h4 className="font-sora font-extrabold text-sm text-white">SMTT Propriá</h4>
-                  <span className="text-[9px] font-extrabold text-slate-450 uppercase tracking-wider block">Propriá / SE</span>
-                </div>
-              </div>
-              <p className="text-slate-400 text-xs mb-6 leading-relaxed">
-                Superintendência Municipal de Transportes e Trânsito de Propriá/SE. Atuando continuamente para promover um trânsito mais seguro, ordeiro e com mobilidade eficiente para todos os cidadãos propriaenses.
+              <p className="home-footer-description">
+                Trabalhando pela segurança viária e pela mobilidade de todos os cidadãos.
               </p>
-              <div className="flex space-x-3.5">
-                <a href="#" onClick={(e) => e.preventDefault()} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-[#003399] hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-md" aria-label="Facebook">
-                  <i className="fa-brands fa-facebook-f text-sm"></i>
-                </a>
-                <a href="https://www.instagram.com/smttpropria?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-gradient-to-tr hover:from-amber-500 hover:via-red-500 hover:to-purple-650 hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-md" aria-label="Instagram">
-                  <i className="fa-brands fa-instagram text-sm"></i>
+
+              <div className="home-footer-socials">
+                <a
+                  href="https://www.instagram.com/smttpropria/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram da SMTT Propriá"
+                >
+                  <i className="fa-brands fa-instagram" aria-hidden="true"></i>
                 </a>
 
+                <a href="#" aria-label="Facebook">
+                  <i className="fa-brands fa-facebook-f" aria-hidden="true"></i>
+                </a>
 
+                <a href="#" aria-label="YouTube">
+                  <i className="fa-brands fa-youtube" aria-hidden="true"></i>
+                </a>
               </div>
+
+              <span className="home-footer-social-label">
+                Acompanhe nossas redes
+              </span>
+
+
             </div>
 
-            {/* Col 2: Links */}
-            <div>
-              <h3 className="font-sora font-bold text-base mb-6 border-l-4 border-secondary-500 pl-3">Acesso Rápido</h3>
-              <ul className="space-y-3.5 text-xs font-medium text-slate-400">
-                <li><button onClick={() => navigate('/login')} className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Painel do Cidadão</button></li>
-                <li><button onClick={() => navigate('/consultar')} className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Consultar Protocolo</button></li>
-                <li><button onClick={() => navigate('/admin/login')} className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Acesso Administrativo</button></li>
-                <li><button onClick={() => navigate('/fale-conosco')} className="hover:text-white transition-colors flex items-center gap-2.5 text-left"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500 shrink-0 mt-0.5"></i> Ouvidoria SMTT</button></li>
-                <li><a href="https://www.propria.se.gov.br/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5"><i className="fa-solid fa-chevron-right text-[8px] text-secondary-500"></i> Portal da Prefeitura</a></li>
-              </ul>
+            {/* Acesso rápido */}
+            <nav
+              aria-label="Links úteis do rodapé"
+              className="home-footer-links"
+            >
+              <h3>Acesso rápido</h3>
+
+              <a
+                href="/login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/login');
+                }}
+              >
+                <span>
+                  <i className="fa-solid fa-user"></i>
+                  Painel do Cidadão
+                </span>
+
+                <i className="fa-solid fa-chevron-right home-footer-arrow"></i>
+              </a>
+
+              <a
+                href="/consultar"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/consultar');
+                }}
+              >
+                <span>
+                  <i className="fa-regular fa-file-lines"></i>
+                  Consultar protocolo
+                </span>
+
+                <i className="fa-solid fa-chevron-right home-footer-arrow"></i>
+              </a>
+
+              <a
+                href="/fale-conosco"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/fale-conosco');
+                }}
+              >
+                <span>
+                  <i className="fa-solid fa-headset"></i>
+                  Ouvidoria SMTT
+                </span>
+
+                <i className="fa-solid fa-chevron-right home-footer-arrow"></i>
+              </a>
+
+              <a
+                href="https://www.propria.se.gov.br/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>
+                  <i className="fa-solid fa-building"></i>
+                  Portal da Prefeitura
+                </span>
+
+                <i className="fa-solid fa-arrow-up-right-from-square home-footer-arrow"></i>
+              </a>
+
+              <a
+                href="/admin/login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/admin/login');
+                }}
+              >
+                <span>
+                  <i className="fa-solid fa-gear"></i>
+                  Acesso administrativo
+                </span>
+
+                <i className="fa-solid fa-chevron-right home-footer-arrow"></i>
+              </a>
+            </nav>
+
+            {/* Atendimento */}
+            <div className="home-footer-contact">
+              <h3>Atendimento</h3>
+
+              <address>
+                <div className="home-footer-contact-row">
+                  <div className="home-footer-contact-icon">
+                    <i className="fa-solid fa-location-dot" aria-hidden="true"></i>
+                  </div>
+
+                  <div>
+                    <p>
+                      Avenida João Barbosa Pôrto, 1829
+                      <br />
+                      Propriá – SE · CEP 49900-000
+                    </p>
+                  </div>
+                </div>
+
+                <div className="home-footer-contact-row">
+                  <div className="home-footer-contact-icon">
+                    <i className="fa-solid fa-phone" aria-hidden="true"></i>
+                  </div>
+
+                  <a href="tel:+5579996654115">
+                    (79) 99665-4115
+                  </a>
+                </div>
+
+                <div className="home-footer-contact-row">
+                  <div className="home-footer-contact-icon">
+                    <i className="fa-regular fa-envelope" aria-hidden="true"></i>
+                  </div>
+
+                  <a href="mailto:smtt@propria.se.gov.br">
+                    smtt@propria.se.gov.br
+                  </a>
+                </div>
+
+                <div className="home-footer-contact-row">
+                  <div className="home-footer-contact-icon">
+                    <i className="fa-regular fa-clock" aria-hidden="true"></i>
+                  </div>
+
+                  <p>Seg a Sex, 07h às 13h</p>
+                </div>
+              </address>
             </div>
 
-            {/* Col 3: Contact */}
-            <div>
-              <h3 className="font-sora font-bold text-base mb-6 border-l-4 border-secondary-500 pl-3">Atendimento</h3>
-              <ul className="space-y-4 text-xs text-slate-400 font-medium">
-                <li className="flex items-start gap-3">
-                  <i className="fa-solid fa-location-dot mt-0.5 text-secondary-500 text-sm"></i>
-                  <span className="leading-relaxed">Avenida João Barbosa Pôrto, 1829<br />Propriá - SE - CEP 49900-000<br />Funcionamento: 07h às 13h</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <i className="fa-solid fa-phone text-secondary-500 text-sm"></i>
-                  <span>(79) 99665-4115</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <i className="fa-solid fa-envelope text-secondary-500 text-sm"></i>
-                  <a href="mailto:smtt@propria.se.gov.br" className="hover:text-white transition-colors">smtt@propria.se.gov.br</a>
-                </li>
-              </ul>
+            {/* Fale com a SMTT */}
+            <div className="home-footer-action">
+              <h3>Fale com a SMTT</h3>
+
+              <p>
+                Dúvidas, sugestões ou solicitações?
+                <br />
+                Estamos à disposição para te atender.
+              </p>
+
+              <a
+                className="home-footer-cta"
+                href="/fale-conosco"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/fale-conosco');
+                }}
+              >
+                Entrar em contato
+
+                <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+
             </div>
-
-
 
           </div>
 
-          {/* Bottom Copyright */}
-          <div className="flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 pt-8 border-t border-white/5 gap-4">
-            <div className="flex items-center gap-3">
-              <img src="/SMTT.png" alt="Prefeitura de Propriá" className="h-6 w-auto object-contain opacity-70" />
-              <p className="text-center md:text-left">&copy; 2026 SMTT Propriá/SE. Todos os direitos reservados. Governo Municipal.</p>
-            </div>
-            <div className="flex gap-4">
-              <button onClick={() => navigate('/privacidade')} className="hover:text-white transition-colors">Privacidade</button>
-              <span>|</span>
-              <button onClick={() => navigate('/termos')} className="hover:text-white transition-colors">Termos</button>
+          {/* Parte inferior */}
+          <div className="home-footer-bottom">
+            <p>
+              © {new Date().getFullYear()} SMTT Propriá. Governo Municipal.
+              Todos os direitos reservados.
+            </p>
+
+            <nav aria-label="Informações legais">
+              <a
+                href="/privacidade"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/privacidade');
+                }}
+              >
+                Privacidade
+              </a>
+
+              <span className="home-footer-divider"></span>
+
+              <a
+                href="/termos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/termos');
+                }}
+              >
+                Termos de uso
+              </a>
+
+              <span className="home-footer-divider"></span>
+
+              <a href="#conteudo">
+                Acessibilidade
+              </a>
+            </nav>
+
+            <div className="home-footer-prefeitura">
+              <a
+                href="https://www.propria.se.gov.br/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Portal da Prefeitura de Propriá"
+              >
+                <img src="/.png" alt="Prefeitura de Propriá" />
+              </a>
+              
             </div>
           </div>
+
         </div>
       </footer>
 
@@ -1120,3 +1216,6 @@ function Home() {
 }
 
 export default Home;
+
+
+
