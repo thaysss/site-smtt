@@ -1,7 +1,8 @@
 // src/pages/PortalNoticias.jsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
+import SiteHeader from '../components/SiteHeader';
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const montarUrlArquivo = (caminho) => {
@@ -12,8 +13,10 @@ const montarUrlArquivo = (caminho) => {
 
 function PortalNoticias() {
   const [noticias, setNoticias] = useState([]);
-  const [busca, setBusca] = useState('');
-  const [categoriaAtiva, setCategoriaAtiva] = useState('Todas');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [busca, setBusca] = useState(() => searchParams.get('q') || '');
+  const [categoriaAtiva, setCategoriaAtiva] = useState(() => searchParams.get('categoria') || 'Todas');
+  const [paginaAtual, setPaginaAtual] = useState(() => Math.max(1, Number(searchParams.get('pagina')) || 1));
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -31,6 +34,18 @@ function PortalNoticias() {
     carregarNoticias();
   }, []);
 
+  useEffect(() => {
+    const params = {};
+    if (busca.trim()) params.q = busca.trim();
+    if (categoriaAtiva !== 'Todas') params.categoria = categoriaAtiva;
+    if (paginaAtual > 1) params.pagina = String(paginaAtual);
+    setSearchParams(params, { replace: true });
+  }, [busca, categoriaAtiva, paginaAtual, setSearchParams]);
+
+  const selecionarCategoria = (categoria) => {
+    setCategoriaAtiva(categoria);
+    setPaginaAtual(1);
+  };
   const categorias = ['Todas', 'Educação', 'Mobilidade', 'Infraestrutura', 'Comunicados', 'Geral'];
 
   const noticiasFiltradas = noticias.filter((noticia) => {
@@ -41,6 +56,12 @@ function PortalNoticias() {
     
     return correspondeBusca && correspondeCategoria;
   });
+
+  const itensPorPagina = 6;
+  const noticiasSecundarias = noticiasFiltradas;
+  const totalPaginas = Math.max(1, Math.ceil(noticiasSecundarias.length / itensPorPagina));
+  const noticiasPaginadas = noticiasSecundarias.slice((paginaAtual - 1) * itensPorPagina, paginaAtual * itensPorPagina);
+
 
   const getPlaceholderIcon = (categoria) => {
     switch (categoria) {
@@ -74,49 +95,30 @@ function PortalNoticias() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
-      
-      {/* Header Simplificado */}
-      <header className="bg-primary-900 text-white shadow-md py-4 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/SMTT.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
-            <div>
-              <h1 className="font-bold text-lg leading-tight">SMTT Propriá</h1>
-              <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Portal de Notícias</span>
-            </div>
-          </div>
-          <button 
-            onClick={() => navigate('/')} 
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-white/20 hover:bg-white/10 transition-colors"
-          >
-            <i className="fa-solid fa-arrow-left"></i> Voltar ao Portal
-          </button>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Hero Section das Notícias */}
-      <section className="bg-gradient-to-r from-primary-900 to-primary-850 text-white py-16">
+      <section className="relative overflow-hidden bg-[#0b1c3e] text-white py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-extrabold mb-4 tracking-tight">Notícias e Comunicados</h2>
+          <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">Notícias e comunicados</h2>
           <p className="text-gray-300 max-w-xl mx-auto text-sm md:text-base">
-            Fique por dentro das ações de mobilidade urbana, infraestrutura viária e campanhas de educação no trânsito em Propriá/SE.
+            Acompanhe ações de mobilidade, mudanças no trânsito, serviços e campanhas da SMTT de Propriá.
           </p>
         </div>
       </section>
 
       {/* Área Principal de Filtros e Listagem */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         
         {/* Barra de Ações (Busca e Categorias) */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-150 p-6 mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Campo de Busca */}
           <div className="relative w-full md:max-w-md">
             <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             <input
-              type="text"
-              placeholder="Pesquisar notícias..."
+              type="search" aria-label="Pesquisar notícias" placeholder="Busque por título ou assunto"
               value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              onChange={(e) => { setBusca(e.target.value); setPaginaAtual(1); }}
               className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
             />
           </div>
@@ -128,7 +130,7 @@ function PortalNoticias() {
               return (
                 <button
                   key={cat}
-                  onClick={() => setCategoriaAtiva(cat)}
+                  onClick={() => selecionarCategoria(cat)}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
                     ativo 
                       ? 'bg-primary-600 border-primary-600 text-white shadow-sm' 
@@ -142,33 +144,42 @@ function PortalNoticias() {
           </div>
         </div>
 
+        {!loading && noticiasFiltradas.length > 0 && (
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary-600">Conteúdo atualizado</p>
+              <h2 className="mt-1 text-2xl font-black text-slate-900">Últimas notícias</h2>
+            </div>
+            <span className="text-sm text-slate-500">{noticiasFiltradas.length} {noticiasFiltradas.length === 1 ? 'matéria' : 'matérias'}</span>
+          </div>
+        )}
         {/* Listagem */}
         {loading ? (
-          <div className="text-center py-20">
-            <i className="fa-solid fa-circle-notch fa-spin text-4xl text-primary-600"></i>
-            <p className="text-gray-500 text-sm mt-3 font-semibold">Carregando notícias...</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6" aria-label="Carregando notícias">
+            {[1, 2, 3].map((item) => <div key={item} className="overflow-hidden rounded-2xl border border-slate-200 bg-white animate-pulse"><div className="aspect-[16/10] bg-slate-200"></div><div className="p-6 space-y-3"><div className="h-3 w-24 rounded bg-slate-200"></div><div className="h-5 rounded bg-slate-200"></div><div className="h-4 w-2/3 rounded bg-slate-100"></div></div></div>)}
           </div>
         ) : noticiasFiltradas.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
             <i className="fa-solid fa-newspaper text-5xl text-gray-300 mb-4"></i>
-            <h3 className="text-lg font-bold text-gray-700 mb-1">Nenhuma matéria localizada</h3>
-            <p className="text-xs text-gray-400 font-medium">Nenhuma notícia correspondente aos filtros de pesquisa foi encontrada.</p>
+            <h3 className="text-lg font-bold text-gray-700 mb-1">Nenhuma matéria encontrada</h3>
+            <p className="text-xs text-gray-400 font-medium">Tente outro termo ou selecione outra categoria.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {noticiasFiltradas.map((noticia) => (
+          <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {noticiasPaginadas.map((noticia, index) => (
               <article 
                 key={noticia.id}
                 onClick={() => navigate(`/noticias/${noticia.id}`)}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all group flex flex-col h-full cursor-pointer"
+                className={`bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all group flex flex-col h-full cursor-pointer ${paginaAtual === 1 && index === 0 ? 'md:col-span-2 lg:col-span-2' : ''}`}
               >
                 {/* Imagem de Capa */}
-                <div className="h-48 overflow-hidden relative shrink-0">
+                <div className="aspect-[16/10] overflow-hidden relative shrink-0 bg-slate-100">
                   {noticia.imagem_url ? (
                     <img 
                       src={montarUrlArquivo(noticia.imagem_url)} 
                       alt={noticia.titulo} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className={`w-full h-full ${getPlaceholderBg(noticia.categoria)} flex items-center justify-center group-hover:scale-105 transition-transform duration-500`}>
@@ -190,18 +201,26 @@ function PortalNoticias() {
                       {noticia.titulo}
                     </h3>
                     {noticia.subtitulo && (
-                      <p className="text-gray-500 text-xs mb-4 line-clamp-2 leading-relaxed">
+                      <p className="text-slate-500 text-sm mb-4 line-clamp-2 leading-relaxed">
                         {noticia.subtitulo}
                       </p>
                     )}
                   </div>
                   <span className="text-primary-600 font-bold text-xs hover:underline flex items-center gap-1.5 mt-2">
-                    Ler matéria completa <i className="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    Continuar lendo <i className="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
                   </span>
                 </div>
               </article>
             ))}
           </div>
+          {totalPaginas > 1 && (
+            <nav className="mt-10 flex items-center justify-center gap-3" aria-label="Paginação de notícias">
+              <button disabled={paginaAtual === 1} onClick={() => setPaginaAtual((pagina) => pagina - 1)} className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 disabled:opacity-40">Anterior</button>
+              <span className="text-sm text-slate-500">Página <strong className="text-slate-800">{paginaAtual}</strong> de {totalPaginas}</span>
+              <button disabled={paginaAtual === totalPaginas} onClick={() => setPaginaAtual((pagina) => pagina + 1)} className="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-bold disabled:opacity-40">Próxima</button>
+            </nav>
+          )}
+          </>
         )}
 
       </main>

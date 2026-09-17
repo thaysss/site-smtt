@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import SiteHeader from '../components/SiteHeader';
 
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const montarUrlArquivo = (caminho) => {
@@ -16,6 +17,7 @@ function NoticiaDetalhe() {
   const [noticia, setNoticia] = useState(null);
   const [outrasNoticias, setOutrasNoticias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [linkCopiado, setLinkCopiado] = useState(false);
 
   useEffect(() => {
     const carregarNoticia = async () => {
@@ -95,33 +97,21 @@ function NoticiaDetalhe() {
     );
   }
 
+  const totalPalavras = (noticia.conteudo || '').trim().split(/\s+/).filter(Boolean).length;
+  const tempoLeitura = Math.max(1, Math.ceil(totalPalavras / 200));
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-850">
-      
-      {/* Header Fixo */}
-      <header className="bg-primary-900 text-white shadow-md py-4 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logon.png" alt="Logo SMTT" className="w-10 h-10 object-contain" />
-            <div>
-              <h1 className="font-bold text-lg leading-tight">SMTT Propriá</h1>
-              <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Leitor de Matérias</span>
-            </div>
-          </div>
-          <button 
-            onClick={() => navigate('/noticias')} 
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-white/20 hover:bg-white/10 transition-colors"
-          >
-            <i className="fa-solid fa-arrow-left"></i> Todas as Notícias
-          </button>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <nav className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500" aria-label="Navegação estrutural">
+          <button onClick={() => navigate('/')} className="hover:text-primary-650">Início</button><i className="fa-solid fa-chevron-right text-[8px] text-slate-300" /><button onClick={() => navigate('/noticias')} className="hover:text-primary-650">Notícias</button><i className="fa-solid fa-chevron-right text-[8px] text-slate-300" /><span className="truncate text-slate-400">{noticia.titulo}</span>
+        </nav>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Coluna do Artigo */}
-          <article className="lg:col-span-8 bg-white rounded-3xl border border-gray-150 shadow-sm p-6 md:p-10">
+          <article className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-10 lg:p-12">
             {/* Categoria e Data */}
             <div className="flex items-center gap-3 mb-6">
               <span className={`text-[10px] font-extrabold px-3 py-1 rounded-lg uppercase tracking-wider ${getCategoriaBadgeColor(noticia.categoria)}`}>
@@ -130,10 +120,14 @@ function NoticiaDetalhe() {
               <span className="text-xs text-gray-400 font-bold tracking-wide">
                 <i className="fa-regular fa-calendar mr-1"></i> {noticia.criado_em}
               </span>
+              <span className="text-xs text-slate-400 font-semibold"><i className="fa-regular fa-clock mr-1"></i> {tempoLeitura} min de leitura</span>
+              {noticia.autor && <span className="text-xs text-slate-400 font-semibold"><i className="fa-regular fa-user mr-1"></i> {noticia.autor}</span>}
+              {noticia.atualizado_em && <span className="text-xs text-slate-400 font-semibold"><i className="fa-solid fa-rotate mr-1"></i> Atualizada em {noticia.atualizado_em}</span>}
+              {(noticia.atualizado_em || noticia.data_atualizacao) && <span className="text-xs text-slate-400 font-semibold">Atualizada em {noticia.atualizado_em || noticia.data_atualizacao}</span>}
             </div>
 
             {/* Título e Subtítulo */}
-            <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 leading-tight tracking-tight">
               {noticia.titulo}
             </h1>
             {noticia.subtitulo && (
@@ -158,7 +152,7 @@ function NoticiaDetalhe() {
             </div>
 
             {/* Conteúdo Principal (parágrafos dinâmicos) */}
-            <div className="text-gray-700 leading-relaxed text-base space-y-6">
+            <div className="text-slate-700 leading-8 text-[17px] space-y-6">
               {noticia.conteudo.split('\n').map((paragrafo, idx) => {
                 const trimmed = paragrafo.trim();
                 if (!trimmed) return null;
@@ -177,18 +171,28 @@ function NoticiaDetalhe() {
               <div className="flex items-center gap-2.5">
                 <span className="text-xs text-gray-400 font-bold uppercase tracking-wide">Compartilhar:</span>
                 <button 
-                  onClick={() => { navigator.clipboard.writeText(window.location.href); alert("Link copiado para a área de transferência!"); }}
+                  onClick={async () => { await navigator.clipboard.writeText(window.location.href); setLinkCopiado(true); setTimeout(() => setLinkCopiado(false), 2000); }}
                   className="w-8 h-8 rounded-full bg-gray-100 hover:bg-primary-600 hover:text-white text-gray-600 transition-colors flex items-center justify-center" 
-                  title="Copiar Link"
+                  title={linkCopiado ? 'Link copiado' : 'Copiar link'} aria-label={linkCopiado ? 'Link copiado' : 'Copiar link'}
                 >
-                  <i className="fa-solid fa-link text-xs"></i>
+                  <i className={`fa-solid ${linkCopiado ? 'fa-check' : 'fa-link'} text-xs`}></i>
                 </button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`${noticia.titulo} - ${window.location.href}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-green-50 hover:bg-green-600 hover:text-white text-green-700 transition-colors flex items-center justify-center"
+                  title="Compartilhar no WhatsApp"
+                  aria-label="Compartilhar no WhatsApp"
+                >
+                  <i className="fa-brands fa-whatsapp text-sm"></i>
+                </a>
               </div>
             </div>
           </article>
 
           {/* Coluna Lateral (Sugestões) */}
-          <aside className="lg:col-span-4 space-y-8">
+          <aside className="lg:col-span-4 space-y-8 lg:sticky lg:top-32 lg:self-start">
             <div className="bg-white rounded-2xl border border-gray-150 shadow-sm p-6">
               <h3 className="font-extrabold text-lg text-gray-900 mb-6 pb-2 border-b border-gray-100 flex items-center gap-2">
                 <i className="fa-solid fa-newspaper text-primary-600 text-sm"></i> Outras Matérias
@@ -235,7 +239,7 @@ function NoticiaDetalhe() {
             {/* Card de Informação Rápida */}
             <div className="bg-primary-900 text-white rounded-2xl p-6 shadow-sm border border-primary-950/20 text-center relative overflow-hidden">
               <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-white/5 rounded-full"></div>
-              <img src="/logon.png" alt="SMTT" className="w-12 h-12 mx-auto mb-4 object-contain" />
+              <img src="/logo.png" alt="SMTT" className="w-12 h-12 mx-auto mb-4 object-contain" />
               <h4 className="font-bold text-base mb-2">Canais de Atendimento</h4>
               <p className="text-xs text-gray-300 mb-4 leading-relaxed">Dúvidas sobre trânsito, multas ou interdições? Acesse nosso portal público ou fale com a ouvidoria.</p>
               <button 

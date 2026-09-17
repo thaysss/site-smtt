@@ -2,6 +2,7 @@
 import json
 import logging
 import unittest
+from flask_jwt_extended import create_access_token
 from flask import g
 from app import create_app
 from app.extensions import db
@@ -64,7 +65,9 @@ class TestMonitoringAndDebugging(unittest.TestCase):
 
     def test_performance_metrics_endpoint(self):
         """Rule 7: Every service must have performance metrics like timing, memory, and CPU."""
-        response = self.client.get('/metrics')
+        with self.app.app_context():
+            token = create_access_token(identity='monitor', additional_claims={'role': 'admin'})
+        response = self.client.get('/metrics', headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
         
         data = json.loads(response.data)

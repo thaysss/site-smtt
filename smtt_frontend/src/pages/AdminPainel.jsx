@@ -16,6 +16,17 @@ import AdminDateFilter from '../components/AdminDateFilter';
 import AdminAlvarasSection from '../components/AdminAlvarasSection';
 import { matchesDateFilter } from '../utils/dateFilters';
 
+const CAMPOS_EDICAO_INFRACAO = [
+  ['numero_ait', 'Número do AIT', 'text'], ['data_hora_infracao', 'Data e hora da infração', 'datetime-local'],
+  ['local_cometimento', 'Local da infração', 'text'], ['fase_atual', 'Fase atual', 'text'],
+  ['valor_final', 'Valor da multa (R$)', 'number'], ['data_vencimento_defesa', 'Prazo da defesa', 'date'],
+  ['agente_aparelho', 'Agente / aparelho', 'text'], ['desdobramento', 'Desdobramento', 'text'],
+  ['medicao_aferida', 'Medição aferida', 'text'], ['medicao_considerada', 'Medição considerada', 'text'],
+  ['medicao_regulamentada', 'Medição regulamentada', 'text'], ['codigo_renainf', 'Código Renainf', 'text'],
+  ['numero_nait', 'Número da NAIT', 'text'], ['numero_nip', 'Número da NIP', 'text'],
+  ['data_expedicao', 'Data de expedição', 'date'], ['linha_digitavel', 'Linha digitável', 'text'],
+  ['nosso_numero', 'Nosso número', 'text'], ['data_vencimento_boleto', 'Vencimento do boleto', 'date']
+];
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const montarUrlArquivo = (caminho) => {
   if (!caminho) return '';
@@ -28,6 +39,7 @@ function AdminPainel({ defaultTab }) {
   const [mensagem, setMensagem] = useState('');
   const [justificativaJari, setJustificativaJari] = useState('');
   const [recursoFoco, setRecursoFoco] = useState(null);
+  const [recursoModoEdicao, setRecursoModoEdicao] = useState(false);
   const [recursoSalvando, setRecursoSalvando] = useState(false);
   
   // Novo estado para guardar o arquivo de resposta do agente
@@ -65,10 +77,15 @@ function AdminPainel({ defaultTab }) {
   const [menuAtivo, setMenuAtivo] = useState(() => defaultTab || localStorage.getItem('adminMenuAtivo') || 'recursos');
   const [eventos, setEventos] = useState([]);
   const [eventoFoco, setEventoFoco] = useState(null);
+  const [eventoModoEdicao, setEventoModoEdicao] = useState(false);
+  const [arquivoRespostaEvento, setArquivoRespostaEvento] = useState(null);
   const [justificativaEvento, setJustificativaEvento] = useState('');
   const [infracoes, setInfracoes] = useState([]);
   const [filtroInfracao, setFiltroInfracao] = useState('');
   const [infracaoAberta, setInfracaoAberta] = useState(null);
+  const [infracaoEditando, setInfracaoEditando] = useState(null);
+  const [infracaoValores, setInfracaoValores] = useState({});
+  const [infracaoSalvando, setInfracaoSalvando] = useState(false);
   const [alvaras, setAlvaras] = useState([]);
 
   // ESTADOS DO SISTEMA DE NOTÍCIAS
@@ -634,9 +651,38 @@ function AdminPainel({ defaultTab }) {
     }
   };
 
-  const abrirRecurso = (recurso) => {
+  const abrirEdicaoInfracao = async (infracao) => {
+    setInfracaoAberta(infracao.id);
+    try {
+      const { data } = await api.get('/admin/registros/infracoes');
+      const registro = data.registros.find((item) => item.id === infracao.id);
+      if (!registro) throw new Error('Infração não encontrada.');
+      setInfracaoValores(Object.fromEntries(CAMPOS_EDICAO_INFRACAO.map(([nome]) => [nome, registro[nome] ?? ''])));
+      setInfracaoEditando(infracao.id);
+    } catch (error) {
+      alert(error.response?.data?.erro || error.message || 'Não foi possível abrir a edição da infração.');
+    }
+  };
+
+  const salvarEdicaoInfracao = async (event, id) => {
+    event.preventDefault();
+    if (infracaoSalvando) return;
+    try {
+      setInfracaoSalvando(true);
+      await api.put(`/admin/registros/infracoes/${id}`, infracaoValores);
+      setMensagem('Infração atualizada com sucesso.');
+      setInfracaoEditando(null);
+      await carregarInfracoes();
+    } catch (error) {
+      alert(error.response?.data?.erro || 'Não foi possível salvar a infração.');
+    } finally {
+      setInfracaoSalvando(false);
+    }
+  };
+  const abrirRecurso = (recurso, editar = false) => {
     const finalizado = recurso.resultado_julgamento !== 'Em Análise';
     setRecursoFoco(recurso.id);
+    setRecursoModoEdicao(editar);
     setJustificativaJari(finalizado ? (recurso.justificativa_julgamento || '') : '');
     setArquivoResposta(null);
   };
@@ -644,6 +690,7 @@ function AdminPainel({ defaultTab }) {
   const fecharRecurso = () => {
     if (recursoSalvando) return;
     setRecursoFoco(null);
+    setRecursoModoEdicao(false);
     setJustificativaJari('');
     setArquivoResposta(null);
   };
@@ -668,6 +715,7 @@ function AdminPainel({ defaultTab }) {
       setJustificativaJari('');
       setArquivoResposta(null);
       setRecursoFoco(null);
+      setRecursoModoEdicao(false);
       await carregarRecursos();
     } catch (error) {
       console.error('Erro ao julgar recurso', error);
@@ -677,6 +725,20 @@ function AdminPainel({ defaultTab }) {
     }
   };
 
+  const abrirEvento = (evento, editar = false) => {
+    const finalizado = evento.status === 'Aprovado' || evento.status === 'Negado';
+    setEventoFoco(evento.id);
+    setEventoModoEdicao(editar);
+    setJustificativaEvento(finalizado ? (evento.resposta_analise || '') : '');
+    setArquivoRespostaEvento(null);
+  };
+
+  const fecharEvento = () => {
+    setEventoFoco(null);
+    setEventoModoEdicao(false);
+    setJustificativaEvento('');
+    setArquivoRespostaEvento(null);
+  };
   const julgarEvento = async (id, decisao) => {
     if (!justificativaEvento) {
       alert("Digite o parecer técnico antes de decidir.");
@@ -684,14 +746,17 @@ function AdminPainel({ defaultTab }) {
     }
     
     try {
-      await api.put(`/admin/eventos/${id}/julgar`, {
-        decisao,
-        justificativa_jari: justificativaEvento
-      });
+      const formData = new FormData();
+      formData.append('decisao', decisao);
+      formData.append('justificativa_jari', justificativaEvento);
+      if (arquivoRespostaEvento) formData.append('arquivo_resposta', arquivoRespostaEvento);
+      await api.put(`/admin/eventos/${id}/julgar`, formData);
       
       setMensagem(`Solicitação de evento ${decisao === 'Aprovado' ? 'aprovada' : 'negada'} com sucesso!`);
       setJustificativaEvento('');
+      setArquivoRespostaEvento(null);
       setEventoFoco(null);
+      setEventoModoEdicao(false);
       carregarEventos();
     } catch {
       alert("Erro ao julgar solicitação de evento.");
@@ -968,7 +1033,7 @@ function AdminPainel({ defaultTab }) {
                               <td><span className="recursos-doc-count"><Paperclip size={15} /> {documentos} {documentos === 1 ? 'arquivo' : 'arquivos'}</span></td>
                               <td>{rec.criado_em?.split(' ')[0] || 'Não informado'}</td>
                               <td><span className={`recursos-status ${rec.resultado_julgamento === 'Deferido' ? 'is-approved' : rec.resultado_julgamento === 'Indeferido' ? 'is-denied' : 'is-review'}`}>{rec.resultado_julgamento === 'Em Análise' ? 'Aguardando análise' : rec.resultado_julgamento}</span></td>
-                              <td><button type="button" className="recursos-table-action" onClick={() => abrirRecurso(rec)}>{finalizado ? 'Visualizar' : 'Analisar'}</button><AdminRegistroActions category="recursos" id={rec.id} onSaved={carregarRecursos} /></td>
+                              <td><button type="button" className="recursos-table-action" onClick={() => abrirRecurso(rec)}>{finalizado ? 'Visualizar' : 'Analisar'}</button><AdminRegistroActions category="recursos" id={rec.id} onEdit={() => abrirRecurso(rec, true)} onSaved={carregarRecursos} /></td>
                             </tr>
                           );
                         })}
@@ -1031,7 +1096,7 @@ function AdminPainel({ defaultTab }) {
                         </div>
                       </section>
 
-                      {finalizado ? (
+                      {finalizado && !recursoModoEdicao ? (
                         <section className="recurso-decision-readonly">
                           <div className="recurso-section-heading"><div><CheckCircle size={18} /><h3>Decisão registrada</h3></div><span>{recursoSelecionado.data_julgamento || 'Data não informada'}</span></div>
                           <blockquote>{recursoSelecionado.justificativa_julgamento || 'Nenhum parecer técnico foi registrado.'}</blockquote>
@@ -1052,10 +1117,18 @@ function AdminPainel({ defaultTab }) {
                             {arquivoResposta && <span><CheckCircle size={15} /> {arquivoResposta.name}</span>}
                           </div>
 
+                          {recursoModoEdicao && recursoSelecionado.anexo_resposta_jari && !arquivoResposta && (
+                            <a href={montarUrlArquivo(recursoSelecionado.anexo_resposta_jari)} target="_blank" rel="noopener noreferrer"><FileText size={17} /> Visualizar ofício atual <i className="fa-solid fa-arrow-up-right-from-square" /></a>
+                          )}
+
                           <div className="recurso-decision-note"><ShieldAlert size={17} /><p><strong>Confira o parecer antes de concluir.</strong> A decisão altera a situação da infração e ficará disponível na consulta pública.</p></div>
                           <div className="recurso-decision-actions">
-                            <button type="button" className="is-approved" disabled={recursoSalvando || !justificativaJari.trim()} onClick={() => julgarRecurso(recursoSelecionado.id, 'Deferido')}><CheckCircle size={19} /> {recursoSalvando ? 'Registrando...' : 'Deferir recurso'}</button>
-                            <button type="button" className="is-denied" disabled={recursoSalvando || !justificativaJari.trim()} onClick={() => julgarRecurso(recursoSelecionado.id, 'Indeferido')}><XCircle size={19} /> {recursoSalvando ? 'Registrando...' : 'Indeferir recurso'}</button>
+                            {recursoModoEdicao ? (
+                              <button type="button" className={recursoSelecionado.resultado_julgamento === 'Deferido' ? 'is-approved' : 'is-denied'} disabled={recursoSalvando || !justificativaJari.trim()} onClick={() => julgarRecurso(recursoSelecionado.id, recursoSelecionado.resultado_julgamento)}><CheckCircle size={19} /> {recursoSalvando ? 'Salvando...' : 'Salvar alterações'}</button>
+                            ) : (<>
+                              <button type="button" className="is-approved" disabled={recursoSalvando || !justificativaJari.trim()} onClick={() => julgarRecurso(recursoSelecionado.id, 'Deferido')}><CheckCircle size={19} /> {recursoSalvando ? 'Registrando...' : 'Deferir recurso'}</button>
+                              <button type="button" className="is-denied" disabled={recursoSalvando || !justificativaJari.trim()} onClick={() => julgarRecurso(recursoSelecionado.id, 'Indeferido')}><XCircle size={19} /> {recursoSalvando ? 'Registrando...' : 'Indeferir recurso'}</button>
+                            </>)}
                           </div>
                         </section>
                       )}
@@ -1173,14 +1246,11 @@ function AdminPainel({ defaultTab }) {
                                 <button
                                   type="button"
                                   className="evento-table-action"
-                                  onClick={() => {
-                                    setEventoFoco(eve.id);
-                                    setJustificativaEvento(finalizado ? (eve.resposta_analise || '') : '');
-                                  }}
+                                  onClick={() => abrirEvento(eve)}
                                 >
                                   {finalizado ? 'Visualizar' : aguardando ? 'Analisar' : 'Continuar análise'}
                                 </button>
-                                <AdminRegistroActions category="eventos" id={eve.id} onSaved={carregarEventos} />
+                                <AdminRegistroActions category="eventos" id={eve.id} onEdit={() => abrirEvento(eve, true)} onSaved={carregarEventos} />
                               </td>
                             </tr>
                           );
@@ -1202,14 +1272,14 @@ function AdminPainel({ defaultTab }) {
               const finalizado = eventoSelecionado.status === 'Aprovado' || eventoSelecionado.status === 'Negado';
 
               return (
-                <div className="evento-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEventoFoco(null); }}>
+                <div className="evento-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) fecharEvento(); }}>
                   <section className="evento-modal" role="dialog" aria-modal="true" aria-labelledby="evento-modal-title">
                     <header className="evento-modal-header">
                       <div>
                         <span>Solicitação de evento</span>
                         <h2 id="evento-modal-title">{eventoSelecionado.numero_protocolo}</h2>
                       </div>
-                      <button type="button" onClick={() => setEventoFoco(null)} aria-label="Fechar detalhes"><XCircle size={22} /></button>
+                      <button type="button" onClick={fecharEvento} aria-label="Fechar detalhes"><XCircle size={22} /></button>
                     </header>
 
                     <div className="evento-modal-body">
@@ -1239,12 +1309,13 @@ function AdminPainel({ defaultTab }) {
 
                       <section className="evento-modal-section evento-modal-opinion">
                         <h3>Parecer técnico da SMTT</h3>
-                        {finalizado ? (
+                        {finalizado && !eventoModoEdicao ? (
                           <div className="evento-modal-final-opinion">
                             <span className={'eventos-status ' + (eventoSelecionado.status === 'Aprovado' ? 'is-approved' : 'is-denied')}>
                               {eventoSelecionado.status === 'Aprovado' ? 'Aprovada' : 'Negada'}
                             </span>
                             <p>{eventoSelecionado.resposta_analise || 'Nenhum parecer registrado.'}</p>
+                            {eventoSelecionado.anexo_resposta && <a className="evento-modal-file" href={montarUrlArquivo(eventoSelecionado.anexo_resposta)} target="_blank" rel="noopener noreferrer"><FileText size={17} /> Visualizar anexo da resposta</a>}
                           </div>
                         ) : (
                           <>
@@ -1257,14 +1328,20 @@ function AdminPainel({ defaultTab }) {
                               onChange={(event) => setJustificativaEvento(event.target.value)}
                               autoFocus
                             />
+                            <label htmlFor="anexo-resposta-evento"><Upload size={16} /> Anexo da resposta <small>(opcional)</small></label>
+                            <input id="anexo-resposta-evento" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" onChange={(event) => setArquivoRespostaEvento(event.target.files?.[0] || null)} />
+                            {arquivoRespostaEvento && <small><CheckCircle size={14} /> {arquivoRespostaEvento.name}</small>}
+                            {eventoModoEdicao && eventoSelecionado.anexo_resposta && !arquivoRespostaEvento && <a className="evento-modal-file" href={montarUrlArquivo(eventoSelecionado.anexo_resposta)} target="_blank" rel="noopener noreferrer"><FileText size={17} /> Visualizar anexo atual</a>}
                           </>
                         )}
                       </section>
                     </div>
 
                     <footer className="evento-modal-footer">
-                      <button type="button" className="evento-modal-cancel" onClick={() => setEventoFoco(null)}>{finalizado ? 'Fechar' : 'Cancelar'}</button>
-                      {!finalizado && (
+                      <button type="button" className="evento-modal-cancel" onClick={fecharEvento}>{finalizado && !eventoModoEdicao ? 'Fechar' : 'Cancelar'}</button>
+                      {eventoModoEdicao && finalizado ? (
+                        <button type="button" className="evento-modal-approve" disabled={!justificativaEvento.trim()} onClick={() => julgarEvento(eventoSelecionado.id, eventoSelecionado.status)}><CheckCircle size={18} /> Salvar alterações</button>
+                      ) : !finalizado && (
                         <>
                           <button type="button" className="evento-modal-deny" onClick={() => julgarEvento(eventoSelecionado.id, 'Negado')}><XCircle size={18} /> Negar solicitação</button>
                           <button type="button" className="evento-modal-approve" onClick={() => julgarEvento(eventoSelecionado.id, 'Aprovado')}><CheckCircle size={18} /> Aprovar solicitação</button>
@@ -1402,7 +1479,7 @@ function AdminPainel({ defaultTab }) {
                           </div>
                         </button>
 
-                        <div className="px-5 pb-3 flex justify-end"><AdminRegistroActions category="infracoes" id={inf.id} onSaved={carregarInfracoes} /></div>
+                        <div className="px-5 pb-3 flex justify-end"><AdminRegistroActions category="infracoes" id={inf.id} onEdit={() => abrirEdicaoInfracao(inf)} onSaved={carregarInfracoes} /></div>
 
                         {estaAberto && (
                           <div className="infracao-card-details">
@@ -1442,6 +1519,17 @@ function AdminPainel({ defaultTab }) {
                               </section>
                             </div>
 
+                            {infracaoEditando === inf.id && (
+                              <form onSubmit={(event) => salvarEdicaoInfracao(event, inf.id)} className="mb-5 rounded-xl border border-blue-200 bg-blue-50/40 p-5">
+                                <div className="mb-4 flex items-center justify-between gap-3"><h4>Editar dados da infração</h4><button type="button" onClick={() => setInfracaoEditando(null)} className="text-sm font-semibold text-gray-600">Cancelar</button></div>
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                  {CAMPOS_EDICAO_INFRACAO.map(([nome, label, tipo]) => (
+                                    <label key={nome} className="text-sm font-semibold text-gray-700">{label}<input type={tipo} step={tipo === 'number' ? '0.01' : undefined} value={infracaoValores[nome] ?? ''} onChange={(event) => setInfracaoValores((atual) => ({ ...atual, [nome]: event.target.value }))} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal" /></label>
+                                  ))}
+                                </div>
+                                <div className="mt-5 flex justify-end"><button type="submit" disabled={infracaoSalvando} className="rounded-lg bg-blue-700 px-5 py-2.5 font-bold text-white disabled:opacity-50">{infracaoSalvando ? 'Salvando...' : 'Salvar alterações'}</button></div>
+                              </form>
+                            )}
                             <section className="infracao-process">
                               <h4><Clock3 size={14} /> Histórico legal da autuação</h4>
                               <ol>

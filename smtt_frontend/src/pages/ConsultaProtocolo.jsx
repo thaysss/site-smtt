@@ -112,6 +112,12 @@ function ConsultaProtocolo() {
                       <p className="text-gray-700 leading-relaxed italic">"{resultado.parecer_jari}"</p>
                     </div>
 
+                    {resultado.tipo_servico === 'Solicitação de Evento' && resultado.anexo_resposta_evento && (
+                      <div className="pt-4 border-t border-gray-150">
+                        <a href={montarUrlArquivo(resultado.anexo_resposta_evento)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-all text-sm hover:-translate-y-0.5 w-full sm:w-auto"><FileText className="w-5 h-5 text-white" /> Baixar anexo da resposta</a>
+                      </div>
+                    )}
+
                     {resultado.status_julgamento === 'Aprovado' && ['Renovação de Alvará', 'Inclusão de Permissionário'].includes(resultado.tipo_servico) && (
                       <div className="pt-4 border-t border-gray-150 flex flex-col sm:flex-row gap-3">
                         {resultado.caminho_alvara_emitido ? (

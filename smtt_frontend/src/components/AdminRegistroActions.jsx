@@ -3,12 +3,16 @@ import { createPortal } from 'react-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 import AdminRegistrosSection from './AdminRegistrosSection';
 
-export default function AdminRegistroActions({ category, id, onSaved }) {
+export default function AdminRegistroActions({ category, id, onSaved, onEdit }) {
   const [target, setTarget] = useState(null);
   const trigger = useRef(null);
   const open = (event, action) => {
     event.stopPropagation();
     trigger.current = event.currentTarget;
+    if (action === 'edit' && onEdit) {
+      onEdit();
+      return;
+    }
     setTarget({ category, id, action });
   };
   const close = () => {

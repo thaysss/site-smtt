@@ -11,7 +11,12 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'chave-padrao-de-seguranca')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'chave-padrao-de-seguranca')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
+    CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '*')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 70 * 1024 * 1024))
+    MAX_FORM_MEMORY_SIZE = int(os.getenv('MAX_FORM_MEMORY_SIZE', 2 * 1024 * 1024))
+    MAX_FORM_PARTS = int(os.getenv('MAX_FORM_PARTS', 100))
+    UPLOAD_MAX_FILE_SIZE = int(os.getenv('UPLOAD_MAX_FILE_SIZE', 10 * 1024 * 1024))
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
@@ -29,13 +34,20 @@ class ProductionConfig(Config):
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY') or SECRET_KEY
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
-    # Validações de segurança obrigatórias para produção
-    if os.getenv('FLASK_ENV') == 'production':
-        if not SECRET_KEY or SECRET_KEY == 'chave-padrao-de-seguranca':
-            raise ValueError("A SECRET_KEY de produção deve ser definida no .env e não pode ser a chave padrão.")
-        if not JWT_SECRET_KEY or JWT_SECRET_KEY == 'chave-padrao-de-seguranca':
-            raise ValueError("A JWT_SECRET_KEY de produção deve ser definida no .env e não pode ser a chave padrão.")
-
+    @classmethod
+    def validate(cls):
+        """Fail fast before accepting traffic with unsafe production settings."""
+        invalid = []
+        if not cls.SECRET_KEY or cls.SECRET_KEY == 'chave-padrao-de-seguranca':
+            invalid.append('SECRET_KEY')
+        if not cls.JWT_SECRET_KEY or cls.JWT_SECRET_KEY == 'chave-padrao-de-seguranca':
+            invalid.append('JWT_SECRET_KEY')
+        if not cls.SQLALCHEMY_DATABASE_URI:
+            invalid.append('DATABASE_URL')
+        if not cls.CORS_ALLOWED_ORIGINS or cls.CORS_ALLOWED_ORIGINS == '*':
+            invalid.append('CORS_ALLOWED_ORIGINS')
+        if invalid:
+            raise RuntimeError('Configuração de produção inválida: ' + ', '.join(invalid))
 class TestingConfig(Config):
     """Configurações específicas para execução de testes unitários."""
     TESTING = True

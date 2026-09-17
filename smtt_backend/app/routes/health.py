@@ -115,12 +115,15 @@ def metrics():
         "checked_in": 0,
         "checked_out": 0
     }
-    if hasattr(db.engine, 'pool') and db.engine.pool is not None:
-        db_metrics = {
-            "pool_size": db.engine.pool.size(),
-            "checked_in": db.engine.pool.checkedin(),
-            "checked_out": db.engine.pool.checkedout()
-        }
+    pool = getattr(db.engine, 'pool', None)
+    if pool is not None:
+        for key, method_name in (
+            ("pool_size", "size"),
+            ("checked_in", "checkedin"),
+            ("checked_out", "checkedout"),
+        ):
+            method = getattr(pool, method_name, None)
+            db_metrics[key] = method() if callable(method) else 0
 
     return jsonify({
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),

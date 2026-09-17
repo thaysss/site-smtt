@@ -5,7 +5,7 @@ import api from '../services/api';
 import html2pdf from 'html2pdf.js';
 import {
   Car, AlertCircle, FileText, Download,
-  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, Coins, ExternalLink, Compass,
+  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, ExternalLink, Compass,
   Info
 } from 'lucide-react';
 import formularioPDF from '../assets/requerimento.pdf';
@@ -450,15 +450,6 @@ function Painel() {
   const totalVeiculos = veiculos.length;
   const totalMultas = multas.length;
   const totalRecursos = multas.filter(m => m.recurso).length;
-
-  const pontosCNH = multas
-    .filter(m => !m.fase_atual.includes('Cancelada') && !m.fase_atual.includes('Deferida'))
-    .reduce((acc, m) => acc + (m.tipo_infracao?.pontos || 0), 0);
-
-  const valorPendente = multas
-    .filter(m => !m.fase_atual.includes('Cancelada') && !m.fase_atual.includes('Deferida'))
-    .reduce((acc, m) => acc + parseFloat(m.valor_final || 0), 0)
-    .toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const multasFiltradas = multas.filter(m => {
     if (buscaInfracao.trim() !== '') {

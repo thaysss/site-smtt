@@ -28,7 +28,7 @@ EDITAVEIS = {
     'recursos': 'justificativa_julgamento',
 }
 ANEXOS = {
-    'eventos': {'caminho_arquivo': 'Requerimento do evento'},
+    'eventos': {'caminho_arquivo': 'Requerimento do evento', 'anexo_resposta': 'Anexo da resposta'},
     'alvaras': {col.name: col.name.replace('caminho_', '').replace('_', ' ').capitalize() for col in SolicitacaoAlvara.__table__.columns if col.name.startswith('caminho_')},
     'recursos': {'arquivo_recurso_cidadao': 'Requerimento do cidadão', 'anexo_resposta_jari': 'Resposta da JARI'},
 }
@@ -63,7 +63,7 @@ def preparar_anexos(item, recurso, removidos):
 def aplicar_anexo(item, nome, url, filename=None):
     if nome == 'novo_anexo':
         db.session.add(RecursoAnexo(recurso_id=item.id, caminho_arquivo=url, nome_original=filename[:150]))
-    elif nome.startswith('anexo_') and nome != 'anexo_resposta_jari':
+    elif nome.startswith('anexo_') and nome not in ('anexo_resposta_jari', 'anexo_resposta'):
         anexo = next(anexo for anexo in item.anexos if nome == f'anexo_{anexo.id}')
         if url is None:
             db.session.delete(anexo)

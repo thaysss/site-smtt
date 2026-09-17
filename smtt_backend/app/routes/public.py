@@ -9,10 +9,10 @@ public_bp = Blueprint('public', __name__, url_prefix='/api/public')
 def get_alertas():
     # Consulta no banco: SELECT * FROM alertas_transito WHERE status = 'Ativo'
     alertas_ativos = AlertaTransito.query.filter_by(status='Ativo').all()
-    
+
     # Transforma a lista de objetos do banco em uma lista de dicionários (JSON)
     resultado = [alerta.to_dict() for alerta in alertas_ativos]
-    
+
     return jsonify(resultado), 200
 
 # app/routes/public.py (Adicione os imports necessários no topo se faltar)
@@ -29,17 +29,35 @@ from flask import current_app
 
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(arquivo):
+    if not arquivo or not arquivo.filename or '.' not in arquivo.filename:
+        return False
+    extensao = arquivo.filename.rsplit('.', 1)[1].lower()
+    if extensao not in ALLOWED_EXTENSIONS:
+        return False
+    cabecalho = arquivo.stream.read(12)
+    arquivo.stream.seek(0)
+    assinaturas_validas = (
+        extensao == 'pdf' and cabecalho.startswith(b'%PDF-')
+    ) or (
+        extensao == 'png' and cabecalho.startswith(b'\x89PNG\r\n\x1a\n')
+    ) or (
+        extensao in {'jpg', 'jpeg'} and cabecalho.startswith(b'\xff\xd8\xff')
+    )
+    if not assinaturas_validas:
+        return False
+    arquivo.stream.seek(0, os.SEEK_END)
+    tamanho = arquivo.stream.tell()
+    arquivo.stream.seek(0)
+    return 0 < tamanho <= 10 * 1024 * 1024
 
 @public_bp.route('/protocolos/<numero>', methods=['GET'])
 def consultar_protocolo(numero):
     protocolo = Protocolo.query.filter_by(numero_protocolo=numero.upper()).first()
-    
+
     if not protocolo:
         return jsonify({"erro": "Protocolo não encontrado. Verifique o número digitado."}), 404
-        
+
     if protocolo.tipo_servico == 'Solicitação de Evento':
         evento = SolicitacaoEvento.query.filter_by(protocolo_id=protocolo.id).first()
         return jsonify({
@@ -47,7 +65,8 @@ def consultar_protocolo(numero):
             "data_abertura": protocolo.criado_em.strftime("%d/%m/%Y"),
             "tipo_servico": protocolo.tipo_servico,
             "status_julgamento": protocolo.status,
-            "parecer_jari": evento.resposta_analise if evento else "Sua solicitação de evento está em análise pela equipe técnica da SMTT."
+            "parecer_jari": evento.resposta_analise if evento else "Sua solicitação de evento está em análise pela equipe técnica da SMTT.",
+            "anexo_resposta_evento": evento.anexo_resposta if evento else None
         }), 200
     elif protocolo.tipo_servico in ['Renovação de Alvará', 'Inclusão de Permissionário']:
         alvara = SolicitacaoAlvara.query.filter_by(protocolo_id=protocolo.id).first()
@@ -61,7 +80,7 @@ def consultar_protocolo(numero):
         }), 200
     else:
         recurso = RecursoMulta.query.filter_by(protocolo_id=protocolo.id).first()
-        
+
         # Retorna o status do julgamento para a tela do cidadão
         return jsonify({
             "numero_protocolo": protocolo.numero_protocolo,
@@ -82,31 +101,31 @@ def enviar_solicitacao_evento():
     data_evento = request.form.get('data_evento')
     local_evento = request.form.get('local_evento')
     descricao = request.form.get('descricao', '')
-    
+
     if not (nome and cpf_cnpj and email and telefone and data_evento):
         return jsonify({"erro": "Todos os campos obrigatórios devem ser preenchidos."}), 400
-        
+
     arquivo = request.files.get('arquivo')
     if not arquivo or arquivo.filename == '':
         return jsonify({"erro": "O formulário de requerimento assinado é obrigatório."}), 400
-        
-    if not allowed_file(arquivo.filename):
+
+    if not allowed_file(arquivo):
         return jsonify({"erro": "Tipo de arquivo não permitido. Apenas arquivos PDF, PNG, JPG e JPEG são suportados."}), 400
-        
+
     # Gera um número de protocolo único (Ex: EVE202606114819)
     numero_protocolo = f"EVE{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
-    
+
     # Salva o arquivo enviado
     pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'eventos')
     os.makedirs(pasta_destino, exist_ok=True)
-    
+
     ext = arquivo.filename.rsplit('.', 1)[1].lower() if '.' in arquivo.filename else 'pdf'
     nome_seguro = secure_filename(f"evento_{numero_protocolo}_{uuid.uuid4().hex}.{ext}")
     caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
     arquivo.save(caminho_arquivo)
-    
+
     caminho_salvo = f"/static/uploads/eventos/{nome_seguro}"
-    
+
     # Cria o protocolo geral (sem cidadao_id vinculando uma conta)
     novo_protocolo = Protocolo(
         numero_protocolo=numero_protocolo,
@@ -116,7 +135,7 @@ def enviar_solicitacao_evento():
     )
     db.session.add(novo_protocolo)
     db.session.flush() # Sincroniza para obter id
-    
+
     # Cria a solicitação do evento
     nova_solicitacao = SolicitacaoEvento(
         protocolo_id=novo_protocolo.id,
@@ -131,7 +150,7 @@ def enviar_solicitacao_evento():
     )
     db.session.add(nova_solicitacao)
     db.session.commit()
-    
+
     return jsonify({
         "mensagem": "Solicitação de evento enviada com sucesso!",
         "protocolo": numero_protocolo
@@ -145,19 +164,19 @@ from app.models.servicos import Veiculo, AutoInfracao
 def consulta_publica_placa():
     dados = request.get_json()
     placa = dados.get('placa', '').upper()
-    
+
     veiculo = Veiculo.query.filter_by(placa=placa).first()
-    
+
     # Se o veículo não existe, obviamente não tem multas
     if not veiculo:
         return jsonify({"tem_multas": False, "mensagem": "Nenhum registro de infração encontrado para esta placa."}), 200
-        
+
     # Se o veículo existe, conta as infrações associadas a ele
     infracoes = AutoInfracao.query.filter_by(veiculo_id=veiculo.id).all()
-    
+
     if not infracoes:
          return jsonify({"tem_multas": False, "mensagem": "Nenhuma infração pendente encontrada para esta placa."}), 200
-         
+
     return jsonify({
         "tem_multas": True,
         "quantidade": len(infracoes),
@@ -195,26 +214,26 @@ def enviar_solicitacao_alvara():
     telefone = request.form.get('telefone')
     placa_veiculo = request.form.get('placa_veiculo', '')
     fator_rh = request.form.get('fator_rh', '')
-    
+
     tem_auxiliar = request.form.get('tem_auxiliar') == 'true'
     nome_auxiliar = request.form.get('nome_auxiliar', '')
     cpf_auxiliar = request.form.get('cpf_auxiliar', '')
-    
+
     if not (tipo_servico and nome and cpf and email and telefone):
         return jsonify({"erro": "Preencha todos os campos obrigatórios do permissionário."}), 400
-        
+
     # Gera um número de protocolo único
     prefixo = "ALV" if tipo_servico == 'Renovação de Alvará' else "PER"
     numero_protocolo = f"{prefixo}{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
-    
+
     # Salvar arquivos
     pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'alvaras')
     os.makedirs(pasta_destino, exist_ok=True)
-    
+
     def salvar_arquivo(campo_nome):
         arq = request.files.get(campo_nome)
         if arq and arq.filename != '':
-            if not allowed_file(arq.filename):
+            if not allowed_file(arq):
                 raise ValueError(f"O arquivo enviado no campo '{campo_nome}' possui uma extensão não permitida. Apenas arquivos PDF, PNG, JPG e JPEG são permitidos.")
             ext = arq.filename.rsplit('.', 1)[1].lower() if '.' in arq.filename else 'pdf'
             nome_seguro = secure_filename(f"{numero_protocolo}_{campo_nome}_{uuid.uuid4().hex}.{ext}")
@@ -237,16 +256,16 @@ def enviar_solicitacao_alvara():
         caminho_regularidade_cnis = salvar_arquivo('regularidade_cnis')
         caminho_foto = salvar_arquivo('foto')
         caminho_fator_rh = salvar_arquivo('fator_rh')
-        
+
         # Validações de arquivos obrigatórios do titular
         if not (caminho_requerimento and caminho_cnh and caminho_crlv and caminho_certidao_eleitoral and caminho_antecedentes_criminais and caminho_comprovante_endereco and caminho_certificado_curso and caminho_regularidade_cnis and caminho_foto):
             return jsonify({"erro": "Algum documento obrigatório do permissionário não foi enviado (incluindo o Requerimento Preenchido e a Foto 3/4)."}), 400
-            
+
         # Se for Inclusão, valida Título Eleitoral, Cadastro CNIS
         if tipo_servico == 'Inclusão de Permissionário':
             if not (caminho_titulo_eleitoral and caminho_cadastro_cnis):
                 return jsonify({"erro": "Para inclusão de permissionário, os documentos adicionais (Título Eleitoral, Cadastro CNIS) são obrigatórios."}), 400
-    
+
         # Salva arquivos do auxiliar se houver
         caminho_cnh_auxiliar = None
         caminho_crlv_auxiliar = None
@@ -259,11 +278,11 @@ def enviar_solicitacao_alvara():
         caminho_regularidade_cnis_auxiliar = None
         caminho_foto_auxiliar = None
         caminho_fator_rh_auxiliar = None
-        
+
         if tem_auxiliar:
             if not (nome_auxiliar and cpf_auxiliar):
                 return jsonify({"erro": "Preencha o nome e CPF do condutor auxiliar."}), 400
-                
+
             caminho_cnh_auxiliar = salvar_arquivo('cnh_auxiliar')
             caminho_crlv_auxiliar = salvar_arquivo('crlv_auxiliar')
             caminho_titulo_eleitoral_auxiliar = salvar_arquivo('titulo_eleitoral_auxiliar')
@@ -275,11 +294,11 @@ def enviar_solicitacao_alvara():
             caminho_regularidade_cnis_auxiliar = salvar_arquivo('regularidade_cnis_auxiliar')
             caminho_foto_auxiliar = salvar_arquivo('foto_auxiliar')
             caminho_fator_rh_auxiliar = salvar_arquivo('fator_rh_auxiliar')
-            
+
             # Validar documentos obrigatórios do auxiliar (mesma documentação exigida)
             if not (caminho_cnh_auxiliar and caminho_crlv_auxiliar and caminho_certidao_eleitoral_auxiliar and caminho_antecedentes_criminais_auxiliar and caminho_comprovante_endereco_auxiliar and caminho_certificado_curso_auxiliar and caminho_regularidade_cnis_auxiliar and caminho_foto_auxiliar):
                 return jsonify({"erro": "Algum documento obrigatório do condutor auxiliar não foi enviado (incluindo a Foto 3/4)."}), 400
-                
+
             if tipo_servico == 'Inclusão de Permissionário':
                 if not (caminho_titulo_eleitoral_auxiliar and caminho_cadastro_cnis_auxiliar):
                     return jsonify({"erro": "Para inclusão de permissionário, os documentos adicionais do condutor auxiliar são obrigatórios."}), 400
@@ -295,7 +314,7 @@ def enviar_solicitacao_alvara():
     )
     db.session.add(novo_protocolo)
     db.session.flush()
-    
+
     # Cria a solicitação
     nova_solicitacao = SolicitacaoAlvara(
         protocolo_id=novo_protocolo.id,
@@ -309,7 +328,7 @@ def enviar_solicitacao_alvara():
         tem_auxiliar=tem_auxiliar,
         nome_auxiliar=nome_auxiliar,
         cpf_auxiliar=cpf_auxiliar,
-        
+
         caminho_requerimento=caminho_requerimento,
         caminho_cnh=caminho_cnh,
         caminho_crlv=caminho_crlv,
@@ -322,7 +341,7 @@ def enviar_solicitacao_alvara():
         caminho_regularidade_cnis=caminho_regularidade_cnis,
         caminho_foto=caminho_foto,
         caminho_fator_rh=caminho_fator_rh,
-        
+
         caminho_cnh_auxiliar=caminho_cnh_auxiliar,
         caminho_crlv_auxiliar=caminho_crlv_auxiliar,
         caminho_titulo_eleitoral_auxiliar=caminho_titulo_eleitoral_auxiliar,
@@ -335,10 +354,10 @@ def enviar_solicitacao_alvara():
         caminho_foto_auxiliar=caminho_foto_auxiliar,
         caminho_fator_rh_auxiliar=caminho_fator_rh_auxiliar
     )
-    
+
     db.session.add(nova_solicitacao)
     db.session.commit()
-    
+
     return jsonify({
         "mensagem": "Solicitação enviada com sucesso!",
         "protocolo": numero_protocolo
@@ -354,7 +373,7 @@ def enviar_recurso_multa_publico():
     cpf_solicitante = request.form.get('cpf_solicitante')
     email_solicitante = request.form.get('email_solicitante')
     telefone_solicitante = request.form.get('telefone_solicitante')
-    
+
     if not (placa and numero_ait and nome_solicitante and cpf_solicitante and email_solicitante and telefone_solicitante):
         return jsonify({"erro": "Todos os campos obrigatórios devem ser preenchidos."}), 400
 
@@ -388,7 +407,7 @@ def enviar_recurso_multa_publico():
         veiculo = Veiculo(placa=placa)
         db.session.add(veiculo)
         db.session.flush() # Para gerar o id do veículo
-        
+
     # 2. Encontra ou cria o Auto de Infração (AIT)
     infracao = AutoInfracao.query.filter_by(numero_ait=numero_ait).first()
     if not infracao:
@@ -414,10 +433,10 @@ def enviar_recurso_multa_publico():
     # Salva arquivos
     pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
     os.makedirs(pasta_destino, exist_ok=True)
-    
+
     def salvar_arquivo_publico(arq, tipo_nome):
         if arq and arq.filename != '':
-            if not allowed_file(arq.filename):
+            if not allowed_file(arq):
                 raise ValueError(f"O arquivo enviado no campo '{tipo_nome}' possui uma extensão não permitida. Apenas arquivos PDF, PNG, JPG e JPEG são permitidos.")
             ext = arq.filename.rsplit('.', 1)[1].lower() if '.' in arq.filename else 'pdf'
             nome_seguro = secure_filename(f"{numero_protocolo}_{tipo_nome}_{uuid.uuid4().hex}.{ext}")
@@ -483,4 +502,4 @@ def enviar_recurso_multa_publico():
     return jsonify({
         "mensagem": "Contestação de multa enviada com sucesso!",
         "protocolo": numero_protocolo
-    }), 201
+    }), 201

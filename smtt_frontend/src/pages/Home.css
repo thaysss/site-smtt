@@ -100,7 +100,25 @@
 .home-footer-bottom nav a { transition: color .2s; }
 .home-footer-bottom nav a:hover { color: #f4c542; }
 .home-footer-divider { display: block; width: 1px; height: 15px; background: #ffffff3b; }
-.home-footer-prefeitura { display: flex; flex-direction: column; align-items: flex-end; line-height: 1; }
+.home-footer-prefeitura {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.home-footer-prefeitura a {
+  display: flex;
+  align-items: center;
+}
+
+.home-footer-prefeitura img {
+  display: block;
+  width: auto;
+  height: 25px;
+  max-width: 120px;
+  object-fit: contain;
+}
 .home-footer a:focus-visible { outline: 2px solid #f4c542; outline-offset: 4px; border-radius: 3px; }
 @media (max-width: 1100px) {
   .home-footer-main { grid-template-columns: 1fr 1fr; gap: 44px 34px; }

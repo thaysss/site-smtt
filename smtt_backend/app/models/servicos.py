@@ -163,6 +163,7 @@ class SolicitacaoEvento(db.Model):
     descricao = db.Column(db.Text, nullable=True)
     caminho_arquivo = db.Column(db.String(255), nullable=False)
     resposta_analise = db.Column(db.Text, default='Sua solicitação de evento está em análise pela equipe técnica da SMTT.')
+    anexo_resposta = db.Column(db.String(255), nullable=True)
     
     protocolo = db.relationship('Protocolo', backref=db.backref('evento', uselist=False), lazy=True)
 
@@ -179,6 +180,7 @@ class SolicitacaoEvento(db.Model):
             "descricao": self.descricao,
             "caminho_arquivo": self.caminho_arquivo,
             "resposta_analise": self.resposta_analise,
+            "anexo_resposta": self.anexo_resposta,
             "numero_protocolo": self.protocolo.numero_protocolo if self.protocolo else None,
             "status": self.protocolo.status if self.protocolo else None,
             "criado_em": self.protocolo.criado_em.strftime("%d/%m/%Y") if self.protocolo else None

@@ -12,10 +12,12 @@ app = create_app()
 
 with app.app_context():
     # Parâmetros customizáveis via variáveis de ambiente para produção
-    admin_matricula = os.getenv('INITIAL_ADMIN_MATRICULA', 'admin123')
+    admin_matricula = os.getenv('INITIAL_ADMIN_MATRICULA')
     admin_nome = os.getenv('INITIAL_ADMIN_NOME', 'Inspetor Chefe')
     admin_cargo = os.getenv('INITIAL_ADMIN_CARGO', 'Agente de Trânsito')
-    admin_senha = os.getenv('INITIAL_ADMIN_PASSWORD', 'senha123')
+    admin_senha = os.getenv('INITIAL_ADMIN_PASSWORD')
+    if not admin_matricula or not admin_senha or len(admin_senha) < 12:
+        raise RuntimeError('Defina INITIAL_ADMIN_MATRICULA e uma INITIAL_ADMIN_PASSWORD com pelo menos 12 caracteres.')
 
     # Verifica se o servidor já existe pela matrícula para não duplicar
     servidor_existente = Servidor.query.filter_by(matricula=admin_matricula).first()

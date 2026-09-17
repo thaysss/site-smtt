@@ -189,7 +189,7 @@ function Login() {
                 <label htmlFor="senha">Senha</label>
                 <div className="citizen-auth-field has-action">
                   <Lock size={19} aria-hidden="true" />
-                  <input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(event) => setSenha(event.target.value)} placeholder={isCadastro ? 'Mínimo de 6 caracteres' : 'Digite sua senha'} autoComplete={isCadastro ? 'new-password' : 'current-password'} minLength={isCadastro ? 6 : undefined} required />
+                  <input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(event) => setSenha(event.target.value)} placeholder={isCadastro ? 'Mínimo de 8 caracteres' : 'Digite sua senha'} autoComplete={isCadastro ? 'new-password' : 'current-password'} minLength={isCadastro ? 8 : undefined} required />
                   <button type="button" onClick={() => setMostrarSenha((valor) => !valor)} aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'} title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>
                     {mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>

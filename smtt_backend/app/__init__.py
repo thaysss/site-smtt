@@ -3,15 +3,37 @@ import uuid
 import time
 import logging
 import traceback
+from collections import defaultdict, deque
+from threading import Lock
 from flask import Flask, send_from_directory, request, g, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 import psutil
 
-from .config import Config, DevelopmentConfig, ProductionConfig, TestingConfig
+from .config import DevelopmentConfig, ProductionConfig, TestingConfig
 from .extensions import db, jwt
 from .utils.logging_setup import setup_logging, request_id_var
 from .utils.alerts import start_alert_monitor
+
+_rate_limit_buckets = defaultdict(deque)
+_rate_limit_lock = Lock()
+
+
+def _client_ip():
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    return (forwarded.split(',')[0].strip() if forwarded else request.remote_addr) or 'unknown'
+
+
+def _rate_limit_exceeded(key, limit, window_seconds):
+    now = time.monotonic()
+    with _rate_limit_lock:
+        bucket = _rate_limit_buckets[key]
+        while bucket and now - bucket[0] >= window_seconds:
+            bucket.popleft()
+        if len(bucket) >= limit:
+            return True
+        bucket.append(now)
+        return False
 
 def create_app(test_config=None):
     # 1. Initialize Structured Logging first
@@ -22,6 +44,7 @@ def create_app(test_config=None):
     import os
     env = os.getenv('FLASK_ENV', 'development')
     if env == 'production':
+        ProductionConfig.validate()
         app.config.from_object(ProductionConfig)
     elif env == 'testing':
         app.config.from_object(TestingConfig)
@@ -32,60 +55,18 @@ def create_app(test_config=None):
         app.config.update(test_config)
         
     import os
-    cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '*')
-    if cors_origins != '*' and ',' in cors_origins:
-        cors_origins = [o.strip() for o in cors_origins.split(',')]
-    CORS(app, origins=cors_origins)
+    cors_origins = app.config.get('CORS_ALLOWED_ORIGINS', '*')
+    if cors_origins != '*':
+        cors_origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+    CORS(app, origins=cors_origins, supports_credentials=False, allow_headers=['Authorization', 'Content-Type'], methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
         
     db.init_app(app)
     
-    # Migrações automáticas de esquema de banco de dados
-    with app.app_context():
-        from sqlalchemy import text
-        try:
-            def adicionar_colunas_se_necessario(tabela, colunas):
-                colunas_existentes = {
-                    coluna['name']
-                    for coluna in db.inspect(db.engine).get_columns(tabela)
-                }
-                for nome, definicao in colunas.items():
-                    if nome not in colunas_existentes:
-                        db.session.execute(text(
-                            f"ALTER TABLE {tabela} ADD COLUMN {nome} {definicao}"
-                        ))
-
-            adicionar_colunas_se_necessario('veiculos', {
-                'ano_fabricacao': 'INTEGER',
-                'marca_modelo': 'VARCHAR(100)',
-                'cor': 'VARCHAR(50)',
-                'uf': "VARCHAR(2) DEFAULT 'SE'",
-            })
-
-            adicionar_colunas_se_necessario('autos_infracao', {
-                'agente_aparelho': 'VARCHAR(50)',
-                'desdobramento': "VARCHAR(10) DEFAULT '1'",
-                'medicao_aferida': 'VARCHAR(30)',
-                'medicao_considerada': 'VARCHAR(30)',
-                'medicao_regulamentada': 'VARCHAR(30)',
-                'codigo_renainf': 'VARCHAR(30)',
-                'numero_nait': 'VARCHAR(30)',
-                'numero_nip': 'VARCHAR(30)',
-                'data_expedicao': 'DATE',
-                'linha_digitavel': 'VARCHAR(100)',
-                'nosso_numero': 'VARCHAR(50)',
-                'data_vencimento_boleto': 'DATE',
-            })
-            
-            db.session.commit()
-            logging.getLogger("app.info").info("Migrações automáticas de banco executadas com sucesso!")
-        except Exception as e:
-            db.session.rollback()
-            logging.getLogger("app.error").error(f"Erro na migração automática de banco de dados: {e}")
-
     jwt.init_app(app) # Inicializa o gerenciador de Tokens
     
     # Start the alert checker in the background
-    start_alert_monitor(interval_sec=60)
+    if not app.config.get('TESTING'):
+        start_alert_monitor(interval_sec=60)
     
     from .routes.public import public_bp
     from .routes.auth import auth_bp
@@ -106,6 +87,32 @@ def create_app(test_config=None):
     # 2. Before/After Request Hooks for tracing and metrics
     @app.before_request
     def before_request():
+        if request.method == 'POST' and request.path.startswith(('/api/auth/', '/api/public/')):
+            honeypot = request.form.get('_website') if request.form else None
+            if request.is_json:
+                payload = request.get_json(silent=True)
+                honeypot = payload.get('_website') if isinstance(payload, dict) else None
+            if honeypot:
+                return jsonify({"erro": "Requisição inválida."}), 400
+
+        limits = {
+            ('POST', '/api/auth/login'): (8, 60),
+            ('POST', '/api/auth/admin/login'): (8, 60),
+            ('POST', '/api/auth/cadastro'): (5, 3600),
+            ('POST', '/api/public/solicitacao-evento'): (10, 3600),
+            ('POST', '/api/public/solicitacao-alvara'): (10, 3600),
+            ('POST', '/api/public/contestacao'): (10, 3600),
+        }
+        rule = limits.get((request.method, request.path))
+        if request.method == 'GET' and request.path.startswith('/api/public/protocolos/'):
+            rule = (30, 60)
+        rate_path = '/api/public/protocolos/*' if request.path.startswith('/api/public/protocolos/') else request.path
+        if rule and _rate_limit_exceeded((_client_ip(), request.method, rate_path), *rule):
+            response = jsonify({"erro": "Muitas tentativas. Aguarde e tente novamente."})
+            response.status_code = 429
+            response.headers['Retry-After'] = str(rule[1])
+            return response
+
         # Inject Request ID
         req_id = request.headers.get('X-Request-ID') or uuid.uuid4().hex
         g.request_id = req_id
@@ -114,6 +121,17 @@ def create_app(test_config=None):
 
     @app.after_request
     def after_request(response):
+        response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+        response.headers.setdefault('X-Frame-Options', 'DENY')
+        response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+        response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+        response.headers.setdefault('Cross-Origin-Opener-Policy', 'same-origin')
+        response.headers.setdefault('Cross-Origin-Resource-Policy', 'same-site')
+        if app.config.get('ENV') == 'production' or os.getenv('FLASK_ENV') == 'production':
+            response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+        if request.path.startswith('/api/auth/'):
+            response.headers.setdefault('Cache-Control', 'no-store')
+
         # Attach Request ID header to client response
         req_id = getattr(g, 'request_id', '-')
         response.headers['X-Request-ID'] = req_id

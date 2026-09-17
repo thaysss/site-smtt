@@ -18,7 +18,6 @@ function Home() {
   const [servicoIndisponivel, setServicoIndisponivel] = useState('');
 
   const [activeHeroTab, setActiveHeroTab] = useState('placa'); // 'placa' ou 'avisos'
-  const [openFaq, setOpenFaq] = useState(null);
 
   // Estados de Dados (Busca, Alertas e Notícias)
   const [alertas, setAlertas] = useState([]);
@@ -26,7 +25,7 @@ function Home() {
   const [resultadoBusca, setResultadoBusca] = useState(null);
   const [buscando, setBuscando] = useState(false);
   const [noticias, setNoticias] = useState([]);
-  const [estatisticas, setEstatisticas] = useState([]);
+  const [, setEstatisticas] = useState([]);
 
   // Efeito do Modo Alto Contraste (Acessibilidade)
   useEffect(() => {
@@ -1041,7 +1040,7 @@ function Home() {
                 rel="noopener noreferrer"
                 aria-label="Portal da Prefeitura de Propriá"
               >
-                <img src="/.png" alt="Prefeitura de Propriá" />
+                <img src="/prefe.jpg" alt="Prefeitura de Propriá" />
               </a>
               
             </div>

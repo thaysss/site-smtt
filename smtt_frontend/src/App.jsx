@@ -1,24 +1,24 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Painel from './pages/Painel';
-import AdminLogin from './pages/AdminLogin';
-import AdminPainel from './pages/AdminPainel';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminAlertas from './pages/AdminAlertas';
-import AdminInfracoes from './pages/AdminInfracoes';
-import AdminVeiculos from './pages/AdminVeiculos';
-import AdminUsuarios from './pages/AdminUsuarios';
-import ConsultaProtocolo from './pages/ConsultaProtocolo';
-import SolicitacaoEvento from './pages/SolicitacaoEvento';
-import SolicitacaoAlvara from './pages/SolicitacaoAlvara';
-import PortalNoticias from './pages/PortalNoticias';
-import NoticiaDetalhe from './pages/NoticiaDetalhe';
-import ContestacaoMulta from './pages/ContestacaoMulta';
-import FaleConosco from './pages/FaleConosco';
-import Termos from './pages/Termos';
-import Privacidade from './pages/Privacidade';
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Painel = lazy(() => import('./pages/Painel'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminPainel = lazy(() => import('./pages/AdminPainel'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminAlertas = lazy(() => import('./pages/AdminAlertas'));
+const AdminInfracoes = lazy(() => import('./pages/AdminInfracoes'));
+const AdminVeiculos = lazy(() => import('./pages/AdminVeiculos'));
+const AdminUsuarios = lazy(() => import('./pages/AdminUsuarios'));
+const ConsultaProtocolo = lazy(() => import('./pages/ConsultaProtocolo'));
+const SolicitacaoEvento = lazy(() => import('./pages/SolicitacaoEvento'));
+const SolicitacaoAlvara = lazy(() => import('./pages/SolicitacaoAlvara'));
+const PortalNoticias = lazy(() => import('./pages/PortalNoticias'));
+const NoticiaDetalhe = lazy(() => import('./pages/NoticiaDetalhe'));
+const ContestacaoMulta = lazy(() => import('./pages/ContestacaoMulta'));
+const FaleConosco = lazy(() => import('./pages/FaleConosco'));
+const Termos = lazy(() => import('./pages/Termos'));
+const Privacidade = lazy(() => import('./pages/Privacidade'));
 
 // Guarda de Rota para Cidadão Autenticado
 const ProtectedRoute = ({ children }) => {
@@ -76,6 +76,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Suspense fallback={<div className="min-h-screen grid place-items-center">Carregando…</div>}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -99,6 +100,7 @@ function App() {
         <Route path="/termos" element={<Termos />} />
         <Route path="/privacidade" element={<Privacidade />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

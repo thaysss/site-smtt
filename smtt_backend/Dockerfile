@@ -17,7 +17,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose port
+RUN useradd --create-home --uid 10001 app && chown -R app:app /app
+
+USER app
+
 EXPOSE 5000
 
 # Run using gunicorn with JSON logging enabled in stdout
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--timeout", "60", "run:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "2", "--timeout", "60", "run:app"]

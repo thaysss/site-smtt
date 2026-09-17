@@ -12,7 +12,6 @@ function FaleConosco() {
   // Estados de Acessibilidade e Modais
   const [altoContraste, setAltoContraste] = useState(() => localStorage.getItem('altoContraste') === 'true');
   const [modalConteudo, setModalConteudo] = useState(null);
-  const [servicoIndisponivel, setServicoIndisponivel] = useState('');
 
   // Estados do Formulário de Ouvidoria
   const [ouvidoriaNome, setOuvidoriaNome] = useState('');

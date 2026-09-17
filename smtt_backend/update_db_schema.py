@@ -2,12 +2,17 @@
 from app import create_app, db
 from sqlalchemy import text
 import sys
+import os
+
+if os.getenv("RUN_DATABASE_MIGRATIONS") != "yes":
+    print("Migração não executada. Defina RUN_DATABASE_MIGRATIONS=yes após revisar backup e destino.", file=sys.stderr)
+    sys.exit(2)
 
 app = create_app()
 
 with app.app_context():
     try:
-        print("Iniciando migração de banco de dados no Supabase...")
+        print("Iniciando migração explícita de banco de dados...")
         
         # 1. Colunas da tabela veiculos
         print("Adicionando colunas na tabela veiculos...")
@@ -73,9 +78,10 @@ with app.app_context():
         # 7. Alterar tabela solicitacoes_eventos para permitir local_evento nulo
         print("Alterando tabela solicitacoes_eventos para permitir local_evento nulo...")
         db.session.execute(text("ALTER TABLE solicitacoes_eventos ALTER COLUMN local_evento DROP NOT NULL;"))
+        db.session.execute(text("ALTER TABLE solicitacoes_eventos ADD COLUMN IF NOT EXISTS anexo_resposta VARCHAR(255);"))
         
         db.session.commit()
-        print("[SUCCESS] Migração concluída com sucesso no Supabase!")
+        print("[SUCCESS] Migração concluída com sucesso!")
     except Exception as e:
         db.session.rollback()
         print(f"[ERROR] Erro na migração: {e}", file=sys.stderr)

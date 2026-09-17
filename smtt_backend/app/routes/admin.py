@@ -1,5 +1,6 @@
 # app/routes/admin.py
 import os
+import uuid
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, current_app
 from app.extensions import db
@@ -7,6 +8,7 @@ from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, 
 from app.models.portal import AlertaTransito, Noticia, Estatistica
 from datetime import datetime
 from app.utils.timezone import get_brasilia_time
+from app.utils.uploads import validate_upload
 import random
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
@@ -245,6 +247,8 @@ def julgar_recurso(id):
         # 2. Limpa o nome do arquivo (tira espaços e caracteres especiais) e salva
         nome_seguro = secure_filename(f"resposta_{id}_{arquivo.filename}")
         caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
+        if not validate_upload(arquivo):
+            return jsonify({"erro": "Envie um arquivo PDF, PNG ou JPEG válido de até 10 MB."}), 400
         arquivo.save(caminho_arquivo)
         
         # 3. Guarda o link no banco de dados
@@ -460,6 +464,24 @@ def julgar_evento(id):
         return jsonify({"erro": "A decisão é obrigatória."}), 400
         
     evento.resposta_analise = parecer or f"Solicitação avaliada pela equipe e classificada como: {decisao}."
+    arquivo_resposta = request.files.get('arquivo_resposta')
+    if arquivo_resposta and arquivo_resposta.filename:
+        if not validate_upload(arquivo_resposta):
+            return jsonify({"erro": "Envie um anexo PDF, PNG ou JPEG válido de até 10 MB."}), 400
+        arquivo_resposta.stream.seek(0, os.SEEK_END)
+        tamanho = arquivo_resposta.stream.tell()
+        arquivo_resposta.stream.seek(0)
+        if tamanho > 10 * 1024 * 1024:
+            return jsonify({"erro": "O anexo deve ter no máximo 10 MB."}), 400
+        extensao = os.path.splitext(secure_filename(arquivo_resposta.filename))[1].lower()
+        if extensao not in {'.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx'}:
+            return jsonify({"erro": "Envie um anexo PDF, DOC, DOCX, PNG ou JPEG."}), 400
+        numero_proto = evento.protocolo.numero_protocolo if evento.protocolo else f"EVENTO{id}"
+        nome_seguro = secure_filename(f"resposta_{numero_proto}_{uuid.uuid4().hex}{extensao}")
+        pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'eventos', 'respostas')
+        os.makedirs(pasta_destino, exist_ok=True)
+        arquivo_resposta.save(os.path.join(pasta_destino, nome_seguro))
+        evento.anexo_resposta = f"/static/uploads/eventos/respostas/{nome_seguro}"
     
     if evento.protocolo:
         evento.protocolo.status = decisao # Ex: 'Aprovado' ou 'Negado'
@@ -503,6 +525,8 @@ def julgar_alvara(id):
             pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'emitidos')
             os.makedirs(pasta_destino, exist_ok=True)
             caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
+            if not validate_upload(file):
+                return jsonify({"erro": "Envie um arquivo PDF, PNG ou JPEG válido de até 10 MB."}), 400
             file.save(caminho_arquivo)
             alvara.caminho_alvara_emitido = f"/static/uploads/emitidos/{nome_seguro}"
             
@@ -540,6 +564,8 @@ def criar_noticia_admin():
             pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'noticias')
             os.makedirs(pasta_destino, exist_ok=True)
             
+            if not validate_upload(file, {'.png', '.jpg', '.jpeg'}):
+                return jsonify({"erro": "Envie uma imagem PNG ou JPEG válida de até 10 MB."}), 400
             file.save(os.path.join(pasta_destino, filename))
             imagem_url = f"/static/uploads/noticias/{filename}"
             
@@ -584,6 +610,8 @@ def editar_noticia_admin(id):
             pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'noticias')
             os.makedirs(pasta_destino, exist_ok=True)
             
+            if not validate_upload(file, {'.png', '.jpg', '.jpeg'}):
+                return jsonify({"erro": "Envie uma imagem PNG ou JPEG válida de até 10 MB."}), 400
             file.save(os.path.join(pasta_destino, filename))
             noticia.imagem_url = f"/static/uploads/noticias/{filename}"
             

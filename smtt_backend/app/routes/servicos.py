@@ -1,3 +1,4 @@
+import os
 # app/routes/servicos.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -10,9 +11,27 @@ from app.utils.timezone import get_brasilia_time
 
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(arquivo):
+    if not arquivo or not arquivo.filename or '.' not in arquivo.filename:
+        return False
+    extensao = arquivo.filename.rsplit('.', 1)[1].lower()
+    if extensao not in ALLOWED_EXTENSIONS:
+        return False
+    cabecalho = arquivo.stream.read(12)
+    arquivo.stream.seek(0)
+    assinaturas_validas = (
+        extensao == 'pdf' and cabecalho.startswith(b'%PDF-')
+    ) or (
+        extensao == 'png' and cabecalho.startswith(b'\x89PNG\r\n\x1a\n')
+    ) or (
+        extensao in {'jpg', 'jpeg'} and cabecalho.startswith(b'\xff\xd8\xff')
+    )
+    if not assinaturas_validas:
+        return False
+    arquivo.stream.seek(0, os.SEEK_END)
+    tamanho = arquivo.stream.tell()
+    arquivo.stream.seek(0)
+    return 0 < tamanho <= 10 * 1024 * 1024
 
 servicos_bp = Blueprint('servicos', __name__, url_prefix='/api/servicos')
 
@@ -158,7 +177,7 @@ def abrir_recurso(id):
         os.makedirs(pasta_destino, exist_ok=True)
         
         if arquivo and arquivo.filename != '':
-            if not allowed_file(arquivo.filename):
+            if not allowed_file(arquivo):
                 raise ValueError("O arquivo de recurso enviado possui uma extensão não permitida. Apenas PDF, PNG, JPG e JPEG são permitidos.")
             ext = arquivo.filename.rsplit('.', 1)[1].lower() if '.' in arquivo.filename else 'pdf'
             nome_seguro = secure_filename(f"req_{numero_protocolo}_{uuid.uuid4().hex}.{ext}")
@@ -189,7 +208,7 @@ def abrir_recurso(id):
                 
         for idx, arq in enumerate(arquivos_adicionais):
             if arq and arq.filename != '':
-                if not allowed_file(arq.filename):
+                if not allowed_file(arq):
                     raise ValueError(f"O anexo '{arq.filename}' possui uma extensão não permitida. Apenas PDF, PNG, JPG e JPEG são permitidos.")
                 ext = arq.filename.rsplit('.', 1)[1].lower() if '.' in arq.filename else 'pdf'
                 nome_seguro_anexo = secure_filename(f"anexo_{numero_protocolo}_{idx}_{uuid.uuid4().hex}.{ext}")

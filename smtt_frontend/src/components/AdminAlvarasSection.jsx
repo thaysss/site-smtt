@@ -71,6 +71,7 @@ function AdminAlvarasSection({
 
   // Selected item modal state
   const [alvaraSelecionado, setAlvaraSelecionado] = useState(null);
+  const [modoEdicao, setModoEdicao] = useState(false);
   const [justificativa, setJustificativa] = useState('');
   const [arquivoEmitido, setArquivoEmitido] = useState(null);
   const [processando, setProcessando] = useState(false);
@@ -158,9 +159,10 @@ function AdminAlvarasSection({
     return Array.from({ length: fim - inicio + 1 }, (_, index) => inicio + index);
   }, [pageSeguro, totalPages]);
 
-  const abrirDetalhes = (alvara) => {
+  const abrirDetalhes = (alvara, editar = false) => {
     setAlvaraSelecionado(alvara);
-    setJustificativa('');
+    setModoEdicao(editar);
+    setJustificativa(editar ? (alvara.resposta_analise || '') : '');
     setArquivoEmitido(null);
     setErro('');
   };
@@ -168,6 +170,7 @@ function AdminAlvarasSection({
   const fecharDetalhes = () => {
     if (processando) return;
     setAlvaraSelecionado(null);
+    setModoEdicao(false);
     setErro('');
   };
 
@@ -185,7 +188,7 @@ function AdminAlvarasSection({
       setErro('Informe a justificativa ou o parecer técnico antes de continuar.');
       return;
     }
-    if (decisao === 'Aprovado' && !arquivoEmitido) {
+    if (decisao === 'Aprovado' && !arquivoEmitido && !alvaraSelecionado?.caminho_alvara_emitido) {
       setErro('Anexe o PDF do alvará digital emitido para aprovar a solicitação.');
       return;
     }
@@ -349,7 +352,7 @@ function AdminAlvarasSection({
                       <td className="text-gray-600">{alv.tipo_servico || 'Alvará'}</td>
                       <td className="text-gray-600">{dataSolicitacao}</td>
                       <td>{renderStatusBadge(alv.status)}</td>
-                      <td className="text-right"><button type="button" onClick={() => abrirDetalhes(alv)} className="alvaras-view-button" title="Ver detalhes" aria-label={'Ver detalhes do protocolo ' + numExibicao}><Eye size={18} /></button><AdminRegistroActions category="alvaras" id={alv.id} onSaved={carregarAlvaras} /></td>
+                      <td className="text-right"><button type="button" onClick={() => abrirDetalhes(alv)} className="alvaras-view-button" title="Ver detalhes" aria-label={'Ver detalhes do protocolo ' + numExibicao}><Eye size={18} /></button><AdminRegistroActions category="alvaras" id={alv.id} onEdit={() => abrirDetalhes(alv, true)} onSaved={carregarAlvaras} /></td>
                     </tr>
                   );
                 })
@@ -445,7 +448,7 @@ function AdminAlvarasSection({
             </div>
 
             {/* Parecer Técnico e Análise */}
-            {alvaraSelecionado.status === 'Em Análise' ? (
+            {alvaraSelecionado.status === 'Em Análise' || modoEdicao ? (
               <div className="border-t border-outline-variant pt-5">
                 <label className="block text-xs font-bold text-on-surface uppercase tracking-wide mb-2">
                   Parecer Técnico SMTT *
@@ -483,22 +486,12 @@ function AdminAlvarasSection({
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    type="button"
-                    disabled={processando}
-                    onClick={() => handleJulgar(alvaraSelecionado.id, 'Aprovado')}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"
-                  >
-                    <CheckCircle className="w-5 h-5" /> {processando ? 'Processando...' : 'Emitir / Aprovar Pedido'}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={processando}
-                    onClick={() => handleJulgar(alvaraSelecionado.id, 'Negado')}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"
-                  >
-                    <XCircle className="w-5 h-5" /> {processando ? 'Processando...' : 'Negar Pedido'}
-                  </button>
+                  {modoEdicao ? (
+                    <button type="button" disabled={processando || !justificativa.trim()} onClick={() => handleJulgar(alvaraSelecionado.id, alvaraSelecionado.status === 'Ativo' ? 'Aprovado' : alvaraSelecionado.status)} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"><CheckCircle className="w-5 h-5" /> {processando ? 'Salvando...' : 'Salvar alterações'}</button>
+                  ) : (<>
+                    <button type="button" disabled={processando} onClick={() => handleJulgar(alvaraSelecionado.id, 'Aprovado')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"><CheckCircle className="w-5 h-5" /> {processando ? 'Processando...' : 'Emitir / Aprovar Pedido'}</button>
+                    <button type="button" disabled={processando} onClick={() => handleJulgar(alvaraSelecionado.id, 'Negado')} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"><XCircle className="w-5 h-5" /> {processando ? 'Processando...' : 'Negar Pedido'}</button>
+                  </>)}
                 </div>
               </div>
             ) : (
