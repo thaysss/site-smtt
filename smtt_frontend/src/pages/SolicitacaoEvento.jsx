@@ -168,6 +168,7 @@ function SolicitacaoEvento() {
                       placeholder="Ex: João da Silva"
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
+                      maxLength={150}
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                       required
                     />
@@ -178,7 +179,9 @@ function SolicitacaoEvento() {
                       type="text"
                       placeholder="Apenas números"
                       value={cpfCnpj}
-                      onChange={(e) => setCpfCnpj(e.target.value)}
+                      onChange={(e) => setCpfCnpj(e.target.value.replace(/\D/g, ''))}
+                      maxLength={14}
+                      inputMode="numeric"
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                       required
                     />
@@ -193,6 +196,7 @@ function SolicitacaoEvento() {
                       placeholder="Ex: contato@exemplo.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      maxLength={100}
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                       required
                     />
@@ -204,6 +208,7 @@ function SolicitacaoEvento() {
                       placeholder="Ex: (79) 99999-9999"
                       value={telefone}
                       onChange={(e) => setTelefone(e.target.value)}
+                      maxLength={20}
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                       required
                     />
@@ -218,6 +223,7 @@ function SolicitacaoEvento() {
                       placeholder="Ex: 25/07/2026 - 18h às 22h"
                       value={dataEvento}
                       onChange={(e) => setDataEvento(e.target.value)}
+                      maxLength={50}
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                       required
                     />
@@ -229,6 +235,7 @@ function SolicitacaoEvento() {
                       placeholder="Ex: Av. Beira Rio (entre ruas A e B)"
                       value={localEvento}
                       onChange={(e) => setLocalEvento(e.target.value)}
+                      maxLength={255}
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
 
                     />
@@ -242,6 +249,7 @@ function SolicitacaoEvento() {
                     placeholder="Descreva brevemente o evento (Ex: Procissão religiosa, Caminhada esportiva, Show festivo...)"
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
+                    maxLength={2000}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all resize-none"
                   />
                 </div>

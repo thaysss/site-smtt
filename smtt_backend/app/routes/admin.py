@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, current_app
 from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento, SolicitacaoAlvara
-from app.models.portal import AlertaTransito, Noticia, Estatistica
+from app.models.portal import AlertaTransito, Noticia
 from datetime import datetime
 from app.utils.timezone import get_brasilia_time
 from app.utils.uploads import validate_upload
@@ -543,6 +543,18 @@ def listar_noticias_admin():
     return jsonify([n.to_dict() for n in noticias]), 200
 
 
+def _validar_campos_noticia(titulo, subtitulo, conteudo, categoria):
+    limites = {
+        "Título": (titulo, 140),
+        "Subtítulo": (subtitulo, 240),
+        "Conteúdo": (conteudo, 20000),
+        "Categoria": (categoria, 100),
+    }
+    for campo, (valor, limite) in limites.items():
+        if valor is not None and len(valor) > limite:
+            return f"{campo} deve ter no máximo {limite} caracteres."
+    return None
+
 @admin_bp.route('/noticias', methods=['POST'])
 def criar_noticia_admin():
     titulo = request.form.get('titulo')
@@ -552,6 +564,9 @@ def criar_noticia_admin():
     
     if not titulo or not conteudo:
         return jsonify({"erro": "Título e Conteúdo são obrigatórios."}), 400
+    erro_limite = _validar_campos_noticia(titulo, subtitulo, conteudo, categoria)
+    if erro_limite:
+        return jsonify({"erro": erro_limite}), 400
         
     imagem_url = None
     if 'imagem' in request.files:
@@ -590,6 +605,9 @@ def editar_noticia_admin(id):
     subtitulo = request.form.get('subtitulo', '')
     conteudo = request.form.get('conteudo')
     categoria = request.form.get('categoria', 'Geral')
+    erro_limite = _validar_campos_noticia(titulo, subtitulo, conteudo, categoria)
+    if erro_limite:
+        return jsonify({"erro": erro_limite}), 400
     
     if titulo:
         noticia.titulo = titulo
@@ -634,67 +652,3 @@ def excluir_noticia_admin(id):
     db.session.delete(noticia)
     db.session.commit()
     return jsonify({"mensagem": "Notícia excluída com sucesso!"}), 200
-
-# ==========================================
-# 6. GESTÃO DE ESTATÍSTICAS (Painel Admin)
-# ==========================================
-@admin_bp.route('/estatisticas', methods=['GET'])
-def listar_estatisticas_admin():
-    estatisticas = Estatistica.query.order_by(Estatistica.ordem.asc(), Estatistica.id.asc()).all()
-    return jsonify([e.to_dict() for e in estatisticas]), 200
-
-@admin_bp.route('/estatisticas', methods=['POST'])
-def criar_estatistica_admin():
-    dados = request.get_json()
-    titulo = dados.get('titulo')
-    valor = dados.get('valor')
-    icone = dados.get('icone', 'fa-chart-simple')
-    try:
-        ordem = int(dados.get('ordem', 0))
-    except (TypeError, ValueError):
-        ordem = 0
-        
-    if not titulo or not valor:
-        return jsonify({"erro": "Título e Valor são obrigatórios."}), 400
-        
-    nova_estatistica = Estatistica(
-        titulo=titulo,
-        valor=valor,
-        icone=icone,
-        ordem=ordem
-    )
-    db.session.add(nova_estatistica)
-    db.session.commit()
-    return jsonify({"mensagem": "Estatística cadastrada com sucesso!", "estatistica": nova_estatistica.to_dict()}), 201
-
-@admin_bp.route('/estatisticas/<int:id>', methods=['PUT'])
-def editar_estatistica_admin(id):
-    estatistica = Estatistica.query.get_or_404(id)
-    dados = request.get_json()
-    
-    titulo = dados.get('titulo')
-    valor = dados.get('valor')
-    icone = dados.get('icone')
-    ordem = dados.get('ordem')
-    
-    if titulo:
-        estatistica.titulo = titulo
-    if valor:
-        estatistica.valor = valor
-    if icone:
-        estatistica.icone = icone
-    if ordem is not None:
-        try:
-            estatistica.ordem = int(ordem)
-        except (TypeError, ValueError):
-            pass
-            
-    db.session.commit()
-    return jsonify({"mensagem": "Estatística atualizada com sucesso!", "estatistica": estatistica.to_dict()}), 200
-
-@admin_bp.route('/estatisticas/<int:id>', methods=['DELETE'])
-def excluir_estatistica_admin(id):
-    estatistica = Estatistica.query.get_or_404(id)
-    db.session.delete(estatistica)
-    db.session.commit()
-    return jsonify({"mensagem": "Estatística excluída com sucesso!"}), 200

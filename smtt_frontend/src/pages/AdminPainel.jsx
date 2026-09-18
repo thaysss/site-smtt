@@ -102,16 +102,6 @@ function AdminPainel({ defaultTab }) {
   const conteudoNewsRef = useRef(null);
   const [exibindoFormNews, setExibindoFormNews] = useState(false);
 
-  // ESTADOS DO SISTEMA DE ESTATÍSTICAS
-  const [estatisticas, setEstatisticas] = useState([]);
-  const [estFoco, setEstFoco] = useState(null);
-  const [tituloEst, setTituloEst] = useState('');
-  const [valorEst, setValorEst] = useState('');
-  const [iconeEst, setIconeEst] = useState('fa-chart-simple');
-  const [ordemEst, setOrdemEst] = useState(0);
-  const [modoEdicaoEst, setModoEdicaoEst] = useState(false);
-  const [exibindoFormEst, setExibindoFormEst] = useState(false);
-  
   const navigate = useNavigate();
 
   // ESTADOS DO VINCO DE NAIT E NIP
@@ -455,7 +445,6 @@ function AdminPainel({ defaultTab }) {
     carregarAlvaras();
     carregarInfracoes();
     carregarNoticias();
-    carregarEstatisticas();
   }, [navigate, menuAtivo]);
 
   async function carregarRecursos() {
@@ -501,35 +490,6 @@ function AdminPainel({ defaultTab }) {
     } catch (error) {
       console.error("Erro ao carregar notícias", error);
     }
-  };
-
-  async function carregarEstatisticas() {
-    try {
-      const response = await api.get('/admin/estatisticas');
-      setEstatisticas(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar estatísticas", error);
-    }
-  };
-
-  const prepararCadastroEst = () => {
-    setEstFoco(null);
-    setTituloEst('');
-    setValorEst('');
-    setIconeEst('fa-chart-simple');
-    setOrdemEst(0);
-    setModoEdicaoEst(false);
-    setExibindoFormEst(true);
-  };
-
-  const prepararEdicaoEst = (est) => {
-    setEstFoco(est);
-    setTituloEst(est.titulo);
-    setValorEst(est.valor);
-    setIconeEst(est.icone || 'fa-chart-simple');
-    setOrdemEst(est.ordem || 0);
-    setModoEdicaoEst(true);
-    setExibindoFormEst(true);
   };
 
   // Funções para Modais de NAIT/NIP
@@ -603,51 +563,6 @@ function AdminPainel({ defaultTab }) {
       carregarInfracoes();
     } catch (err) {
       alert(err.response?.data?.erro || "Erro ao salvar NIP.");
-    }
-  };
-
-  const salvarEstatistica = async (e) => {
-    e.preventDefault();
-    setMensagem("");
-    
-    const payload = {
-      titulo: tituloEst,
-      valor: valorEst,
-      icone: iconeEst,
-      ordem: parseInt(ordemEst) || 0
-    };
-    
-    try {
-      if (modoEdicaoEst && estFoco) {
-        await api.put(`/admin/estatisticas/${estFoco.id}`, payload);
-        setMensagem("Estatística editada com sucesso!");
-      } else {
-        await api.post('/admin/estatisticas', payload);
-        setMensagem("Estatística cadastrada com sucesso!");
-      }
-      
-      setExibindoFormEst(false);
-      setEstFoco(null);
-      setTituloEst('');
-      setValorEst('');
-      setIconeEst('fa-chart-simple');
-      setOrdemEst(0);
-      carregarEstatisticas();
-    } catch (error) {
-      console.error("Erro ao salvar estatística", error);
-      alert(error.response?.data?.erro || "Erro ao salvar a estatística.");
-    }
-  };
-
-  const deletarEstatistica = async (id) => {
-    if (!window.confirm("Deseja realmente excluir esta estatística? Ela deixará de aparecer na página inicial.")) return;
-    try {
-      await api.delete(`/admin/estatisticas/${id}`);
-      setMensagem("Estatística excluída com sucesso!");
-      carregarEstatisticas();
-    } catch (error) {
-      console.error("Erro ao excluir estatística", error);
-      alert("Erro ao excluir a estatística.");
     }
   };
 
@@ -1635,7 +1550,7 @@ function AdminPainel({ defaultTab }) {
                     <div className="news-field news-editor-field">
                       <div className="news-label-row">
                         <label htmlFor="news-content">Conteúdo / matéria completa <b>*</b></label>
-                        <span>{conteudoNews.length} caracteres</span>
+                        <span>{conteudoNews.length}/20000</span>
                       </div>
                       <div className="news-editor-shell">
                         <div className="news-editor-toolbar" aria-label="Ferramentas de formatação">
@@ -1654,6 +1569,7 @@ function AdminPainel({ defaultTab }) {
                           id="news-content"
                           rows="15"
                           required
+                          maxLength="20000"
                           placeholder="Digite o texto da notícia..."
                           value={conteudoNews}
                           onChange={(e) => setConteudoNews(e.target.value)}
@@ -1820,150 +1736,7 @@ function AdminPainel({ defaultTab }) {
               </>
             )}
           </div>
-        ) : (
-          <>
-            {/* Estatísticas View */}
-            <header className="mb-10 flex flex-wrap justify-between items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestão de Estatísticas</h1>
-                <p className="text-gray-500">Cadastre e gerencie as métricas de destaque exibidas na página inicial pública.</p>
-              </div>
-              {!exibindoFormEst && (
-                <button
-                  onClick={prepararCadastroEst}
-                  className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
-                >
-                  <i className="fa-solid fa-plus text-xs"></i> Cadastrar Estatística
-                </button>
-              )}
-            </header>
-
-            {mensagem && <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200 flex items-start gap-3 font-medium"><CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />{mensagem}</div>}
-
-            {exibindoFormEst ? (
-              <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8 max-w-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
-                
-                <h3 className="font-bold text-lg text-primary-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-2">
-                  <i className="fa-solid fa-chart-line text-primary-600"></i>
-                  {modoEdicaoEst ? 'Editar Estatística' : 'Cadastrar Nova Estatística'}
-                </h3>
-
-                <form onSubmit={salvarEstatistica} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Título / Rótulo *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: Veículos Fiscalizados"
-                        value={tituloEst}
-                        onChange={(e) => setTituloEst(e.target.value)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Valor de Destaque *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: 150k+ ou -15%"
-                        value={valorEst}
-                        onChange={(e) => setValorEst(e.target.value)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Ícone do FontAwesome</label>
-                      <input
-                        type="text"
-                        placeholder="Ex: fa-car, fa-laptop, fa-chart-line"
-                        value={iconeEst}
-                        onChange={(e) => setIconeEst(e.target.value)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                      />
-                      <span className="text-[10px] text-gray-400 mt-1 block">Use classes válidas do FontAwesome 6 (solid/regular).</span>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Ordem de Exibição</label>
-                      <input
-                        type="number"
-                        placeholder="Ex: 1, 2, 3"
-                        value={ordemEst}
-                        onChange={(e) => setOrdemEst(parseInt(e.target.value) || 0)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => setExibindoFormEst(false)}
-                      className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-bold transition-all"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow transition-all text-sm"
-                    >
-                      Salvar Estatística
-                    </button>
-                  </div>
-                </form>
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-                {estatisticas.length === 0 ? (
-                  <div className="text-center py-16 text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
-                    <i className="fa-solid fa-chart-line text-4xl mb-3 text-gray-300"></i>
-                    <p className="font-bold text-base text-gray-600 mb-1">Nenhuma estatística cadastrada</p>
-                    <p className="text-xs text-gray-400 font-medium">Clique no botão "Cadastrar Estatística" para criar a primeira métrica.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {estatisticas.map((item) => (
-                      <div key={item.id} className="border border-gray-200 hover:border-gray-250 rounded-xl p-5 bg-gray-50/40 hover:bg-gray-50 transition-all flex flex-col justify-between h-44 shadow-sm relative overflow-hidden group">
-                        <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-primary-600/5 rounded-full group-hover:scale-110 transition-transform"></div>
-                        <div>
-                          <div className="flex justify-between items-start mb-3">
-                            <span className="text-2xl font-bold text-secondary-500">{item.valor}</span>
-                            <span className="text-gray-400 text-lg">
-                              <i className={`fa-solid ${item.icone || 'fa-chart-simple'}`}></i>
-                            </span>
-                          </div>
-                          <h4 className="font-bold text-sm text-primary-950 leading-snug mb-1">{item.titulo}</h4>
-                          <span className="text-[10px] text-gray-400 font-semibold block">Ordem: {item.ordem}</span>
-                        </div>
-                        
-                        <div className="flex gap-2 justify-end border-t border-gray-100 pt-3 mt-3">
-                          <button
-                            onClick={() => prepararEdicaoEst(item)}
-                            className="text-primary-600 hover:text-primary-800 text-xs font-bold transition-all flex items-center gap-1"
-                            title="Editar"
-                          >
-                            <i className="fa-solid fa-pen-to-square"></i> Editar
-                          </button>
-                          <button
-                            onClick={() => deletarEstatistica(item.id)}
-                            className="text-red-600 hover:text-red-800 text-xs font-bold transition-all flex items-center gap-1"
-                            title="Excluir"
-                          >
-                            <i className="fa-solid fa-trash"></i> Excluir
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
+        ) : null}
         {/* Modal Vincular NAIT */}
         {modalNaitAberta && infracaoFocoControle && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">

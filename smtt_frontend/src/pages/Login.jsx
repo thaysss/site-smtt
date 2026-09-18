@@ -176,20 +176,20 @@ function Login() {
             <form onSubmit={handleSubmit} className="citizen-auth-form">
               {isCadastro && (
                 <>
-                  <FormField id="nome-completo" label="Nome completo" icon={User} className="is-full" type="text" value={nome} onChange={(event) => setNome(event.target.value)} placeholder="Digite seu nome completo" autoComplete="name" minLength={3} required />
-                  <FormField id="email" label="E-mail" icon={Mail} type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nome@exemplo.com" autoComplete="email" required />
-                  <FormField id="telefone" label="Telefone" icon={Phone} type="tel" inputMode="numeric" value={telefone} onChange={(event) => setTelefone(formatPhone(event.target.value))} placeholder="(79) 99999-9999" autoComplete="tel" minLength={14} required />
-                  <FormField id="endereco" label="Endereço" icon={MapPin} className="is-full" type="text" value={endereco} onChange={(event) => setEndereco(event.target.value)} placeholder="Rua, número e bairro" autoComplete="street-address" minLength={5} required />
+                  <FormField id="nome-completo" label="Nome completo" icon={User} className="is-full" type="text" value={nome} onChange={(event) => setNome(event.target.value)} placeholder="Digite seu nome completo" autoComplete="name" minLength={3} maxLength={150} required />
+                  <FormField id="email" label="E-mail" icon={Mail} type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nome@exemplo.com" autoComplete="email" maxLength={100} required />
+                  <FormField id="telefone" label="Telefone" icon={Phone} type="tel" inputMode="numeric" value={telefone} onChange={(event) => setTelefone(formatPhone(event.target.value))} placeholder="(79) 99999-9999" autoComplete="tel" minLength={14} maxLength={15} required />
+                  <FormField id="endereco" label="Endereço" icon={MapPin} className="is-full" type="text" value={endereco} onChange={(event) => setEndereco(event.target.value)} placeholder="Rua, número e bairro" autoComplete="street-address" minLength={5} maxLength={255} required />
                 </>
               )}
 
-              <FormField id="cpf" label="CPF" icon={FileDigit} type="text" inputMode="numeric" value={cpf} onChange={(event) => setCpf(formatCpf(event.target.value))} placeholder="000.000.000-00" autoComplete="username" minLength={14} required />
+              <FormField id="cpf" label="CPF" icon={FileDigit} type="text" inputMode="numeric" value={cpf} onChange={(event) => setCpf(formatCpf(event.target.value))} placeholder="000.000.000-00" autoComplete="username" minLength={14} maxLength={14} required />
 
               <div className="citizen-auth-group">
                 <label htmlFor="senha">Senha</label>
                 <div className="citizen-auth-field has-action">
                   <Lock size={19} aria-hidden="true" />
-                  <input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(event) => setSenha(event.target.value)} placeholder={isCadastro ? 'Mínimo de 8 caracteres' : 'Digite sua senha'} autoComplete={isCadastro ? 'new-password' : 'current-password'} minLength={isCadastro ? 8 : undefined} required />
+                  <input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(event) => setSenha(event.target.value)} placeholder={isCadastro ? 'Mínimo de 8 caracteres' : 'Digite sua senha'} autoComplete={isCadastro ? 'new-password' : 'current-password'} minLength={isCadastro ? 8 : undefined} maxLength={128} required />
                   <button type="button" onClick={() => setMostrarSenha((valor) => !valor)} aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'} title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>
                     {mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>

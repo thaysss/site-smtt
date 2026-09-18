@@ -63,7 +63,7 @@ function ConsultaProtocolo() {
           <form onSubmit={handleConsultar} className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="relative flex-1">
               <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input type="text" placeholder="Nº do Protocolo (Ex: DEF12345)" value={numeroProtocolo} onChange={(e) => setNumeroProtocolo(e.target.value)} required className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none uppercase font-bold text-lg transition-all" />
+              <input type="text" maxLength={20} placeholder="Nº do Protocolo (Ex: DEF12345)" value={numeroProtocolo} onChange={(e) => setNumeroProtocolo(e.target.value)} required className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none uppercase font-bold text-lg transition-all" />
             </div>
             <button type="submit" disabled={buscando} className="bg-primary-600 hover:bg-primary-700 text-white font-bold px-8 py-4 rounded-xl shadow-md transition-colors sm:w-auto w-full disabled:opacity-70">
               {buscando ? 'Consultando...' : 'Consultar'}

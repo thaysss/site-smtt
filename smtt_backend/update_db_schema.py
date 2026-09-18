@@ -47,29 +47,6 @@ with app.app_context():
         db.session.execute(text("ALTER TABLE noticias ADD COLUMN IF NOT EXISTS imagem_url VARCHAR(255);"))
         db.session.execute(text("ALTER TABLE noticias ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP WITHOUT TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW());"))
         
-        # 5. Criar e alimentar tabela estatisticas
-        print("Criando e alimentando a tabela estatisticas...")
-        db.session.execute(text("""
-            CREATE TABLE IF NOT EXISTS estatisticas (
-                id SERIAL PRIMARY KEY,
-                titulo VARCHAR(100) NOT NULL,
-                valor VARCHAR(50) NOT NULL,
-                icone VARCHAR(50) DEFAULT 'fa-chart-simple',
-                ordem INTEGER DEFAULT 0
-            );
-        """))
-        
-        # Semeia dados padrão apenas se a tabela estiver vazia
-        result = db.session.execute(text("SELECT COUNT(*) FROM estatisticas;")).scalar()
-        if result == 0:
-            print("Inserindo dados iniciais em estatisticas...")
-            db.session.execute(text("""
-                INSERT INTO estatisticas (titulo, valor, icone, ordem) VALUES
-                ('Veículos Fiscalizados/Mês', '150k+', 'fa-car', 1),
-                ('Atendimentos Online', '12k', 'fa-laptop', 2),
-                ('Acidentes neste ano', '-15%', 'fa-car-burst', 3),
-                ('Acidentes com vítimas fatais', '45', 'fa-heart-crack', 4);
-            """))
         # 6. Coluna caminho_alvara_emitido na tabela solicitacoes_alvara
         print("Adicionando coluna caminho_alvara_emitido na tabela solicitacoes_alvara...")
         db.session.execute(text("ALTER TABLE solicitacoes_alvara ADD COLUMN IF NOT EXISTS caminho_alvara_emitido VARCHAR(255);"))

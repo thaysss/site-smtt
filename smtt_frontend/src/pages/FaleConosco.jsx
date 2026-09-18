@@ -197,6 +197,7 @@ function FaleConosco() {
                         type="text" 
                         name="searchQuery" 
                         placeholder="Buscar placa ou notícias..." 
+                        maxLength={100}
                         className="w-full text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
                         autoFocus
                       />
@@ -398,6 +399,7 @@ function FaleConosco() {
                         type="text"
                         value={ouvidoriaNome}
                         onChange={(e) => setOuvidoriaNome(e.target.value)}
+                        maxLength={150}
                         placeholder="Ex: João da Silva"
                         className="w-full text-sm placeholder-slate-400 border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 shadow-sm"
                         required
@@ -410,6 +412,7 @@ function FaleConosco() {
                         type="email"
                         value={ouvidoriaEmail}
                         onChange={(e) => setOuvidoriaEmail(e.target.value)}
+                        maxLength={100}
                         placeholder="Ex: joao@exemplo.com"
                         className="w-full text-sm placeholder-slate-400 border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 shadow-sm"
                         required
@@ -437,6 +440,7 @@ function FaleConosco() {
                       <textarea
                         value={ouvidoriaMensagem}
                         onChange={(e) => setOuvidoriaMensagem(e.target.value)}
+                        maxLength={2000}
                         placeholder="Descreva detalhadamente a sua solicitação..."
                         rows="5"
                         className="w-full text-sm placeholder-slate-400 border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none font-sans transition-all duration-300 shadow-sm"

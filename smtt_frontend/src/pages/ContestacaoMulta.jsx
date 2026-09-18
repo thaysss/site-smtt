@@ -360,6 +360,7 @@ function ContestacaoMulta() {
                         placeholder="Nome completo conforme RG/CNH"
                         value={nome}
                         onChange={(e) => setNome(e.target.value)}
+                        maxLength={150}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
@@ -370,7 +371,9 @@ function ContestacaoMulta() {
                         type="text"
                         placeholder="Apenas números (11 dígitos)"
                         value={cpf}
-                        onChange={(e) => setCpf(e.target.value)}
+                        onChange={(e) => setCpf(e.target.value.replace(/\D/g, ''))}
+                        maxLength={11}
+                        inputMode="numeric"
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
@@ -385,6 +388,7 @@ function ContestacaoMulta() {
                         placeholder="exemplo@gmail.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        maxLength={100}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
@@ -396,6 +400,7 @@ function ContestacaoMulta() {
                         placeholder="Ex: (79) 99999-9999"
                         value={telefone}
                         onChange={(e) => setTelefone(e.target.value)}
+                        maxLength={20}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
@@ -409,7 +414,8 @@ function ContestacaoMulta() {
                         type="text"
                         placeholder="Ex: QMA4A90 ou AAA1234"
                         value={placa}
-                        onChange={(e) => setPlaca(e.target.value.toUpperCase())}
+                        onChange={(e) => setPlaca(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())}
+                        maxLength={7}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
@@ -421,6 +427,7 @@ function ContestacaoMulta() {
                         placeholder="Ex: AM01234567"
                         value={numeroAit}
                         onChange={(e) => setNumeroAit(e.target.value.toUpperCase())}
+                        maxLength={20}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />

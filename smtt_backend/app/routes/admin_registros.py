@@ -8,7 +8,7 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError
 from app.extensions import db
-from app.models.portal import AlertaTransito, Estatistica, Noticia
+from app.models.portal import AlertaTransito, Noticia
 from app.models.servicos import AutoInfracao, Protocolo, RecursoMulta, SolicitacaoAlvara, SolicitacaoEvento, Veiculo, RecursoAnexo
 
 RECURSOS = {
@@ -19,7 +19,6 @@ RECURSOS = {
     'veiculos': (Veiculo, 'Veículos', 'placa renavam ano_fabricacao marca_modelo cor uf'),
     'alertas': (AlertaTransito, 'Avisos de interdição', 'descricao rua_bairro data_inicio data_fim status'),
     'noticias': (Noticia, 'Notícias e ações', 'titulo subtitulo conteudo categoria'),
-    'estatisticas': (Estatistica, 'Estatísticas', 'titulo valor icone ordem'),
     'protocolos': (Protocolo, 'Protocolos', 'numero_protocolo tipo_servico status'),
 }
 EDITAVEIS = {

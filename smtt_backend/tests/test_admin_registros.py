@@ -10,7 +10,7 @@ from app.extensions import db, jwt
 from app.models.cidadao import Cidadao
 from app.routes.admin import admin_bp
 from app.models.servicos import Veiculo, AutoInfracao, Protocolo, SolicitacaoEvento, SolicitacaoAlvara, RecursoMulta, RecursoAnexo
-from app.models.portal import Estatistica, AlertaTransito, Noticia
+from app.models.portal import AlertaTransito, Noticia
 from app.routes.admin_registros import RECURSOS
 
 
@@ -123,7 +123,6 @@ class TestAdminRegistros(unittest.TestCase):
             ('alvaras', SolicitacaoAlvara(protocolo_id=protocol.id, tipo_servico='Renovação', nome_solicitante='Maria', cpf='123', email='m@example.com', telefone='123'), {'resposta_analise': 'Parecer atualizado'}),
             ('alertas', AlertaTransito(descricao='Obra', rua_bairro='Centro', data_inicio=datetime(2026, 1, 1)), {'descricao': 'Obra concluída', 'status': 'Resolvido'}),
             ('noticias', Noticia(titulo='Ação', conteudo='Texto'), {'titulo': 'Ação atualizada'}),
-            ('estatisticas', Estatistica(titulo='Total', valor='10'), {'valor': '20', 'ordem': '2'}),
         ]
         for category, item, changes in entries:
             db.session.add(item)

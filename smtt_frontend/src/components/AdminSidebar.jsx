@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BellRing, CalendarDays, ChartNoAxesCombined, ChevronLeft, ChevronRight,
+  BellRing, CalendarDays, ChevronLeft, ChevronRight,
   FilePenLine, FolderOpen, IdCard, ListChecks, LogOut, Menu, Newspaper,
   Search, X, LayoutDashboard, UserPlus,
 } from 'lucide-react';
@@ -14,7 +14,6 @@ const menuItems = [
   { id: 'alvaras', label: 'Alvarás', icon: IdCard, isTab: true },
   { id: 'infracoes', label: 'Infrações lançadas', icon: ListChecks, isTab: true },
   { id: 'noticias', label: 'Notícias', icon: Newspaper, isTab: true },
-  { id: 'estatisticas', label: 'Estatísticas', icon: ChartNoAxesCombined, isTab: true },
   { id: 'lancar-infracao', label: 'Lançar AIT', icon: FilePenLine, isTab: false },
   { id: 'alertas', label: 'Avisos de interdição', icon: BellRing, isTab: false },
   { id: 'usuarios', label: 'Administradores', icon: UserPlus, isTab: false },

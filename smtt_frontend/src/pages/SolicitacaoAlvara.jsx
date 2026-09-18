@@ -361,6 +361,7 @@ function SolicitacaoAlvara() {
                         placeholder="Ex: José dos Santos"
                         value={nome}
                         onChange={(e) => setNome(e.target.value)}
+                        maxLength={150}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                         required
                       />
@@ -371,7 +372,9 @@ function SolicitacaoAlvara() {
                         type="text"
                         placeholder="Apenas números"
                         value={cpf}
-                        onChange={(e) => setCpf(e.target.value)}
+                        onChange={(e) => setCpf(e.target.value.replace(/\D/g, ''))}
+                        maxLength={11}
+                        inputMode="numeric"
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                         required
                       />
@@ -386,6 +389,7 @@ function SolicitacaoAlvara() {
                         placeholder="Ex: titular@exemplo.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        maxLength={100}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                         required
                       />
@@ -397,6 +401,7 @@ function SolicitacaoAlvara() {
                         placeholder="Ex: (79) 99999-9999"
                         value={telefone}
                         onChange={(e) => setTelefone(e.target.value)}
+                        maxLength={20}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                         required
                       />
@@ -410,7 +415,8 @@ function SolicitacaoAlvara() {
                         type="text"
                         placeholder="Ex: ABC1D23"
                         value={placaVeiculo}
-                        onChange={(e) => setPlacaVeiculo(e.target.value.toUpperCase())}
+                        onChange={(e) => setPlacaVeiculo(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())}
+                        maxLength={7}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all"
                       />
                     </div>
@@ -502,6 +508,7 @@ function SolicitacaoAlvara() {
                             placeholder="Ex: Maria dos Santos"
                             value={nomeAuxiliar}
                             onChange={(e) => setNomeAuxiliar(e.target.value)}
+                            maxLength={150}
                             className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all"
                             required
                           />
@@ -512,7 +519,9 @@ function SolicitacaoAlvara() {
                             type="text"
                             placeholder="Apenas números"
                             value={cpfAuxiliar}
-                            onChange={(e) => setCpfAuxiliar(e.target.value)}
+                            onChange={(e) => setCpfAuxiliar(e.target.value.replace(/\D/g, ''))}
+                            maxLength={11}
+                            inputMode="numeric"
                             className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all"
                             required
                           />
