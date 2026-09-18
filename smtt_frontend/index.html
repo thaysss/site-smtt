@@ -3,6 +3,14 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Portal oficial da SMTT de Propriá para serviços de trânsito, consulta de protocolos, notícias, alertas e atendimento ao cidadão." />
+  <meta name="theme-color" content="#0b1c3e" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:title" content="SMTT Propriá — Serviços de Trânsito" />
+  <meta property="og:description" content="Acesse serviços, notícias e alertas da Superintendência Municipal de Transportes e Trânsito de Propriá." />
+  <meta property="og:image" content="/vc.png" />
 <link rel="icon" type="image/png" href="/logo-sem.png?v=20260908" />
   <link rel="shortcut icon" type="image/png" href="/logo-sem.png?v=20260908" />
   <link rel="apple-touch-icon" href="/logo-sem.png?v=20260908" />
@@ -154,6 +162,15 @@
 
     .animate-kenburns {
       animation: kenburns 20s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
   <title>SMTT - Superintendência Municipal de Transportes e Trânsito</title>

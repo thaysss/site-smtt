@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import html2pdf from 'html2pdf.js';
 import {
   Car, AlertCircle, FileText, Download,
   Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, ExternalLink, Compass,
@@ -198,7 +197,7 @@ function Painel() {
     }
   };
 
-  const gerarPDF = (multa) => {
+  const gerarPDF = async (multa) => {
     const isNIP = multa.fase_atual?.toLowerCase() === 'penalidade';
     const documentTitle = isNIP ? 'NOTIFICAÇÃO DA IMPOSIÇÃO DE PENALIDADE - NIP' : 'NOTIFICAÇÃO DA AUTUAÇÃO DE INFRAÇÃO DE TRÂNSITO - NAIT';
     const docNumberLabel = isNIP ? 'Nº da NIP' : 'Nº da NAIT';
@@ -437,7 +436,8 @@ function Painel() {
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opcoes).from(elemento).save();
+    const { default: html2pdf } = await import('html2pdf.js');
+    await html2pdf().set(opcoes).from(elemento).save();
   };
 
   function handleLogout(mensagemOpcional) {

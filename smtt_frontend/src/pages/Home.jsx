@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Home.css';
@@ -16,6 +16,7 @@ function Home() {
   const [altoContraste, setAltoContraste] = useState(() => localStorage.getItem('altoContraste') === 'true');
   const [modalConteudo, setModalConteudo] = useState(null);
   const [servicoIndisponivel, setServicoIndisponivel] = useState('');
+  const modalRef = useRef(null);
 
   const [activeHeroTab, setActiveHeroTab] = useState('placa'); // 'placa' ou 'avisos'
 
@@ -25,7 +26,10 @@ function Home() {
   const [resultadoBusca, setResultadoBusca] = useState(null);
   const [buscando, setBuscando] = useState(false);
   const [noticias, setNoticias] = useState([]);
-  const [, setEstatisticas] = useState([]);
+  const [carregandoDados, setCarregandoDados] = useState(true);
+  const [erroAlertas, setErroAlertas] = useState(false);
+  const [erroNoticias, setErroNoticias] = useState(false);
+  const [reduzirMovimento, setReduzirMovimento] = useState(false);
 
   // Efeito do Modo Alto Contraste (Acessibilidade)
   useEffect(() => {
@@ -37,14 +41,38 @@ function Home() {
     localStorage.setItem('altoContraste', altoContraste);
   }, [altoContraste]);
 
-  // Efeito do Slider Hero (pausa rotação automática se o usuário estiver digitando a placa)
   useEffect(() => {
-    if (placaBusca.length > 0) return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const atualizarPreferencia = () => setReduzirMovimento(mediaQuery.matches);
+    atualizarPreferencia();
+    mediaQuery.addEventListener('change', atualizarPreferencia);
+    return () => mediaQuery.removeEventListener('change', atualizarPreferencia);
+  }, []);
+
+  // Efeito do Slider Hero (pausa ao digitar e respeita a preferência de movimento reduzido)
+  useEffect(() => {
+    if (placaBusca.length > 0 || reduzirMovimento) return;
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % 2); // Alterna entre 0 e 1
     }, 6000);
     return () => clearInterval(slideInterval);
-  }, [placaBusca]);
+  }, [placaBusca, reduzirMovimento]);
+
+  useEffect(() => {
+    if (!modalConteudo) return undefined;
+    const elementoAnterior = document.activeElement;
+    const fecharComEscape = (event) => {
+      if (event.key === 'Escape') setModalConteudo(null);
+    };
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', fecharComEscape);
+    requestAnimationFrame(() => modalRef.current?.focus());
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', fecharComEscape);
+      elementoAnterior?.focus?.();
+    };
+  }, [modalConteudo]);
 
   // Efeito de Scroll (Botão Topo)
   useEffect(() => {
@@ -56,28 +84,31 @@ function Home() {
   }, []);
 
   // Carregar Alertas e Notícias da API
+  const carregarDados = async () => {
+    setCarregandoDados(true);
+    setErroAlertas(false);
+    setErroNoticias(false);
+    const [resultadoAlertas, resultadoNoticias] = await Promise.allSettled([
+      api.get('/public/alertas'),
+      api.get('/public/noticias')
+    ]);
+    if (resultadoAlertas.status === 'fulfilled') {
+      setAlertas(resultadoAlertas.value.data);
+    } else {
+      console.error('Erro ao carregar alertas:', resultadoAlertas.reason);
+      setErroAlertas(true);
+    }
+    if (resultadoNoticias.status === 'fulfilled') {
+      setNoticias(resultadoNoticias.value.data.slice(0, 3));
+    } else {
+      console.error('Erro ao carregar notícias:', resultadoNoticias.reason);
+      setErroNoticias(true);
+    }
+    setCarregandoDados(false);
+  };
+
   useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        const resAlertas = await api.get('/public/alertas');
-        setAlertas(resAlertas.data);
-      } catch (error) {
-        console.error("Erro ao carregar alertas:", error);
-      }
-      try {
-        const resNoticias = await api.get('/public/noticias');
-        setNoticias(resNoticias.data.slice(0, 3));
-      } catch (error) {
-        console.error("Erro ao carregar notícias:", error);
-      }
-      try {
-        const resStats = await api.get('/public/estatisticas');
-        setEstatisticas(resStats.data);
-      } catch (error) {
-        console.error("Erro ao carregar estatísticas:", error);
-      }
-    };
-    carregarDados();
+    void Promise.resolve().then(carregarDados);
   }, []);
 
   // Função de Buscar Placa
@@ -119,9 +150,6 @@ function Home() {
           {/* Social Icons */}
           <a href="https://www.instagram.com/smttpropria?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="hover:text-secondary-500 transition-colors">
             <i className="fa-brands fa-instagram text-sm"></i>
-          </a>
-          <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-secondary-500 transition-colors">
-            <i className="fa-brands fa-twitter text-sm"></i>
           </a>
           <span className="text-white/20">|</span>
           <button
@@ -403,10 +431,11 @@ function Home() {
             <div className="home-consulta lg:w-1/2 w-full max-w-md mx-auto z-20">
               <div className="bg-white/95 rounded-2xl shadow-xl overflow-hidden text-slate-800 border border-slate-200/85 relative animate-fadeInUp flex flex-col backdrop-blur-md">
                 {/* Custom Glass Header with Tabs */}
-                <div className="bg-slate-50 border-b border-slate-100 flex">
+                <div className="bg-slate-50 border-b border-slate-100 flex" role="tablist" aria-label="Informações rápidas">
 
                   <button
                     onClick={() => setActiveHeroTab('avisos')}
+                    role="tab" aria-selected={activeHeroTab === 'avisos'} aria-controls="painel-avisos" id="tab-avisos"
                     className={`flex-1 py-4 px-3 text-xs md:text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all duration-300 relative ${activeHeroTab === 'avisos'
                       ? 'border-primary-600 text-primary-600 bg-white'
                       : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
@@ -421,6 +450,7 @@ function Home() {
                   </button>
                   <button
                     onClick={() => setActiveHeroTab('placa')}
+                    role="tab" aria-selected={activeHeroTab === 'placa'} aria-controls="painel-placa" id="tab-placa"
                     className={`flex-1 py-4 px-3 text-xs md:text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all duration-300 ${activeHeroTab === 'placa'
                       ? 'border-primary-600 text-primary-600 bg-white'
                       : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
@@ -434,7 +464,7 @@ function Home() {
                 {/* Tab Contents */}
                 <div className="p-6 flex-grow">
                   {activeHeroTab === 'placa' ? (
-                    <div className="animate-fadeIn">
+                    <div id="painel-placa" role="tabpanel" aria-labelledby="tab-placa" className="animate-fadeIn">
                       <p className="text-xs text-slate-500 mb-6 text-center leading-relaxed">
                         Consulte infrações ou pendências registradas para o seu veículo na base da SMTT Propriá.
                       </p>
@@ -515,8 +545,16 @@ function Home() {
                       )}
                     </div>
                   ) : (
-                    <div className="animate-fadeIn">
-                      {alertas.length === 0 ? (
+                    <div id="painel-avisos" role="tabpanel" aria-labelledby="tab-avisos" className="animate-fadeIn">
+                      {erroAlertas ? (
+                        <div className="text-center py-8 text-slate-600" role="alert">
+                          <i className="fa-solid fa-triangle-exclamation text-2xl text-amber-500 mb-3"></i>
+                          <p className="font-bold text-sm">Não foi possível carregar os alertas.</p>
+                          <button type="button" onClick={carregarDados} className="mt-3 text-xs font-bold text-primary-600 hover:underline">Tentar novamente</button>
+                        </div>
+                      ) : carregandoDados ? (
+                        <div className="text-center py-8 text-slate-500" role="status">Carregando alertas…</div>
+                      ) : alertas.length === 0 ? (
                         <div className="text-center py-8 text-slate-500">
                           <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-200">
                             <i className="fa-solid fa-circle-check text-2xl animate-pulse"></i>
@@ -679,7 +717,18 @@ function Home() {
               </a>
             </div>
 
-            {noticias.length === 0 ? (
+            {erroNoticias ? (
+              <div className="text-center py-16 text-slate-500 bg-amber-50 rounded-2xl border border-amber-200" role="alert">
+                <i className="fa-solid fa-triangle-exclamation text-4xl mb-3 text-amber-500"></i>
+                <p className="text-sm font-bold">Não foi possível carregar as notícias.</p>
+                <button type="button" onClick={carregarDados} className="mt-3 text-sm font-bold text-primary-600 hover:underline">Tentar novamente</button>
+              </div>
+            ) : carregandoDados ? (
+              <div className="text-center py-16 text-slate-500 bg-slate-50 rounded-2xl border border-slate-200" role="status">
+                <i className="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i>
+                <p className="text-sm font-medium">Carregando notícias…</p>
+              </div>
+            ) : noticias.length === 0 ? (
               <div className="text-center py-16 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                 <i className="fa-solid fa-newspaper text-4xl mb-3 text-slate-300"></i>
                 <p className="text-sm font-medium">Nenhuma notícia publicada recentemente.</p>
@@ -821,14 +870,6 @@ function Home() {
                   aria-label="Instagram da SMTT Propriá"
                 >
                   <i className="fa-brands fa-instagram" aria-hidden="true"></i>
-                </a>
-
-                <a href="#" aria-label="Facebook">
-                  <i className="fa-brands fa-facebook-f" aria-hidden="true"></i>
-                </a>
-
-                <a href="#" aria-label="YouTube">
-                  <i className="fa-brands fa-youtube" aria-hidden="true"></i>
                 </a>
               </div>
 
@@ -1060,8 +1101,8 @@ function Home() {
 
       {/* Modal Institucional / Acessos */}
       {modalConteudo && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden border border-gray-150 shadow-2xl relative transition-transform duration-300 transform scale-100">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300" onMouseDown={(event) => { if (event.target === event.currentTarget) setModalConteudo(null); }}>
+          <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="modal-titulo" tabIndex={-1} className="bg-white rounded-2xl max-w-lg w-full overflow-hidden border border-gray-150 shadow-2xl relative transition-transform duration-300 transform scale-100">
             {/* Modal header border */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-600 to-secondary-500"></div>
 
@@ -1071,13 +1112,14 @@ function Home() {
                 onClick={() => setModalConteudo(null)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full w-8 h-8 flex items-center justify-center bg-gray-100 transition-colors"
                 title="Fechar"
+                aria-label="Fechar janela"
               >
                 <i className="fa-solid fa-xmark text-sm"></i>
               </button>
 
               {modalConteudo === 'sobre' && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 id="modal-titulo" className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i className="fa-solid fa-circle-info text-primary-600"></i> Sobre a SMTT
                   </h3>
                   <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
@@ -1096,7 +1138,7 @@ function Home() {
 
               {modalConteudo === 'legislacao' && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 id="modal-titulo" className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i className="fa-solid fa-gavel text-primary-600"></i> Legislação e Resoluções
                   </h3>
                   <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
@@ -1115,7 +1157,7 @@ function Home() {
 
               {modalConteudo === 'equipe' && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 id="modal-titulo" className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i className="fa-solid fa-users text-primary-600"></i> Equipe Diretiva
                   </h3>
                   <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
@@ -1148,7 +1190,7 @@ function Home() {
 
               {modalConteudo === 'ouvidoria' && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 id="modal-titulo" className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i className="fa-solid fa-comments text-primary-600"></i> Ouvidoria SMTT
                   </h3>
                   <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
@@ -1178,7 +1220,7 @@ function Home() {
 
               {modalConteudo === 'servico-breve' && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 id="modal-titulo" className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i className="fa-solid fa-laptop text-primary-600"></i> Serviço em Breve
                   </h3>
                   <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
@@ -1215,6 +1257,3 @@ function Home() {
 }
 
 export default Home;
-
-
-

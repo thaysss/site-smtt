@@ -1385,7 +1385,7 @@ function AdminPainel({ defaultTab }) {
               <AdminCountBadge icon={FileText} label="Total registrado" value={infracaoStats.total} description="Autos" />
               <AdminCountBadge icon={CheckCircle} label="Defesas deferidas" value={infracaoStats.canceladas} tone="green" description="Anulados" />
               <AdminCountBadge icon={XCircle} label="Multas ativas" value={infracaoStats.ativas} tone="red" description="Em cobrança" />
-              <AdminCountBadge icon={FileText} label="Pontuação gerada" value={infracaoStats.pontos} description="Pontos na CNH" />
+              
             </section>
 
             <section className="infracoes-filter-card">

@@ -26,9 +26,6 @@ function SiteHeader() {
           <a href="https://www.instagram.com/smttpropria?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="hover:text-secondary-500 transition-colors">
             <i className="fa-brands fa-instagram text-sm"></i>
           </a>
-          <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-secondary-500 transition-colors">
-            <i className="fa-brands fa-twitter text-sm"></i>
-          </a>
           <span className="text-white/20">|</span>
           <button
             onClick={() => setAltoContraste(!altoContraste)}
