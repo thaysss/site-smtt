@@ -126,7 +126,10 @@ def create_app(test_config=None):
         response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
         response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
         response.headers.setdefault('Cross-Origin-Opener-Policy', 'same-origin')
-        response.headers.setdefault('Cross-Origin-Resource-Policy', 'same-site')
+        # Uploads are rendered by the frontend hosted on a different site
+        # (Vercel -> Railway). Other responses keep the stricter default.
+        resource_policy = 'cross-origin' if request.path.startswith('/static/uploads/') else 'same-site'
+        response.headers.setdefault('Cross-Origin-Resource-Policy', resource_policy)
         if app.config.get('ENV') == 'production' or os.getenv('FLASK_ENV') == 'production':
             response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
         if request.path.startswith('/api/auth/'):

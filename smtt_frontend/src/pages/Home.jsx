@@ -382,13 +382,13 @@ function Home() {
           {/* Background Slide 1 */}
           <div className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${currentSlide === 0 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 pointer-events-none z-0'}`}>
             <img src="/propria.png" alt="Trânsito da cidade" className="w-full h-full object-cover animate-kenburns" />
-            <div className="absolute inset-0 bg-primary-900 mix-blend-multiply opacity-80"></div>
+            
           </div>
 
           {/* Background Slide 2 */}
           <div className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${currentSlide === 1 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 pointer-events-none z-0'}`}>
             <img src="/propri.png" alt="Transporte público" className="w-full h-full object-cover animate-kenburns" />
-            <div className="absolute inset-0 bg-primary-900 mix-blend-multiply opacity-80"></div>
+            
           </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col lg:flex-row items-center z-20 w-full gap-12 lg:gap-8">
@@ -397,7 +397,7 @@ function Home() {
               {currentSlide === 0 ? (
                 <div className="animate-fadeInUp">
                   
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-sora font-extrabold tracking-tight mb-6 leading-[1.1] text-white">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-sora font-extrabold tracking-tight mb-6 leading-[1.1] text-[#12345B]">
                     No trânsito,<br />
                     <span className="text-secondary-500">escolha a vida.</span>
                   </h2>
