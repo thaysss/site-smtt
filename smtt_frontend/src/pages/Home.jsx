@@ -973,10 +973,17 @@ function Home() {
 
                   <div>
                     <p>
-                      Avenida João Barbosa Pôrto, 1829
-                      <br />
-                      Propriá – SE · CEP 49900-000
+                      <a
+                        href="https://maps.app.goo.gl/hKUQCpSY8B2c8kpq5"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Avenida João Barbosa Pôrto, 1829
+                        <br />
+                        Propriá – SE · CEP 49900-000
+                      </a>
                     </p>
+                                
                   </div>
                 </div>
 
