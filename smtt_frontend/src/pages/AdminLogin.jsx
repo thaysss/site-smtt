@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { UserRound, LockKeyhole, Eye, EyeOff, ShieldCheck, LogIn, Globe2, Building2 } from 'lucide-react';
+import { UserRound, LockKeyhole, Eye, EyeOff, ShieldCheck, LogIn, Globe2, TrafficCone, UsersRound, Leaf } from 'lucide-react';
 
 function AdminLogin() {
   const location = useLocation();
@@ -29,7 +29,6 @@ function AdminLogin() {
     e.preventDefault();
     setErro('');
     try {
-      // Adicionamos o /auth aqui no começo do endereço
       const response = await api.post('/auth/admin/login', { usuario, senha });
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminNome', response.data.nome);
@@ -42,29 +41,44 @@ function AdminLogin() {
   return (
     <main className="admin-login">
       <section className="admin-login-brand" aria-label="Identificação institucional">
+        <div className="admin-login-slogan">
+          <span>Mobilidade</span>
+          <span>Segura</span>
+          <span>Cidade Melhor</span>
+          <i aria-hidden="true" />
+        </div>
+
         <div className="admin-login-brand-content">
           <img className="admin-login-logo" src="/SMTT.png" alt="SMTT Propriá" />
           <p className="admin-login-eyebrow">Superintendência Municipal</p>
           <h1>SMTT Propriá</h1>
           <span className="admin-login-accent" aria-hidden="true" />
-          
-          
+          <p className="admin-login-subtitle">Gestão, mobilidade e<br />segurança no trânsito.</p>
+        </div>
+
+        <div className="admin-login-benefits" aria-label="Compromissos da SMTT">
+          <div><TrafficCone /><span>Trânsito<br />mais seguro</span></div>
+          <div><UsersRound /><span>Cidade<br />mais humana</span></div>
+          <div><Leaf /><span>Mobilidade<br />sustentável</span></div>
         </div>
       </section>
 
       <section className="admin-login-panel">
+        <img className="admin-login-city-logo" src="/prefe.jpg" alt="Prefeitura de Propriá — Trabalho que transforma" />
+
         <div className="admin-login-form-wrap">
           <div className="admin-login-mobile-brand">
             <img src="/SMTT.png" alt="SMTT Propriá" />
             <strong>SMTT Propriá</strong>
-            <span>Ambiente interno monitorado</span>
+            <span>Área administrativa</span>
           </div>
 
           <div className="admin-login-heading">
             <span className="admin-login-heading-icon"><LockKeyhole size={23} /></span>
-            <span>Portal do servidor</span>
-            <h2>Acesso ao sistema</h2>
-            <p>Insira suas credenciais para continuar.</p>
+            <span>Área administrativa</span>
+            <i aria-hidden="true" />
+            <h2>Bem-vindo de volta</h2>
+            <p>Acesse sua conta institucional<br />para continuar.</p>
           </div>
 
           {erro && <div className="admin-login-error" role="alert">{erro}</div>}
@@ -99,13 +113,13 @@ function AdminLogin() {
               <Globe2 size={19} /> Acessar Portal Público
             </button>
           </form>
+
+          <div className="admin-login-restricted">
+            <ShieldCheck />
+            <span><strong>Ambiente restrito</strong><small>Apenas usuários autorizados podem acessar este sistema.</small></span>
+          </div>
         </div>
       </section>
-      <footer className="admin-login-footer">
-        <div className="admin-login-footer-brand"><Building2 /><span><strong>SMTT Propriá</strong><small>Superintendência Municipal de<br />Trânsito e Transporte de Propriá - SE</small></span></div>
-        <p>© 2026 SMTT Propriá.<br />Todos os direitos reservados.</p>
-        <ShieldCheck />
-      </footer>
     </main>
   );
 }

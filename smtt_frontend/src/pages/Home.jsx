@@ -401,8 +401,9 @@ function Home() {
                     No trânsito,<br />
                     <span className="text-secondary-500">escolha a vida.</span>
                   </h2>
-                  <p className="text-base md:text-lg text-primary-100 mb-8 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
-                    Paz no trânsito começa por você. Respeite os limites de velocidade e proteja a vida de quem caminha pelas faixas de pedestres.
+                  <p className="text-base md:text-lg text-[#4B6480] mb-8 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                    Paz no trânsito começa por você. Respeite os limites de velocidade e
+                    proteja a vida de quem caminha pelas faixas de pedestres.
                   </p>
                 </div>
               ) : (

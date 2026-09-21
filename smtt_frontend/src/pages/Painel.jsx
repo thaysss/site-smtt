@@ -5,7 +5,7 @@ import api from '../services/api';
 import {
   Car, AlertCircle, FileText, Download,
   Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, ExternalLink, Compass,
-  Info
+  Info, LogOut, UserRound, Clock3
 } from 'lucide-react';
 import formularioPDF from '../assets/requerimento.pdf';
 
@@ -450,6 +450,12 @@ function Painel() {
   const totalVeiculos = veiculos.length;
   const totalMultas = multas.length;
   const totalRecursos = multas.filter(m => m.recurso).length;
+  const totalPendencias = multas.filter(m =>
+    !m.fase_atual?.toLowerCase().includes('cancelada') &&
+    !m.fase_atual?.toLowerCase().includes('deferida') &&
+    !m.fase_atual?.toLowerCase().includes('paga') &&
+    !m.fase_atual?.toLowerCase().includes('finalizado')
+  ).length;
 
   const multasFiltradas = multas.filter(m => {
     if (buscaInfracao.trim() !== '') {
@@ -486,32 +492,43 @@ function Painel() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white pb-20">
 
       {/* Header */}
-      <header className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
+      <header className="bg-white/95 border-b border-slate-200 py-3 px-4 sm:px-6 sticky top-0 z-50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+          <button type="button" className="flex items-center gap-3 text-left" onClick={() => navigate('/')} aria-label="Voltar para a página inicial">
             <img src="/logo-smtt.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
             <div className="border-l border-gray-300 pl-3 hidden sm:block">
-              <span className="text-xs uppercase tracking-wider text-gray-500 font-bold">Área do Cidadão</span>
+              <span className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-bold block">SMTT Propriá</span>
+              <span className="text-sm text-slate-800 font-extrabold block">Área do Cidadão</span>
             </div>
-          </div>
+          </button>
 
-          <div className="flex items-center gap-6">
-            <span className="text-sm font-medium hidden md:block">Olá, <strong className="text-primary-600">{nomeUsuario}</strong></span>
-            <button onClick={() => handleLogout()} className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors font-semibold border border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg bg-white">
-              Sair <i className="fa-solid fa-right-from-bracket"></i>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <div className="hidden md:flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center"><UserRound className="w-4 h-4" /></div>
+              <div className="leading-tight"><span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">Conta do cidadão</span><strong className="text-sm text-slate-800">{nomeUsuario || 'Cidadão'}</strong></div>
+            </div>
+            <button onClick={() => handleLogout()} className="flex items-center gap-2 text-sm text-slate-600 hover:text-red-700 transition-colors font-bold border border-slate-200 hover:border-red-200 hover:bg-red-50 px-3.5 py-2 rounded-xl bg-white" aria-label="Sair da Área do Cidadão">
+              <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Sair</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
+
+        <nav className="flex items-center gap-2 overflow-x-auto pb-2 mb-4" aria-label="Navegação da Área do Cidadão">
+          <a href="#resumo" className="shrink-0 px-4 py-2 rounded-full bg-primary-600 text-white text-xs font-bold">Visão geral</a>
+          <a href="#veiculos" className="shrink-0 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-700 text-xs font-bold transition-colors">Meus veículos</a>
+          <a href="#servicos" className="shrink-0 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-700 text-xs font-bold transition-colors">Serviços</a>
+          <a href="#infracoes" className="shrink-0 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-700 text-xs font-bold transition-colors">Infrações</a>
+        </nav>
 
         {/* SEÇÃO DE RESUMO (KPIs) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
+        <section id="resumo" className="scroll-mt-28 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-8">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
             <div>
               <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Veículos Vinculados</span>
               <span className="text-2xl font-extrabold text-gray-900">{totalVeiculos}</span>
@@ -521,7 +538,7 @@ function Painel() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
             <div>
               <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Infrações Registradas</span>
               <span className="text-2xl font-extrabold text-gray-900">{totalMultas}</span>
@@ -531,7 +548,7 @@ function Painel() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
             <div>
               <span className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Recursos em Andamento</span>
               <span className="text-2xl font-extrabold text-primary-600">{totalRecursos}</span>
@@ -540,13 +557,23 @@ function Painel() {
               <FileText className="w-6 h-6" />
             </div>
           </div>
-        </div>
+
+          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-soft border border-gray-100 flex items-center justify-between hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
+            <div>
+              <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1">Pendências</span>
+              <span className="text-2xl font-extrabold text-orange-600">{totalPendencias}</span>
+            </div>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center">
+              <Clock3 className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+          </div>
+        </section>
 
         {/* ÁREA DE CONTEÚDO PRINCIPAL */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* COLUNA ESQUERDA: GESTÃO DE VEÍCULOS */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 scroll-mt-28" id="veiculos">
 
             {/* Vincular Veículo */}
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
@@ -619,82 +646,40 @@ function Painel() {
             </div>
 
             {/* SERVIÇOS DISPONÍVEIS */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+            <div id="servicos" className="scroll-mt-28 bg-white rounded-2xl shadow-md border border-gray-100 p-6">
               <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
                 <Compass className="text-primary-600 w-5 h-5" />
                 <h2 className="font-bold text-lg text-gray-900">Serviços Disponíveis</h2>
               </div>
 
               <div className="space-y-4">
-                {/* Serviço 1: Alvarás */}
-                <div
-                  onClick={() => navigate('/solicitacao-alvara')}
-                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-blue-50/30 border border-transparent hover:border-blue-100 transition-all cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-primary-600 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-primary-600 group-hover:text-white transition-colors">
-                    <FileText className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-primary-600 transition-colors">
-                      Alvarás e Permissionários <ExternalLink className="w-3. h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </span>
-                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Renovação ou inclusão de auxiliar para táxi, mototáxi e escolar.</span>
-                  </div>
-                </div>
-
-                {/* Serviço 2: Eventos */}
-                <div
-                  onClick={() => navigate('/solicitacao-evento')}
-                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-red-50/30 border border-transparent hover:border-red-100 transition-all cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-red-500 group-hover:text-white transition-colors">
-                    <Car className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-red-500 transition-colors">
-                      Autorização de Eventos <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </span>
-                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Solicite interdição de via ou apoio de tráfego para a realização de eventos.</span>
-                  </div>
-                </div>
-
-                {/* Serviço 3: Contestação de Multa */}
-                <div
-                  onClick={() => navigate('/contestacao-multa')}
-                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-amber-50/30 border border-transparent hover:border-amber-100 transition-all cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                    <ShieldAlert className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-amber-600 transition-colors">
-                      Contestação Avulsa <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </span>
-                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Abra defesas prévias ou recursos de multas de forma avulsa.</span>
-                  </div>
-                </div>
-
-                {/* Serviço 4: Consulta de Protocolos */}
-                <div
-                  onClick={() => navigate('/consultar')}
-                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-green-50/30 border border-transparent hover:border-green-100 transition-all cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                    <FileDigit className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="block font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-green-600 transition-colors">
-                      Consultar Protocolo <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </span>
-                    <span className="text-xs text-gray-500 leading-snug block mt-0.5">Consulte o andamento e pareceres dos seus protocolos abertos.</span>
-                  </div>
-                </div>
+                {[
+                  { title: 'Alvarás e Permissionários', description: 'Renovação ou inclusão de auxiliar para táxi, mototáxi e escolar.', route: '/solicitacao-alvara', icon: FileText },
+                  { title: 'Autorização de Eventos', description: 'Solicite interdição de via ou apoio de tráfego para a realização de eventos.', route: '/solicitacao-evento', icon: Car },
+                  { title: 'Contestação Avulsa', description: 'Abra defesas prévias ou recursos de multas de forma avulsa.', route: '/contestacao-multa', icon: ShieldAlert },
+                  { title: 'Consultar Protocolo', description: 'Consulte o andamento e pareceres dos seus protocolos abertos.', route: '/consultar', icon: FileDigit }
+                ].map(servico => {
+                  const Icone = servico.icon;
+                  return (
+                    <div key={servico.title} onClick={() => navigate(servico.route)} className="flex items-start gap-3 p-3 rounded-xl hover:bg-blue-50/30 border border-transparent hover:border-blue-100 transition-all cursor-pointer group">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 text-primary-600 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                        <Icone className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm text-gray-800 flex items-center gap-1 group-hover:text-primary-600 transition-colors">
+                          {servico.title} <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </span>
+                        <span className="text-xs text-gray-500 leading-snug block mt-0.5">{servico.description}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* COLUNA DIREITA: MULTAS E INFRAÇÕES */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 scroll-mt-28" id="infracoes">
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 sm:p-8">
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
                 <div className="flex items-center gap-2">
@@ -1009,6 +994,7 @@ function Painel() {
             </div>
           </div>
         </div> {/* Fecha grid de 3 colunas */}
+
       </main>
 
       {/* JANELA MODAL DE RECURSO */}

@@ -6163,3 +6163,279 @@ body.alto-contraste .text-gray-900 {
 .admin-record-actions .admin-record-edit:hover { background: #edf5ff; }
 .admin-record-actions .admin-record-delete:hover { background: #fff1f0; }
 .admin-record-actions button:focus-visible { outline: 3px solid #80b6ff; outline-offset: 2px; }
+
+/* Login administrativo — composição institucional 2026 */
+.admin-login {
+  grid-template-columns: minmax(0, 53.6%) minmax(540px, 46.4%);
+  min-height: 100svh;
+  background: #f5f9fd;
+}
+
+.admin-login-brand {
+  min-height: 100svh;
+  background:
+    linear-gradient(180deg, rgba(6, 77, 166, .84) 0%, rgba(0, 51, 126, .91) 52%, rgba(0, 48, 119, .96) 100%),
+    url('/propria.png') center / cover no-repeat;
+}
+
+.admin-login-brand::before {
+  width: 560px;
+  height: 560px;
+  top: -355px;
+  right: -175px;
+  border: 0;
+  background: rgba(255, 255, 255, .035);
+}
+
+.admin-login-brand::after {
+  width: 350px;
+  height: 350px;
+  left: -285px;
+  bottom: -205px;
+  border: 5px solid #ffd20a;
+}
+
+.admin-login-slogan {
+  position: absolute;
+  z-index: 2;
+  top: 6.5%;
+  left: 10.2%;
+  display: grid;
+  gap: 5px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .25em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.admin-login-slogan i {
+  width: 60px;
+  height: 4px;
+  margin-top: 16px;
+  border-radius: 999px;
+  background: #ffd20a;
+}
+
+.admin-login-brand-content {
+  width: min(76%, 650px);
+  padding: 20px 40px 120px;
+}
+
+.admin-login-logo {
+  width: 188px;
+  height: 188px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 12px 22px rgba(0, 23, 72, .2));
+}
+
+.admin-login-eyebrow {
+  margin-bottom: 11px;
+  font-size: 14px;
+  letter-spacing: .19em;
+}
+
+.admin-login-brand h1 {
+  font-size: clamp(3rem, 4vw, 4rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.admin-login-accent {
+  width: 104px;
+  height: 4px;
+  margin-top: 25px;
+  background: #ffd20a;
+}
+
+.admin-login-subtitle {
+  margin: 24px 0 0;
+  color: rgba(255, 255, 255, .82);
+  font-size: 20px;
+  line-height: 1.45;
+}
+
+.admin-login-benefits {
+  position: absolute;
+  z-index: 2;
+  bottom: 5.5%;
+  left: 14.8%;
+  display: grid;
+  width: 70%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.admin-login-benefits > div {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 0;
+}
+
+.admin-login-benefits svg {
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, .95);
+  stroke-width: 2.3;
+}
+
+.admin-login-benefits span {
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .15em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.admin-login-panel {
+  position: relative;
+  min-height: 100svh;
+  padding: 115px 8% 30px;
+  background:
+    linear-gradient(135deg, transparent 0 75%, rgba(214, 229, 247, .72) 75% 78%, transparent 78%) right top / 350px 430px no-repeat,
+    radial-gradient(circle at 35% 18%, #fff 0, rgba(255,255,255,.86) 24%, transparent 56%),
+    #f5f9fd;
+}
+
+.admin-login-city-logo {
+  position: absolute;
+  top: 30px;
+  right: 8.5%;
+  width: 205px;
+  height: 72px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.admin-login-form-wrap {
+  width: min(100%, 535px);
+  padding: 32px 40px 40px;
+  border: 1px solid rgba(255,255,255,.98);
+  border-radius: 20px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 18px 55px rgba(16, 57, 102, .12);
+}
+
+.admin-login-heading .admin-login-heading-icon {
+  width: 62px;
+  height: 62px;
+  margin-bottom: 17px;
+  border-radius: 50%;
+  background: #e9f3ff;
+  color: #075bc4;
+}
+
+.admin-login-heading > span:not(.admin-login-heading-icon) {
+  color: #0756bd;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .17em;
+}
+
+.admin-login-heading > i {
+  display: block;
+  width: 54px;
+  height: 3px;
+  margin: 11px auto 13px;
+  border-radius: 999px;
+  background: #ffd20a;
+}
+
+.admin-login-heading h2 {
+  margin: 0 0 8px;
+  color: #061b52;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.admin-login-heading p {
+  margin-bottom: 27px;
+  color: #536c9b;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.admin-login-form { gap: 18px; }
+.admin-login-form label { margin-bottom: 8px; color: #071843; font-size: 13px; }
+.admin-login-field > svg { color: #315b9a; }
+.admin-login-field input { height: 56px; border-color: #bdcbe0; border-radius: 9px; color: #071843; }
+.admin-login-field input::placeholder { color: #697fa7; }
+.admin-login-options { margin-top: 0; color: #071843; }
+.admin-login-options button { color: #0756bd; }
+.admin-login-submit, .admin-login-back { min-height: 55px; border-radius: 9px; font-size: 14px; }
+.admin-login-submit { margin-top: 2px; background: linear-gradient(105deg, #075fd0, #0044a5); box-shadow: 0 8px 18px rgba(0, 75, 174, .18); }
+.admin-login-divider { gap: 18px; color: #6d7d99; }
+.admin-login-back { border-color: #bfcde0; color: #0756bd; }
+
+.admin-login-restricted {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 24px;
+  padding: 17px 22px;
+  border-radius: 9px;
+  background: #eaf4ff;
+  color: #2761aa;
+}
+
+.admin-login-restricted > svg {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+  fill: #2761aa;
+  color: #fff;
+}
+
+.admin-login-restricted span { display: grid; gap: 4px; }
+.admin-login-restricted strong { color: #315d9b; font-size: 13px; }
+.admin-login-restricted small { color: #55719a; font-size: 11px; }
+
+@media (max-width: 1180px) {
+  .admin-login { grid-template-columns: 48% 52%; }
+  .admin-login-brand h1 { font-size: 2.8rem; }
+  .admin-login-benefits { left: 7%; width: 86%; }
+  .admin-login-benefits > div { grid-template-columns: 34px 1fr; padding: 0 7px; }
+  .admin-login-benefits svg { width: 27px; height: 27px; }
+  .admin-login-benefits span { font-size: 9px; }
+  .admin-login-panel { padding-inline: 6%; }
+}
+
+@media (max-height: 850px) and (min-width: 761px) {
+  .admin-login-panel { padding-top: 88px; padding-bottom: 20px; }
+  .admin-login-city-logo { top: 13px; height: 62px; }
+  .admin-login-form-wrap { padding: 24px 36px; }
+  .admin-login-heading .admin-login-heading-icon { width: 50px; height: 50px; margin-bottom: 10px; }
+  .admin-login-heading h2 { font-size: 29px; }
+  .admin-login-heading p { margin-bottom: 19px; }
+  .admin-login-form { gap: 13px; }
+  .admin-login-field input { height: 48px; }
+  .admin-login-submit, .admin-login-back { min-height: 46px; }
+  .admin-login-restricted { margin-top: 16px; padding-block: 12px; }
+  .admin-login-brand-content { padding-bottom: 80px; }
+  .admin-login-logo { width: 145px; height: 145px; }
+}
+
+@media (max-width: 760px) {
+  .admin-login { display: block; min-height: 100svh; background: #f5f9fd; }
+  .admin-login-panel { min-height: 100svh; padding: 28px 18px; background: #f5f9fd; }
+  .admin-login-city-logo { position: static; display: block; width: 180px; height: 62px; margin: 0 auto 20px; }
+  .admin-login-form-wrap { padding: 26px 22px; }
+  .admin-login-mobile-brand { margin-bottom: 24px; }
+  .admin-login-mobile-brand img { width: 74px; height: 74px; }
+  .admin-login-heading .admin-login-heading-icon { display: none; }
+  .admin-login-heading h2 { font-size: 28px; }
+  .admin-login-heading p { margin-bottom: 24px; font-size: 14px; }
+  .admin-login-options { align-items: flex-start; gap: 12px; font-size: 12px; }
+  .admin-login-restricted { padding: 14px; }
+}
