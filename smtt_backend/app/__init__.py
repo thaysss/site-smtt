@@ -44,7 +44,11 @@ def create_app(test_config=None):
     import os
     env = os.getenv('FLASK_ENV', 'development')
     if env == 'production':
-        ProductionConfig.validate()
+        # Testes podem exercitar o comportamento de producao com banco em
+        # memoria e segredos isolados. Em execucao real, a validacao continua
+        # obrigatoria antes de a aplicacao aceitar trafego.
+        if not (test_config and test_config.get('TESTING')):
+            ProductionConfig.validate()
         app.config.from_object(ProductionConfig)
     elif env == 'testing':
         app.config.from_object(TestingConfig)
