@@ -61,14 +61,19 @@ with app.app_context():
         # Ativa RLS em todas as tabelas da aplicacao. O Flask usa o papel
         # proprietario; outros papeis ficam sem acesso sem politica explicita.
         if db.engine.dialect.name == "postgresql":
-            print("Ativando Row Level Security nas tabelas da aplicacao...")
-            for table in db.metadata.sorted_tables:
-                schema = table.schema or "public"
-                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", schema):
-                    raise RuntimeError(f"Schema inseguro para migracao: {schema!r}")
-                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", table.name):
-                    raise RuntimeError(f"Tabela insegura para migracao: {table.name!r}")
-                qualified_name = f'"{schema}"."{table.name}"'
+            print("Ativando Row Level Security nas tabelas public...")
+            table_names = [
+                row[0] for row in db.session.execute(text("""
+                    SELECT tablename
+                    FROM pg_tables
+                    WHERE schemaname = 'public'
+                    ORDER BY tablename
+                """)).all()
+            ]
+            for table_name in table_names:
+                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", table_name):
+                    raise RuntimeError(f"Tabela insegura para migracao: {table_name!r}")
+                qualified_name = f'"public"."{table_name}"'
                 db.session.execute(text(f"ALTER TABLE {qualified_name} ENABLE ROW LEVEL SECURITY"))
 
             rls_disabled = db.session.execute(text("""
@@ -77,7 +82,7 @@ with app.app_context():
                 WHERE schemaname = 'public'
                   AND tablename = ANY(:table_names)
                   AND NOT rowsecurity
-            """), {"table_names": [table.name for table in db.metadata.sorted_tables]}).all()
+            """), {"table_names": table_names}).all()
             if rls_disabled:
                 raise RuntimeError(f"RLS nao foi ativado em: {rls_disabled}")
         

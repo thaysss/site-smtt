@@ -35,10 +35,10 @@ with app.app_context():
         db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
         env = os.getenv('FLASK_ENV', 'development')
         if env == 'production' or 'supabase' in db_uri:
-            print("✅ Conta de servidor criada com sucesso no Supabase (Produção)!")
+            print("[SUCCESS] Conta de servidor criada com sucesso no Supabase (Producao)!")
         elif 'sqlite' in db_uri:
-            print("✅ Conta de servidor criada com sucesso no SQLite Local!")
+            print("[SUCCESS] Conta de servidor criada com sucesso no SQLite Local!")
         else:
-            print("✅ Conta de servidor criada com sucesso no PostgreSQL Local!")
+            print("[SUCCESS] Conta de servidor criada com sucesso no PostgreSQL Local!")
     else:
-        print("⚠️ O servidor com esta matrícula já existe no banco de dados.")
+        print("[INFO] O servidor com esta matricula ja existe no banco de dados.")
