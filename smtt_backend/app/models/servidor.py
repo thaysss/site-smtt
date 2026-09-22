@@ -9,7 +9,7 @@ class Servidor(db.Model):
     nome = db.Column(db.String(150), nullable=False)
     matricula = db.Column(db.String(20), unique=True, nullable=False)
     senha_hash = db.Column(db.String(255), nullable=False)
-    cargo = db.Column(db.String(50), default='Analista')
+    cargo = db.Column(db.String(50), nullable=False, default='Analista')
 
     def set_senha(self, senha):
         self.senha_hash = generate_password_hash(senha)

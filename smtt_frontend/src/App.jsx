@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { canAccessAdmin } from './utils/adminPermissions';
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Painel = lazy(() => import('./pages/Painel'));
@@ -27,9 +28,10 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // Guarda de Rota para Administrador Autenticado
-const AdminProtectedRoute = ({ children }) => {
+const AdminProtectedRoute = ({ children, feature }) => {
   const token = localStorage.getItem('adminToken');
-  return token ? children : <Navigate to="/admin/login" replace />;
+  if (!token) return <Navigate to="/admin/login" replace />;
+  return !feature || canAccessAdmin(feature) ? children : <Navigate to="/admin/dashboard" replace />;
 };
 
 function App() {
@@ -85,11 +87,11 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
         <Route path="/admin/painel" element={<AdminProtectedRoute><AdminPainel /></AdminProtectedRoute>} />
-        <Route path="/admin/alvaras" element={<AdminProtectedRoute><AdminPainel defaultTab="alvaras" /></AdminProtectedRoute>} />
-        <Route path="/admin/alertas" element={<AdminProtectedRoute><AdminAlertas /></AdminProtectedRoute>} />
-        <Route path="/admin/infracoes" element={<AdminProtectedRoute><AdminInfracoes /></AdminProtectedRoute>} />
-        <Route path="/admin/veiculos" element={<AdminProtectedRoute><AdminVeiculos /></AdminProtectedRoute>} />
-        <Route path="/admin/usuarios" element={<AdminProtectedRoute><AdminUsuarios /></AdminProtectedRoute>} />
+        <Route path="/admin/alvaras" element={<AdminProtectedRoute feature="alvaras"><AdminPainel defaultTab="alvaras" /></AdminProtectedRoute>} />
+        <Route path="/admin/alertas" element={<AdminProtectedRoute feature="alertas"><AdminAlertas /></AdminProtectedRoute>} />
+        <Route path="/admin/infracoes" element={<AdminProtectedRoute feature="lancar-infracao"><AdminInfracoes /></AdminProtectedRoute>} />
+        <Route path="/admin/veiculos" element={<AdminProtectedRoute feature="veiculos"><AdminVeiculos /></AdminProtectedRoute>} />
+        <Route path="/admin/usuarios" element={<AdminProtectedRoute feature="usuarios"><AdminUsuarios /></AdminProtectedRoute>} />
         <Route path="/consultar" element={<ConsultaProtocolo />} />
         <Route path="/solicitacao-evento" element={<SolicitacaoEvento />} />
         <Route path="/solicitacao-alvara" element={<SolicitacaoAlvara />} />

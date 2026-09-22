@@ -1,4 +1,6 @@
 import os
+import re
+import requests
 # app/routes/servicos.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -11,6 +13,38 @@ from app.utils.timezone import get_brasilia_time
 from app.utils.uploads import save_upload
 
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+def renavam_valido(valor):
+    renavam = re.sub(r'\D', '', str(valor or ''))
+    if len(renavam) != 11 or len(set(renavam)) == 1:
+        return False
+    soma = sum(int(numero) * peso for numero, peso in zip(renavam[:10], (3, 2, 9, 8, 7, 6, 5, 4, 3, 2)))
+    digito = (soma * 10) % 11
+    return int(renavam[-1]) == (0 if digito == 10 else digito)
+
+def consultar_renavam_da_placa(placa):
+    token = os.environ.get('APIPLACAS_TOKEN', '').strip()
+    if not token or token == 'placeholder':
+        return None, 'A validação de RENAVAM está temporariamente indisponível.'
+    try:
+        response = requests.get(
+            f'https://wdapi2.com.br/consulta/{placa}/{token}',
+            headers={'Accept': 'application/json', 'User-Agent': 'SMTT-Propria/1.0'},
+            timeout=7,
+        )
+        if response.status_code != 200:
+            return None, 'Não foi possível validar a placa e o RENAVAM agora.'
+        dados = response.json()
+        if isinstance(dados.get('data'), dict):
+            dados = dados['data']
+        elif isinstance(dados.get('dados'), dict):
+            dados = dados['dados']
+        renavam = re.sub(r'\D', '', str(dados.get('renavam', '')))
+        if renavam:
+            renavam = renavam.zfill(11)
+        return renavam or None, None
+    except (requests.RequestException, ValueError, TypeError):
+        return None, 'Não foi possível validar a placa e o RENAVAM agora.'
 
 def allowed_file(arquivo):
     if not arquivo or not arquivo.filename or '.' not in arquivo.filename:
@@ -51,11 +85,24 @@ def listar_meus_veiculos():
 @servicos_bp.route('/veiculos', methods=['POST'])
 @jwt_required()
 def vincular_veiculo():
-    dados = request.get_json()
+    dados = request.get_json(silent=True) or {}
     cidadao_id = get_jwt_identity()
     
-    placa = dados.get('placa', '').upper()
-    renavam = dados.get('renavam', '')
+    placa = re.sub(r'[^A-Z0-9]', '', str(dados.get('placa', '')).upper())
+    renavam = re.sub(r'\D', '', str(dados.get('renavam', '')))
+
+    if not re.fullmatch(r'[A-Z]{3}[0-9][A-Z0-9][0-9]{2}', placa):
+        return jsonify({"erro": "Informe uma placa válida."}), 400
+    if not renavam_valido(renavam):
+        return jsonify({"erro": "Informe um RENAVAM válido com 11 dígitos."}), 400
+
+    renavam_api, erro_api = consultar_renavam_da_placa(placa)
+    if erro_api:
+        return jsonify({"erro": erro_api}), 503
+    if not renavam_api:
+        return jsonify({"erro": "A consulta da placa não retornou o RENAVAM; o veículo não foi cadastrado."}), 422
+    if renavam_api != renavam:
+        return jsonify({"erro": "O RENAVAM informado não pertence a esta placa."}), 400
     
     # 1. Procura o veículo APENAS pela placa
     veiculo = Veiculo.query.filter_by(placa=placa).first()
@@ -130,7 +177,9 @@ def listar_minhas_infracoes():
             inf_dict["valor_final"] = f"{inf.valor_final:.2f}"
         lista.append(inf_dict)
         
-    return jsonify(lista), 200
+    response = jsonify(lista)
+    response.headers['Cache-Control'] = 'no-store'
+    return response, 200
 
 
 # ==========================================

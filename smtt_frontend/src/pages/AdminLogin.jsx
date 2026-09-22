@@ -32,6 +32,8 @@ function AdminLogin() {
       const response = await api.post('/auth/admin/login', { usuario, senha });
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminNome', response.data.nome);
+      localStorage.setItem('adminCargo', response.data.cargo);
+      localStorage.setItem('adminPerfil', response.data.perfil);
       navigate('/admin/dashboard');
     } catch (error) {
       setErro(error.response?.data?.erro || 'Credenciais inválidas.');
@@ -52,15 +54,10 @@ function AdminLogin() {
           <img className="admin-login-logo" src="/SMTT.png" alt="SMTT Propriá" />
           <p className="admin-login-eyebrow">Superintendência Municipal</p>
           <h1>SMTT Propriá</h1>
-          <span className="admin-login-accent" aria-hidden="true" />
-          <p className="admin-login-subtitle">Gestão, mobilidade e<br />segurança no trânsito.</p>
+          
         </div>
 
-        <div className="admin-login-benefits" aria-label="Compromissos da SMTT">
-          <div><TrafficCone /><span>Trânsito<br />mais seguro</span></div>
-          <div><UsersRound /><span>Cidade<br />mais humana</span></div>
-          <div><Leaf /><span>Mobilidade<br />sustentável</span></div>
-        </div>
+        
       </section>
 
       <section className="admin-login-panel">

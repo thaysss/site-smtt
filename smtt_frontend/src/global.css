@@ -672,7 +672,7 @@ body.alto-contraste .text-gray-900 {
 .admin-users-card-title p { font-size: .85rem; }
 .admin-users-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .admin-users-fields label { display: grid; gap: 8px; color: #303841; font-size: .78rem; font-weight: 800; letter-spacing: .025em; text-transform: uppercase; }
-.admin-users-fields input { width: 100%; min-height: 46px; padding: 0 13px; border: 1px solid var(--admin-border); border-radius: 9px; font: inherit; font-weight: 500; letter-spacing: normal; text-transform: none; }
+.admin-users-fields input, .admin-users-fields select { width: 100%; min-height: 46px; padding: 0 13px; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; font: inherit; font-weight: 500; letter-spacing: normal; text-transform: none; }
 .admin-users-full-field { grid-column: 1 / -1; }
 .admin-users-password { position: relative; display: block; }
 .admin-users-password input { padding-right: 46px; }

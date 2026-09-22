@@ -4,6 +4,7 @@ import re
 from app.extensions import db
 from app.models.cidadao import Cidadao
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt
+from app.utils.cargos import CARGOS, cargo_das_claims, normalizar_cargo
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 # app/routes/auth.py
@@ -52,17 +53,19 @@ from app.models.servidor import Servidor
 @jwt_required()
 def cadastro_admin():
     claims = get_jwt()
-    if claims.get("role") != "admin":
+    if cargo_das_claims(claims) != "administrador":
         return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
 
     dados = request.get_json(silent=True) or {}
     nome = str(dados.get('nome', '')).strip()
     matricula = str(dados.get('matricula', '')).strip()
-    cargo = str(dados.get('cargo', '')).strip() or 'Analista'
+    cargo_chave, cargo = normalizar_cargo(dados.get('cargo', 'analista'))
     senha = dados.get('senha', '')
 
     if not nome or not matricula or not senha:
         return jsonify({"erro": "Nome, matrícula e senha são obrigatórios."}), 400
+    if not cargo_chave:
+        return jsonify({"erro": "Cargo inválido.", "cargos": list(CARGOS.values())}), 400
     if len(nome) > 150 or len(matricula) > 20 or len(cargo) > 50:
         return jsonify({"erro": "Um ou mais campos excedem o tamanho permitido."}), 400
     if not isinstance(senha, str) or len(senha) < 8:
@@ -89,7 +92,10 @@ def login_admin():
 
     if servidor and servidor.verificar_senha(senha):
         # Adiciona um "carimbo" no token identificando como admin
-        token = create_access_token(identity=str(servidor.id), additional_claims={"role": "admin"})
-        return jsonify({"token": token, "nome": servidor.nome, "cargo": servidor.cargo}), 200
+        cargo_chave, cargo = normalizar_cargo(servidor.cargo)
+        if not cargo_chave:
+            return jsonify({"erro": "O cargo deste servidor precisa ser atualizado por um administrador."}), 403
+        token = create_access_token(identity=str(servidor.id), additional_claims={"role": cargo_chave, "cargo": cargo_chave})
+        return jsonify({"token": token, "nome": servidor.nome, "cargo": cargo, "perfil": cargo_chave}), 200
 
     return jsonify({"erro": "Matrícula ou senha inválidos"}), 401

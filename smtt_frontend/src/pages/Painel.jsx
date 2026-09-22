@@ -92,6 +92,7 @@ function Painel() {
   // Estados para o formulário de novo veículo
   const [placa, setPlaca] = useState('');
   const [renavam, setRenavam] = useState('');
+  const [validandoVeiculo, setValidandoVeiculo] = useState(false);
 
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
@@ -138,9 +139,28 @@ function Painel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
+  useEffect(() => {
+    const atualizarAoRetornar = () => {
+      if (document.visibilityState === 'visible' && localStorage.getItem('token')) {
+        carregarDados();
+      }
+    };
+    const intervalo = window.setInterval(atualizarAoRetornar, 30000);
+    window.addEventListener('focus', atualizarAoRetornar);
+    document.addEventListener('visibilitychange', atualizarAoRetornar);
+
+    return () => {
+      window.clearInterval(intervalo);
+      window.removeEventListener('focus', atualizarAoRetornar);
+      document.removeEventListener('visibilitychange', atualizarAoRetornar);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleCadastrarVeiculo = async (e) => {
     e.preventDefault();
     setMensagem(''); setErro('');
+    setValidandoVeiculo(true);
     try {
       const response = await api.post('/servicos/veiculos', { placa, renavam });
       setMensagem(response.data.mensagem);
@@ -148,6 +168,8 @@ function Painel() {
       carregarDados();
     } catch (error) {
       setErro(error.response?.data?.erro || 'Erro ao cadastrar.');
+    } finally {
+      setValidandoVeiculo(false);
     }
   };
 
@@ -454,6 +476,7 @@ function Painel() {
     !m.fase_atual?.toLowerCase().includes('cancelada') &&
     !m.fase_atual?.toLowerCase().includes('deferida') &&
     !m.fase_atual?.toLowerCase().includes('paga') &&
+    !m.fase_atual?.toLowerCase().includes('quitada') &&
     !m.fase_atual?.toLowerCase().includes('finalizado')
   ).length;
 
@@ -485,7 +508,7 @@ function Painel() {
 
   const getFaseStep = (fase) => {
     const f = fase ? fase.toLowerCase() : '';
-    if (f.includes('cancelada') || f.includes('deferida') || f.includes('indeferida') || f.includes('paga') || f.includes('finalizado')) return 4;
+    if (f.includes('cancelada') || f.includes('deferida') || f.includes('indeferida') || f.includes('paga') || f.includes('quitada') || f.includes('finalizado')) return 4;
     if (f.includes('recurso') || f.includes('analise') || f.includes('análise')) return 3;
     if (f.includes('penalidade')) return 2;
     return 1;
@@ -594,11 +617,11 @@ function Painel() {
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Renavam</label>
                   <div className="relative">
                     <FileDigit className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input type="text" maxLength="11" placeholder="Somente números" value={renavam} onChange={(e) => setRenavam(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" required />
+                    <input type="text" inputMode="numeric" pattern="[0-9]{11}" maxLength="11" placeholder="11 números" value={renavam} onChange={(e) => setRenavam(e.target.value.replace(/\D/g, ''))} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" required />
                   </div>
                 </div>
-                <button type="submit" className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
-                  <Plus className="w-4 h-4" /> Adicionar Veículo
+                <button type="submit" disabled={validandoVeiculo} className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait">
+                  <Plus className="w-4 h-4" /> {validandoVeiculo ? 'Validando placa e RENAVAM...' : 'Adicionar Veículo'}
                 </button>
               </form>
             </div>

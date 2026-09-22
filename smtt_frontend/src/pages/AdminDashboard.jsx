@@ -9,6 +9,7 @@ import AdminSidebar from '../components/AdminSidebar';
 import AdminDateFilter from '../components/AdminDateFilter';
 import api from '../services/api';
 import { matchesDateFilter } from '../utils/dateFilters';
+import { canAccessAdmin } from '../utils/adminPermissions';
 
 const parseDateBR = (value) => {
   if (!value) return null;
@@ -62,10 +63,10 @@ function AdminDashboard() {
       ['alertas', '/admin/alertas'],
       ['recursos', '/admin/recursos'],
       ['eventos', '/admin/eventos'],
-    ];
+    ].filter(([key]) => canAccessAdmin(key));
 
     const results = await Promise.allSettled(endpoints.map(([, endpoint]) => api.get(endpoint)));
-    const nextData = {};
+    const nextData = { infracoes: [], alvaras: [], alertas: [], recursos: [], eventos: [] };
     let hasFailure = false;
 
     results.forEach((result, index) => {

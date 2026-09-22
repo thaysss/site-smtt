@@ -15,10 +15,11 @@ import AdminRegistroActions from '../components/AdminRegistroActions';
 import AdminDateFilter from '../components/AdminDateFilter';
 import AdminAlvarasSection from '../components/AdminAlvarasSection';
 import { matchesDateFilter } from '../utils/dateFilters';
+import { canAccessAdmin, firstAllowedPanelTab } from '../utils/adminPermissions';
 
 const CAMPOS_EDICAO_INFRACAO = [
   ['numero_ait', 'Número do AIT', 'text'], ['data_hora_infracao', 'Data e hora da infração', 'datetime-local'],
-  ['local_cometimento', 'Local da infração', 'text'], ['fase_atual', 'Fase atual', 'text'],
+  ['local_cometimento', 'Local da infração', 'text'], ['fase_atual', 'Fase atual', 'fase'],
   ['valor_final', 'Valor da multa (R$)', 'number'], ['data_vencimento_defesa', 'Prazo da defesa', 'date'],
   ['agente_aparelho', 'Agente / aparelho', 'text'], ['desdobramento', 'Desdobramento', 'text'],
   ['medicao_aferida', 'Medição aferida', 'text'], ['medicao_considerada', 'Medição considerada', 'text'],
@@ -28,6 +29,14 @@ const CAMPOS_EDICAO_INFRACAO = [
   ['nosso_numero', 'Nosso número', 'text'], ['data_vencimento_boleto', 'Vencimento do boleto', 'date']
 ];
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
+const FASES_INFRACAO = [
+  'Autuação',
+  'Defesa em Análise',
+  'Defesa Deferida (Cancelada)',
+  'Defesa Indeferida',
+  'Penalidade',
+  'Quitada',
+];
 const montarUrlArquivo = (caminho) => {
   if (!caminho) return '';
   if (/^https?:\/\//i.test(caminho)) return caminho;
@@ -74,7 +83,10 @@ function AdminPainel({ defaultTab }) {
   const [periodValue, setPeriodValue] = useState('');
 
   // NOVOS ESTADOS PARA EVENTOS, INFRAÇÕES E ALVARÁS
-  const [menuAtivo, setMenuAtivo] = useState(() => defaultTab || localStorage.getItem('adminMenuAtivo') || 'recursos');
+  const [menuAtivo, setMenuAtivo] = useState(() => {
+    const requested = defaultTab || localStorage.getItem('adminMenuAtivo') || 'recursos';
+    return canAccessAdmin(requested) ? requested : firstAllowedPanelTab();
+  });
   const [eventos, setEventos] = useState([]);
   const [eventoFoco, setEventoFoco] = useState(null);
   const [eventoModoEdicao, setEventoModoEdicao] = useState(false);
@@ -1439,7 +1451,15 @@ function AdminPainel({ defaultTab }) {
                                 <div className="mb-4 flex items-center justify-between gap-3"><h4>Editar dados da infração</h4><button type="button" onClick={() => setInfracaoEditando(null)} className="text-sm font-semibold text-gray-600">Cancelar</button></div>
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                   {CAMPOS_EDICAO_INFRACAO.map(([nome, label, tipo]) => (
-                                    <label key={nome} className="text-sm font-semibold text-gray-700">{label}<input type={tipo} step={tipo === 'number' ? '0.01' : undefined} value={infracaoValores[nome] ?? ''} onChange={(event) => setInfracaoValores((atual) => ({ ...atual, [nome]: event.target.value }))} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal" /></label>
+                                    <label key={nome} className="text-sm font-semibold text-gray-700">{label}
+                                      {tipo === 'fase' ? (
+                                        <select value={infracaoValores[nome] ?? 'Autuação'} onChange={(event) => setInfracaoValores((atual) => ({ ...atual, [nome]: event.target.value }))} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal">
+                                          {FASES_INFRACAO.map((fase) => <option key={fase} value={fase}>{fase}</option>)}
+                                        </select>
+                                      ) : (
+                                        <input type={tipo} step={tipo === 'number' ? '0.01' : undefined} value={infracaoValores[nome] ?? ''} onChange={(event) => setInfracaoValores((atual) => ({ ...atual, [nome]: event.target.value }))} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal" />
+                                      )}
+                                    </label>
                                   ))}
                                 </div>
                                 <div className="mt-5 flex justify-end"><button type="submit" disabled={infracaoSalvando} className="rounded-lg bg-blue-700 px-5 py-2.5 font-bold text-white disabled:opacity-50">{infracaoSalvando ? 'Salvando...' : 'Salvar alterações'}</button></div>

@@ -14,7 +14,7 @@ with app.app_context():
     # Parâmetros customizáveis via variáveis de ambiente para produção
     admin_matricula = os.getenv('INITIAL_ADMIN_MATRICULA')
     admin_nome = os.getenv('INITIAL_ADMIN_NOME', 'Inspetor Chefe')
-    admin_cargo = os.getenv('INITIAL_ADMIN_CARGO', 'Agente de Trânsito')
+    admin_cargo = os.getenv('INITIAL_ADMIN_CARGO', 'Administrador')
     admin_senha = os.getenv('INITIAL_ADMIN_PASSWORD')
     if not admin_matricula or not admin_senha or len(admin_senha) < 12:
         raise RuntimeError('Defina INITIAL_ADMIN_MATRICULA e uma INITIAL_ADMIN_PASSWORD com pelo menos 12 caracteres.')
@@ -41,4 +41,9 @@ with app.app_context():
         else:
             print("[SUCCESS] Conta de servidor criada com sucesso no PostgreSQL Local!")
     else:
-        print("[INFO] O servidor com esta matricula ja existe no banco de dados.")
+        if servidor_existente.cargo != admin_cargo:
+            servidor_existente.cargo = admin_cargo
+            db.session.commit()
+            print("[INFO] Cargo da conta inicial atualizado.")
+        else:
+            print("[INFO] O servidor com esta matricula ja existe no banco de dados.")

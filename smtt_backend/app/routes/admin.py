@@ -17,6 +17,18 @@ from app.routes.admin_registros import registrar_gestao
 registrar_gestao(admin_bp)
 
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
+from app.utils.cargos import FASES_INFRACAO, cargo_das_claims, pode_acessar, pode_acessar_registro
+
+def _recurso_da_requisicao():
+    partes = [parte for parte in request.path.removeprefix('/api/admin/').split('/') if parte]
+    if not partes:
+        return None
+    recurso = partes[0]
+    if recurso == 'tipos-infracao':
+        return 'infracoes'
+    if recurso == 'registros':
+        return 'registros' if len(partes) == 1 else partes[1]
+    return recurso
 
 @admin_bp.before_request
 def verificar_se_eh_admin():
@@ -27,8 +39,13 @@ def verificar_se_eh_admin():
     try:
         verify_jwt_in_request()
         claims = get_jwt()
-        if claims.get("role") != "admin":
-            return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
+        cargo = cargo_das_claims(claims)
+        recurso = _recurso_da_requisicao()
+        permitido = pode_acessar(cargo, recurso)
+        if cargo != 'administrador' and request.path.startswith('/api/admin/registros/'):
+            permitido = pode_acessar_registro(cargo, recurso)
+        if not cargo or not permitido:
+            return jsonify({"erro": "Acesso negado para o seu cargo."}), 403
     except Exception as e:
         return jsonify({"erro": "Autenticação necessária.", "detalhes": str(e)}), 401
 
@@ -39,6 +56,8 @@ def verificar_se_eh_admin():
 @admin_bp.route('/infracoes', methods=['POST'])
 def registrar_infracao():
     dados = request.get_json()
+    if dados.get('fase_atual', 'Autuação') not in FASES_INFRACAO:
+        return jsonify({"erro": "Fase da multa inválida."}), 400
     placa = dados.get('placa', '').upper()
     codigo_ctb = dados.get('codigo_infracao')
     
@@ -178,6 +197,8 @@ def atualizar_infracao(id):
         else:
             infracao.data_vencimento_boleto = None
     if 'fase_atual' in dados:
+        if dados['fase_atual'] not in FASES_INFRACAO:
+            return jsonify({"erro": "Fase da multa inválida."}), 400
         infracao.fase_atual = dados['fase_atual']
     if 'valor_final' in dados:
         try:

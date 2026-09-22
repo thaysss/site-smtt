@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { CheckCircle, Eye, EyeOff, ShieldCheck, UserPlus } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import api from '../services/api';
+import { CARGOS } from '../utils/adminPermissions';
 
-const initialForm = { nome: '', matricula: '', cargo: '', senha: '', confirmarSenha: '' };
+const initialForm = { nome: '', matricula: '', cargo: 'analista', senha: '', confirmarSenha: '' };
 
 function AdminUsuarios() {
   const [form, setForm] = useState(initialForm);
@@ -52,8 +53,8 @@ function AdminUsuarios() {
           <div className="admin-users-heading-icon"><UserPlus size={26} /></div>
           <div>
             <span>Controle de acesso</span>
-            <h1>Novo administrador</h1>
-            <p>Cadastre outro servidor para acessar e gerenciar o painel administrativo.</p>
+            <h1>Novo servidor</h1>
+            <p>Cadastre o servidor e escolha as funções que ele poderá exercer no painel.</p>
           </div>
         </header>
 
@@ -77,8 +78,10 @@ function AdminUsuarios() {
                 <input name="matricula" value={form.matricula} onChange={updateField} maxLength={20} required placeholder="Ex.: 12345" autoComplete="username" />
               </label>
               <label className="admin-users-full-field">
-                Cargo
-                <input name="cargo" value={form.cargo} onChange={updateField} maxLength={50} placeholder="Analista (padrão)" />
+                Cargo *
+                <select name="cargo" value={form.cargo} onChange={updateField} required>
+                  {CARGOS.map((cargo) => <option key={cargo.value} value={cargo.value}>{cargo.label}</option>)}
+                </select>
               </label>
               <label>
                 Senha *
@@ -100,12 +103,10 @@ function AdminUsuarios() {
 
           <aside className="admin-users-info">
             <ShieldCheck size={30} />
-            <h2>Acesso protegido</h2>
-            <p>O novo servidor terá acesso administrativo completo. Compartilhe as credenciais de forma segura.</p>
+            <h2>Funções por cargo</h2>
+            <p>O sistema limita o menu e também protege as operações no servidor.</p>
             <ul>
-              <li>A matrícula deve ser única.</li>
-              <li>A senha precisa ter no mínimo 8 caracteres.</li>
-              <li>A senha é armazenada de forma protegida.</li>
+              {CARGOS.map((cargo) => <li key={cargo.value}><strong>{cargo.label}:</strong> {cargo.descricao}</li>)}
             </ul>
           </aside>
         </section>

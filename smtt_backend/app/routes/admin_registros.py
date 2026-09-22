@@ -11,6 +11,8 @@ from app.extensions import db
 from app.models.portal import AlertaTransito, Noticia
 from app.models.servicos import AutoInfracao, Protocolo, RecursoMulta, SolicitacaoAlvara, SolicitacaoEvento, Veiculo, RecursoAnexo
 from app.utils.uploads import delete_upload, save_upload_bytes
+from flask_jwt_extended import get_jwt
+from app.utils.cargos import FASES_INFRACAO, cargo_das_claims, pode_acessar_registro
 
 RECURSOS = {
     'eventos': (SolicitacaoEvento, 'Solicitações de eventos', 'nome_solicitante cpf_cnpj email telefone data_evento local_evento descricao resposta_analise'),
@@ -151,7 +153,8 @@ def excluir_solicitacao(item):
 def registrar_gestao(bp):
     @bp.route('/registros', methods=['GET'])
     def catalogo_registros():
-        return jsonify([{'id': key, 'label': value[1]} for key, value in RECURSOS.items()])
+        cargo = cargo_das_claims(get_jwt())
+        return jsonify([{'id': key, 'label': value[1]} for key, value in RECURSOS.items() if pode_acessar_registro(cargo, key)])
 
     @bp.route('/registros/<recurso>', methods=['GET'])
     def listar_registros(recurso):
@@ -208,6 +211,9 @@ def registrar_gestao(bp):
                     return jsonify(erro='Status do aviso deve ser Ativo ou Resolvido.'), 400
                 for nome, valor in valores.items():
                     setattr(item, nome, valor)
+                if recurso == 'infracoes' and valores.get('fase_atual') not in (None, *FASES_INFRACAO):
+                    db.session.rollback()
+                    return jsonify(erro='Fase da multa inválida.'), 400
                 if isinstance(item, AlertaTransito):
                     if item.status == 'Ativo':
                         item.data_fim = None

@@ -145,10 +145,7 @@ function Login() {
         <section className={`citizen-auth-card ${isCadastro ? 'is-register' : ''}`}>
           <aside className="citizen-auth-intro">
             <div>
-              <span className="citizen-auth-badge">
-                <ShieldCheck size={16} aria-hidden="true" />
-                Portal do Cidadão
-              </span>
+              
               <h1>{isCadastro ? 'Crie seu acesso aos serviços digitais' : 'Seus serviços em um só lugar'}</h1>
               <p>{isCadastro
                 ? 'Informe seus dados para acompanhar solicitações e utilizar os serviços online da SMTT.'

@@ -5,23 +5,27 @@ import {
   FilePenLine, FolderOpen, IdCard, ListChecks, LogOut, Menu, Newspaper,
   Search, X, LayoutDashboard, UserPlus,
 } from 'lucide-react';
+import { canAccessAdmin } from '../utils/adminPermissions';
 
 const menuItems = [
-  { id: 'registros', label: 'Editar e excluir', icon: FilePenLine, isTab: true },
+  
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, isTab: false },
+  { id: 'lancar-infracao', label: 'Lançar AIT', icon: FilePenLine, isTab: false },
   { id: 'recursos', label: 'Recursos', icon: FolderOpen, isTab: true },
   { id: 'eventos', label: 'Eventos', icon: CalendarDays, isTab: true },
   { id: 'alvaras', label: 'Alvarás', icon: IdCard, isTab: true },
   { id: 'infracoes', label: 'Infrações lançadas', icon: ListChecks, isTab: true },
   { id: 'noticias', label: 'Notícias', icon: Newspaper, isTab: true },
-  { id: 'lancar-infracao', label: 'Lançar AIT', icon: FilePenLine, isTab: false },
+  
   { id: 'alertas', label: 'Avisos de interdição', icon: BellRing, isTab: false },
-  { id: 'usuarios', label: 'Administradores', icon: UserPlus, isTab: false },
+  { id: 'usuarios', label: 'Servidores', icon: UserPlus, isTab: false },
+  { id: 'registros', label: 'Editar e excluir', icon: FilePenLine, isTab: true },
 ];
 
 function AdminSidebar({ activeItem, onTabChange }) {
   const navigate = useNavigate();
   const adminNome = localStorage.getItem('adminNome') || 'Administrador';
+  const adminCargo = localStorage.getItem('adminCargo') || '';
   const [isCollapsed, setIsCollapsed] = useState(
     () => localStorage.getItem('adminSidebarCollapsed') === 'true',
   );
@@ -38,6 +42,8 @@ function AdminSidebar({ activeItem, onTabChange }) {
     if (!window.confirm('Deseja realmente encerrar a sessão?')) return;
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminNome');
+    localStorage.removeItem('adminCargo');
+    localStorage.removeItem('adminPerfil');
     navigate('/admin/login');
   };
 
@@ -59,7 +65,8 @@ function AdminSidebar({ activeItem, onTabChange }) {
   };
 
   const filteredItems = menuItems.filter((item) =>
-    item.label.toLocaleLowerCase('pt-BR').includes(searchQuery.toLocaleLowerCase('pt-BR')),
+    canAccessAdmin(item.id)
+    && item.label.toLocaleLowerCase('pt-BR').includes(searchQuery.toLocaleLowerCase('pt-BR')),
   );
 
   return (
@@ -123,7 +130,7 @@ function AdminSidebar({ activeItem, onTabChange }) {
           <span className="admin-avatar">{adminNome.substring(0, 2).toUpperCase()}</span>
           <div className="admin-sidebar-copy">
             <strong title={adminNome}>{adminNome}</strong>
-
+            {adminCargo && <small>{adminCargo}</small>}
           </div>
         </div>
 
