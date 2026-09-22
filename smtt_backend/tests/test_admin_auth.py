@@ -1,6 +1,7 @@
 # tests/test_admin_auth.py
 import json
 import unittest
+from unittest.mock import patch
 from flask_jwt_extended import create_access_token
 from app import create_app
 from app.extensions import db
@@ -94,6 +95,43 @@ class TestAdminAuthentication(unittest.TestCase):
         self.assertEqual(missing_fields.status_code, 400)
         self.assertEqual(short_password.status_code, 400)
         self.assertIn('8 caracteres', short_password.get_json()['erro'])
+
+    def test_production_cors_allows_official_frontend(self):
+        with patch.dict('os.environ', {
+            'FLASK_ENV': 'production',
+            'CORS_ALLOWED_ORIGINS': 'https://site-smtt.vercel.app',
+        }):
+            app = create_app({
+                'TESTING': True,
+                'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+            })
+            response = app.test_client().options('/api/auth/admin/login', headers={
+                'Origin': 'https://www.smttpropria.com.br',
+                'Access-Control-Request-Method': 'POST',
+                'Access-Control-Request-Headers': 'Content-Type',
+            })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers.get('Access-Control-Allow-Origin'),
+            'https://www.smttpropria.com.br',
+        )
+
+    def test_production_cors_rejects_unknown_origin(self):
+        with patch.dict('os.environ', {
+            'FLASK_ENV': 'production',
+            'CORS_ALLOWED_ORIGINS': 'https://site-smtt.vercel.app',
+        }):
+            app = create_app({
+                'TESTING': True,
+                'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+            })
+            response = app.test_client().options('/api/auth/admin/login', headers={
+                'Origin': 'https://example.invalid',
+                'Access-Control-Request-Method': 'POST',
+            })
+
+        self.assertIsNone(response.headers.get('Access-Control-Allow-Origin'))
 
 if __name__ == '__main__':
     unittest.main()

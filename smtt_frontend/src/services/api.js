@@ -1,12 +1,14 @@
 // src/services/api.js
 import axios from 'axios';
 
-const defaultApiUrl = import.meta.env.PROD
+const apiUrl = import.meta.env.PROD
   ? '/api'
-  : 'http://localhost:5000/api';
+  : (import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || defaultApiUrl,
+  // Em produção, use sempre o proxy do mesmo domínio definido no vercel.json.
+  // Isso evita que uma variável VITE_API_URL antiga reintroduza chamadas CORS.
+  baseURL: apiUrl,
 });
 
 // Interceptor: Antes de qualquer requisição sair, ele injeta o token (se existir)

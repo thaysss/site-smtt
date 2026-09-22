@@ -62,6 +62,11 @@ def create_app(test_config=None):
     cors_origins = app.config.get('CORS_ALLOWED_ORIGINS', '*')
     if cors_origins != '*':
         cors_origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+        if env == 'production':
+            cors_origins = sorted(set(cors_origins) | {
+                'https://smttpropria.com.br',
+                'https://www.smttpropria.com.br',
+            })
     CORS(app, origins=cors_origins, supports_credentials=False, allow_headers=['Authorization', 'Content-Type'], methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
         
     db.init_app(app)
