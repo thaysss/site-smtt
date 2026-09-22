@@ -17,6 +17,12 @@ class Config:
     MAX_FORM_MEMORY_SIZE = int(os.getenv('MAX_FORM_MEMORY_SIZE', 2 * 1024 * 1024))
     MAX_FORM_PARTS = int(os.getenv('MAX_FORM_PARTS', 100))
     UPLOAD_MAX_FILE_SIZE = int(os.getenv('UPLOAD_MAX_FILE_SIZE', 10 * 1024 * 1024))
+    STORAGE_BACKEND = os.getenv('STORAGE_BACKEND', 'local').lower()
+    S3_BUCKET = os.getenv('S3_BUCKET')
+    S3_REGION = os.getenv('S3_REGION') or os.getenv('AWS_REGION', 'us-east-1')
+    S3_PREFIX = os.getenv('S3_PREFIX', 'uploads').strip('/')
+    S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL') or None
+    S3_PRESIGNED_URL_EXPIRES = int(os.getenv('S3_PRESIGNED_URL_EXPIRES', 900))
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
@@ -46,6 +52,8 @@ class ProductionConfig(Config):
             invalid.append('DATABASE_URL')
         if not cls.CORS_ALLOWED_ORIGINS or cls.CORS_ALLOWED_ORIGINS == '*':
             invalid.append('CORS_ALLOWED_ORIGINS')
+        if cls.STORAGE_BACKEND == 's3' and not cls.S3_BUCKET:
+            invalid.append('S3_BUCKET')
         if invalid:
             raise RuntimeError('Configuração de produção inválida: ' + ', '.join(invalid))
 class TestingConfig(Config):

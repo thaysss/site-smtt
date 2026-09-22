@@ -2,13 +2,13 @@
 import os
 import uuid
 from werkzeug.utils import secure_filename
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento, SolicitacaoAlvara
 from app.models.portal import AlertaTransito, Noticia
 from datetime import datetime
 from app.utils.timezone import get_brasilia_time
-from app.utils.uploads import validate_upload
+from app.utils.uploads import delete_upload, save_upload, validate_upload
 import random
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
@@ -241,18 +241,12 @@ def julgar_recurso(id):
     arquivo = request.files.get('arquivo_resposta')
     if arquivo and arquivo.filename != '':
         # 1. Cria a pasta 'uploads' dentro de 'app/static' caso não exista
-        pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads')
-        os.makedirs(pasta_destino, exist_ok=True)
         
         # 2. Limpa o nome do arquivo (tira espaços e caracteres especiais) e salva
         nome_seguro = secure_filename(f"resposta_{id}_{arquivo.filename}")
-        caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
         if not validate_upload(arquivo):
             return jsonify({"erro": "Envie um arquivo PDF, PNG ou JPEG válido de até 10 MB."}), 400
-        arquivo.save(caminho_arquivo)
-        
-        # 3. Guarda o link no banco de dados
-        recurso.anexo_resposta_jari = f"/static/uploads/{nome_seguro}"
+        recurso.anexo_resposta_jari = save_upload(arquivo, nome_seguro)
 
     # Atualiza as informações normais do julgamento
     recurso.resultado_julgamento = decisao
@@ -478,10 +472,7 @@ def julgar_evento(id):
             return jsonify({"erro": "Envie um anexo PDF, DOC, DOCX, PNG ou JPEG."}), 400
         numero_proto = evento.protocolo.numero_protocolo if evento.protocolo else f"EVENTO{id}"
         nome_seguro = secure_filename(f"resposta_{numero_proto}_{uuid.uuid4().hex}{extensao}")
-        pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'eventos', 'respostas')
-        os.makedirs(pasta_destino, exist_ok=True)
-        arquivo_resposta.save(os.path.join(pasta_destino, nome_seguro))
-        evento.anexo_resposta = f"/static/uploads/eventos/respostas/{nome_seguro}"
+        evento.anexo_resposta = save_upload(arquivo_resposta, f"eventos/respostas/{nome_seguro}")
     
     if evento.protocolo:
         evento.protocolo.status = decisao # Ex: 'Aprovado' ou 'Negado'
@@ -522,13 +513,9 @@ def julgar_alvara(id):
         if file and file.filename != '':
             numero_proto = alvara.protocolo.numero_protocolo if alvara.protocolo else f"ALV{id}"
             nome_seguro = secure_filename(f"emitido_{numero_proto}_{file.filename}")
-            pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'emitidos')
-            os.makedirs(pasta_destino, exist_ok=True)
-            caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
             if not validate_upload(file):
                 return jsonify({"erro": "Envie um arquivo PDF, PNG ou JPEG válido de até 10 MB."}), 400
-            file.save(caminho_arquivo)
-            alvara.caminho_alvara_emitido = f"/static/uploads/emitidos/{nome_seguro}"
+            alvara.caminho_alvara_emitido = save_upload(file, f"emitidos/{nome_seguro}")
             
     if alvara.protocolo:
         alvara.protocolo.status = decisao
@@ -576,13 +563,9 @@ def criar_noticia_admin():
             ext = os.path.splitext(filename)[1]
             filename = f"news_{int(datetime.now().timestamp())}_{random.randint(1000,9999)}{ext}"
             
-            pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'noticias')
-            os.makedirs(pasta_destino, exist_ok=True)
-            
             if not validate_upload(file, {'.png', '.jpg', '.jpeg'}):
                 return jsonify({"erro": "Envie uma imagem PNG ou JPEG válida de até 10 MB."}), 400
-            file.save(os.path.join(pasta_destino, filename))
-            imagem_url = f"/static/uploads/noticias/{filename}"
+            imagem_url = save_upload(file, f"noticias/{filename}")
             
     noticia = Noticia(
         titulo=titulo,
@@ -625,13 +608,11 @@ def editar_noticia_admin(id):
             ext = os.path.splitext(filename)[1]
             filename = f"news_{int(datetime.now().timestamp())}_{random.randint(1000,9999)}{ext}"
             
-            pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'noticias')
-            os.makedirs(pasta_destino, exist_ok=True)
-            
             if not validate_upload(file, {'.png', '.jpg', '.jpeg'}):
                 return jsonify({"erro": "Envie uma imagem PNG ou JPEG válida de até 10 MB."}), 400
-            file.save(os.path.join(pasta_destino, filename))
-            noticia.imagem_url = f"/static/uploads/noticias/{filename}"
+            nova_imagem_url = save_upload(file, f"noticias/{filename}")
+            delete_upload(noticia.imagem_url)
+            noticia.imagem_url = nova_imagem_url
             
     db.session.commit()
     return jsonify({"mensagem": "Notícia editada com sucesso!", "noticia": noticia.to_dict()}), 200
@@ -642,12 +623,7 @@ def excluir_noticia_admin(id):
     noticia = Noticia.query.get_or_404(id)
     
     if noticia.imagem_url:
-        filepath = os.path.join(current_app.root_path, noticia.imagem_url.lstrip('/'))
-        if os.path.exists(filepath):
-            try:
-                os.remove(filepath)
-            except Exception as e:
-                print(f"Erro ao deletar imagem física: {e}")
+        delete_upload(noticia.imagem_url)
                 
     db.session.delete(noticia)
     db.session.commit()

@@ -1,7 +1,7 @@
 """Edição e exclusão administrativa com campos explicitamente permitidos."""
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
-from flask import jsonify, request, current_app
+from flask import jsonify, request
 import json
 import uuid
 from pathlib import Path
@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from app.extensions import db
 from app.models.portal import AlertaTransito, Noticia
 from app.models.servicos import AutoInfracao, Protocolo, RecursoMulta, SolicitacaoAlvara, SolicitacaoEvento, Veiculo, RecursoAnexo
+from app.utils.uploads import delete_upload, save_upload_bytes
 
 RECURSOS = {
     'eventos': (SolicitacaoEvento, 'Solicitações de eventos', 'nome_solicitante cpf_cnpj email telefone data_evento local_evento descricao resposta_analise'),
@@ -219,21 +220,19 @@ def registrar_gestao(bp):
                 for nome in removidos:
                     aplicar_anexo(item, nome, None)
                 for nome, filename, extension, content in uploads:
-                    pasta = Path(current_app.root_path) / 'static' / 'uploads' / 'revisoes'
-                    pasta.mkdir(parents=True, exist_ok=True)
-                    destino = pasta / f'{uuid.uuid4().hex}{extension}'
-                    arquivos_criados.append(destino)
-                    destino.write_bytes(content)
-                    aplicar_anexo(item, nome, f'/static/uploads/revisoes/{destino.name}', filename)
+                    relative_path = f'revisoes/{uuid.uuid4().hex}{extension}'
+                    url = save_upload_bytes(content, relative_path)
+                    arquivos_criados.append(url)
+                    aplicar_anexo(item, nome, url, filename)
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
             for arquivo in arquivos_criados:
-                arquivo.unlink(missing_ok=True)
+                delete_upload(arquivo)
             return jsonify(erro='Há um valor duplicado ou registros vinculados. Verifique os dados.'), 409
         except Exception:
             db.session.rollback()
             for arquivo in arquivos_criados:
-                arquivo.unlink(missing_ok=True)
+                delete_upload(arquivo)
             raise
         return jsonify(mensagem='Registro excluído.' if request.method == 'DELETE' else 'Alterações salvas.')

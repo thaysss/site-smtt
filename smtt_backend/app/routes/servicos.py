@@ -8,6 +8,7 @@ import random
 from datetime import datetime
 import uuid
 from app.utils.timezone import get_brasilia_time
+from app.utils.uploads import save_upload
 
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
@@ -165,7 +166,6 @@ def abrir_recurso(id):
     # Cria o Recurso atrelado à multa e ao protocolo
     import os
     from werkzeug.utils import secure_filename
-    from flask import current_app
 
     try:
         # Lógica para salvar o arquivo do cidadão
@@ -173,18 +173,13 @@ def abrir_recurso(id):
         arquivo = request.files.get('arquivo_recurso') # Pega o arquivo do React
         
         # Salva numa subpasta 'cidadao' para organizar
-        pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
-        os.makedirs(pasta_destino, exist_ok=True)
         
         if arquivo and arquivo.filename != '':
             if not allowed_file(arquivo):
                 raise ValueError("O arquivo de recurso enviado possui uma extensão não permitida. Apenas PDF, PNG, JPG e JPEG são permitidos.")
             ext = arquivo.filename.rsplit('.', 1)[1].lower() if '.' in arquivo.filename else 'pdf'
             nome_seguro = secure_filename(f"req_{numero_protocolo}_{uuid.uuid4().hex}.{ext}")
-            caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
-            arquivo.save(caminho_arquivo)
-            
-            caminho_salvo = f"/static/uploads/cidadao/{nome_seguro}"
+            caminho_salvo = save_upload(arquivo, f"cidadao/{nome_seguro}")
     
         # Captura o tipo de recurso enviado pelo cidadão
         tipo_recurso = request.form.get('tipo_recurso', 'Defesa Prévia')
@@ -212,10 +207,7 @@ def abrir_recurso(id):
                     raise ValueError(f"O anexo '{arq.filename}' possui uma extensão não permitida. Apenas PDF, PNG, JPG e JPEG são permitidos.")
                 ext = arq.filename.rsplit('.', 1)[1].lower() if '.' in arq.filename else 'pdf'
                 nome_seguro_anexo = secure_filename(f"anexo_{numero_protocolo}_{idx}_{uuid.uuid4().hex}.{ext}")
-                caminho_anexo = os.path.join(pasta_destino, nome_seguro_anexo)
-                arq.save(caminho_anexo)
-                
-                caminho_salvo_anexo = f"/static/uploads/cidadao/{nome_seguro_anexo}"
+                caminho_salvo_anexo = save_upload(arq, f"cidadao/{nome_seguro_anexo}")
                 
                 novo_anexo = RecursoAnexo(
                     recurso_id=novo_recurso.id,

@@ -24,8 +24,8 @@ import random
 from datetime import datetime
 import uuid
 from app.utils.timezone import get_brasilia_time
+from app.utils.uploads import save_upload
 from werkzeug.utils import secure_filename
-from flask import current_app
 
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
@@ -140,15 +140,10 @@ def enviar_solicitacao_evento():
     numero_protocolo = f"EVE{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
 
     # Salva o arquivo enviado
-    pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'eventos')
-    os.makedirs(pasta_destino, exist_ok=True)
 
     ext = arquivo.filename.rsplit('.', 1)[1].lower() if '.' in arquivo.filename else 'pdf'
     nome_seguro = secure_filename(f"evento_{numero_protocolo}_{uuid.uuid4().hex}.{ext}")
-    caminho_arquivo = os.path.join(pasta_destino, nome_seguro)
-    arquivo.save(caminho_arquivo)
-
-    caminho_salvo = f"/static/uploads/eventos/{nome_seguro}"
+    caminho_salvo = save_upload(arquivo, f"eventos/{nome_seguro}")
 
     # Cria o protocolo geral (sem cidadao_id vinculando uma conta)
     novo_protocolo = Protocolo(
@@ -261,8 +256,6 @@ def enviar_solicitacao_alvara():
     numero_protocolo = f"{prefixo}{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
 
     # Salvar arquivos
-    pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'alvaras')
-    os.makedirs(pasta_destino, exist_ok=True)
 
     def salvar_arquivo(campo_nome):
         arq = request.files.get(campo_nome)
@@ -271,9 +264,7 @@ def enviar_solicitacao_alvara():
                 raise ValueError(f"O arquivo enviado no campo '{campo_nome}' possui uma extensão não permitida. Apenas arquivos PDF, PNG, JPG e JPEG são permitidos.")
             ext = arq.filename.rsplit('.', 1)[1].lower() if '.' in arq.filename else 'pdf'
             nome_seguro = secure_filename(f"{numero_protocolo}_{campo_nome}_{uuid.uuid4().hex}.{ext}")
-            caminho_completo = os.path.join(pasta_destino, nome_seguro)
-            arq.save(caminho_completo)
-            return f"/static/uploads/alvaras/{nome_seguro}"
+            return save_upload(arq, f"alvaras/{nome_seguro}")
         return None
 
     try:
@@ -477,8 +468,6 @@ def enviar_recurso_multa_publico():
     numero_protocolo = f"CON{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000,9999)}"
 
     # Salva arquivos
-    pasta_destino = os.path.join(current_app.root_path, 'static', 'uploads', 'cidadao')
-    os.makedirs(pasta_destino, exist_ok=True)
 
     def salvar_arquivo_publico(arq, tipo_nome):
         if arq and arq.filename != '':
@@ -486,9 +475,7 @@ def enviar_recurso_multa_publico():
                 raise ValueError(f"O arquivo enviado no campo '{tipo_nome}' possui uma extensão não permitida. Apenas arquivos PDF, PNG, JPG e JPEG são permitidos.")
             ext = arq.filename.rsplit('.', 1)[1].lower() if '.' in arq.filename else 'pdf'
             nome_seguro = secure_filename(f"{numero_protocolo}_{tipo_nome}_{uuid.uuid4().hex}.{ext}")
-            caminho_completo = os.path.join(pasta_destino, nome_seguro)
-            arq.save(caminho_completo)
-            return f"/static/uploads/cidadao/{nome_seguro}"
+            return save_upload(arq, f"cidadao/{nome_seguro}")
         return None
 
     try:

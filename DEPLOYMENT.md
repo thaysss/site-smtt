@@ -29,4 +29,20 @@ senha padrao.
 continua acessando-as por meio do papel proprietario; outros papeis nao recebem
 politicas de acesso por padrao.
 
-Migrações não rodam durante o boot da aplicação. Uploads precisam de volume persistente montado em `/app/app/static/uploads`; esse diretório é ignorado pelo Git e nunca deve ser empacotado como fonte.
+Migrações não rodam durante o boot da aplicação.
+
+## Uploads no Amazon S3
+
+Em produção, configure `STORAGE_BACKEND=s3`, `S3_BUCKET`, `S3_REGION` e, opcionalmente, `S3_PREFIX`. Não torne o bucket público: o backend entrega downloads por URLs assinadas de curta duração. As credenciais seguem a cadeia padrão da AWS; prefira uma IAM role do container/instância em vez de chaves estáticas.
+
+A role precisa apenas destas ações no prefixo configurado:
+
+```json
+{
+  "Effect": "Allow",
+  "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+  "Resource": "arn:aws:s3:::SEU_BUCKET/uploads/*"
+}
+```
+
+Para desenvolvimento sem S3, mantenha `STORAGE_BACKEND=local`. Nesse modo, monte um volume persistente em `/app/app/static/uploads`; o diretório é ignorado pelo Git.

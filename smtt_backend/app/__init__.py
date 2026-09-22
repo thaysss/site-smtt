@@ -5,7 +5,7 @@ import logging
 import traceback
 from collections import defaultdict, deque
 from threading import Lock
-from flask import Flask, send_from_directory, request, g, jsonify
+from flask import Flask, send_from_directory, request, g, jsonify, redirect
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 import psutil
@@ -93,6 +93,13 @@ def create_app(test_config=None):
     def frontend():
         return send_from_directory(app.static_folder, 'index.html')
 
+    @app.route('/api/uploads/<path:relative_path>')
+    def download_upload(relative_path):
+        if app.config.get('STORAGE_BACKEND') != 's3':
+            return send_from_directory(os.path.join(app.static_folder, 'uploads'), relative_path)
+        from .utils.uploads import presigned_download_url
+        return redirect(presigned_download_url(relative_path), code=302)
+
     # 2. Before/After Request Hooks for tracing and metrics
     @app.before_request
     def before_request():
@@ -137,7 +144,7 @@ def create_app(test_config=None):
         response.headers.setdefault('Cross-Origin-Opener-Policy', 'same-origin')
         # Uploads are rendered by the frontend hosted on a different site
         # (Vercel -> Railway). Other responses keep the stricter default.
-        resource_policy = 'cross-origin' if request.path.startswith('/static/uploads/') else 'same-site'
+        resource_policy = 'cross-origin' if request.path.startswith(('/static/uploads/', '/api/uploads/')) else 'same-site'
         response.headers.setdefault('Cross-Origin-Resource-Policy', resource_policy)
         if app.config.get('ENV') == 'production' or os.getenv('FLASK_ENV') == 'production':
             response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
