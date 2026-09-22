@@ -381,19 +381,19 @@ function Home() {
 
           {/* Background Slide 1 */}
           <div className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${currentSlide === 0 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 pointer-events-none z-0'}`}>
-            <img src="/propria.png" alt="Trânsito da cidade" className="w-full h-full object-cover animate-kenburns" />
+            <img src="/propria.png" alt="Trânsito da cidade" className="w-full h-full object-cover object-center" />
             
           </div>
 
           {/* Background Slide 2 */}
           <div className={`absolute inset-0 transition-all duration-[1500ms] ease-in-out ${currentSlide === 1 ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 pointer-events-none z-0'}`}>
-            <img src="/propri.png" alt="Transporte público" className="w-full h-full object-cover animate-kenburns" />
+            <img src="/propri.png" alt="Transporte público" className="w-full h-full object-cover object-center" />
             
           </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col lg:flex-row items-center z-20 w-full gap-12 lg:gap-8">
             {/* Text Content Block */}
-            <div className="lg:w-1/2 lg:pr-6 text-center lg:text-left flex flex-col justify-center mb-8 lg:mb-0" key={currentSlide}>
+            <div className={`${currentSlide === 0 ? 'hidden' : 'flex'} lg:w-1/2 lg:pr-6 text-center lg:text-left flex-col justify-center mb-8 lg:mb-0`} key={currentSlide}>
               {currentSlide === 0 ? (
                 <div className="animate-fadeInUp">
                   
@@ -422,7 +422,26 @@ function Home() {
                 <a href="#servicos" className="bg-secondary-500 hover:bg-secondary-600 text-primary-950 px-8 py-3.5 rounded-xl font-bold shadow-lg hover:shadow-secondary-500/20 transition-all duration-300 hover:-translate-y-0.5 text-center text-sm">
                   Acessar Serviços
                 </a>
-                <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" className="bg-white/5 border border-white/30 text-white hover:bg-white/10 hover:border-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 hover:-translate-y-0.5 text-center text-sm">
+                <a
+                  href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    bg-[#12365D]
+                    border border-[#12365D]
+                    text-white
+                    hover:bg-[#0B2949]
+                    hover:border-[#0B2949]
+                    px-8 py-3.5
+                    rounded-xl
+                    font-bold
+                    shadow-md
+                    hover:shadow-lg
+                    transition-all duration-300
+                    hover:-translate-y-0.5
+                    text-center text-sm
+                  "
+                >
                   Conheça a SMTT
                 </a>
               </div>
@@ -946,20 +965,7 @@ function Home() {
                 <i className="fa-solid fa-arrow-up-right-from-square home-footer-arrow"></i>
               </a>
 
-              <a
-                href="/admin/login"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/admin/login');
-                }}
-              >
-                <span>
-                  <i className="fa-solid fa-gear"></i>
-                  Acesso administrativo
-                </span>
-
-                <i className="fa-solid fa-chevron-right home-footer-arrow"></i>
-              </a>
+              
             </nav>
 
             {/* Atendimento */}

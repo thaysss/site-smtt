@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   X, 
@@ -17,6 +17,10 @@ import formularioPDF from '../assets/Requerimentos.pdf';
 
 function ContestacaoMulta() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
 
   // Etapa ativa do formulário (1: Dados Gerais, 2: Uploads)
   const [etapa, setEtapa] = useState(1);
@@ -176,18 +180,19 @@ function ContestacaoMulta() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-12 flex flex-col lg:flex-row gap-8">
         
         {/* Left column: Instructions and Info */}
         <div className="lg:w-5/12 space-y-6">
-          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-              Defesa de Autuação (Defesa Prévia) - SMTT
+          <div className="bg-primary-900 text-white rounded-2xl p-8 shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary-800 rounded-full translate-x-8 -translate-y-8 opacity-50"></div>
+            <h2 className="text-2xl font-bold mb-4 relative z-10">
+              Orientações para Defesa de Autuação
             </h2>
 
             {/* LGPD Consent (Red Text as in screenshot) */}
-            <div className="bg-red-50 p-4 rounded-xl border border-red-100 text-xs text-red-700 leading-relaxed mb-6 space-y-3 font-semibold">
-              <h4 className="font-bold uppercase tracking-wider text-red-800">Termo de Consentimento para Tratamento de Dados Pessoais</h4>
+            <div className="bg-white/10 p-4 rounded-xl border border-white/15 text-xs text-primary-50 leading-relaxed mb-6 space-y-3">
+              <h4 className="font-bold uppercase tracking-wider text-secondary-500">Termo de Consentimento para Tratamento de Dados Pessoais</h4>
               <p>
                 Ao dar prosseguimento, <strong>CONCORDO</strong>, por meio deste e por minha livre manifestação de forma inequívoca com o tratamento de meus dados pessoais, inclusive fotografia, para finalidade específica dos procedimentos administrativos da SMTT Propriá, em conformidade com o artigo 11, inciso I da Lei nº 13.709/2018 - Lei Geral de Proteção de Dados Pessoais (LGPD).
               </p>
@@ -196,24 +201,24 @@ function ContestacaoMulta() {
               </p>
             </div>
 
-            <div className="space-y-5 text-sm text-gray-700">
+            <div className="space-y-5 text-sm text-primary-100 relative z-10">
               <div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1">O que é?</h3>
-                <p className="text-gray-600 text-xs leading-relaxed">
+                <h3 className="font-bold text-white text-sm mb-1">O que é?</h3>
+                <p className="text-primary-100 text-xs leading-relaxed">
                   É a apresentação da defesa de autuação de multa de trânsito emitida pela Superintendência Municipal de Transportes e Trânsito (SMTT).
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1">Qual o Prazo?</h3>
-                <p className="text-gray-600 text-xs leading-relaxed">
+                <h3 className="font-bold text-white text-sm mb-1">Qual o Prazo?</h3>
+                <p className="text-primary-100 text-xs leading-relaxed">
                   O <strong>prazo limite</strong> para apresentar a defesa de autuação consta na Notificação de Autuação enviada ao proprietário, e é o mesmo prazo para identificar o condutor infrator.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-900 text-sm mb-2">Documentos necessários (PDF):</h3>
-                <ul className="text-xs text-gray-600 space-y-2 list-disc pl-4">
+                <h3 className="font-bold text-white text-sm mb-2">Documentos necessários (PDF):</h3>
+                <ul className="text-xs text-primary-100 space-y-2 list-disc pl-4">
                   <li>Cópia, <strong>legível</strong>, da notificação da autuação ou outro documento que identifique o auto de infração;</li>
                   <li>Cópia, <strong>legível</strong>, do Certificado de Registro e Licenciamento do Veículo (CRLV);</li>
                   <li>Cópia, <strong>legível</strong>, do documento de identificação do proprietário do veículo ou do condutor identificado (CNH ou RG);</li>
@@ -223,20 +228,20 @@ function ContestacaoMulta() {
                 </ul>
               </div>
 
-              <div className="border-t border-gray-100 pt-4 space-y-4">
-                <h4 className="font-bold text-gray-900 text-sm uppercase tracking-wider">Instruções de Uso</h4>
+              <div className="border-t border-primary-800 pt-5 space-y-5">
+                <h4 className="font-bold text-secondary-500 text-sm uppercase tracking-wider">Instruções de Uso</h4>
                 
                 <div className="flex gap-3 items-start text-xs">
-                  <div className="w-5 h-5 rounded-full bg-primary-100 text-primary-700 font-bold flex items-center justify-center shrink-0 mt-0.5">1</div>
+                  <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0 mt-0.5">1</div>
                   <div>
-                    <span className="font-bold block text-gray-800">Baixe o Requerimento Único</span>
-                    <span className="text-gray-600 block mb-2">Acesse e preencha previamente para o cadastro de seu pedido.</span>
+                    <span className="font-bold block text-white">Baixe o Requerimento Único</span>
+                    <span className="text-primary-100 block mb-2">Acesse e preencha previamente para o cadastro de seu pedido.</span>
                     <a
                       href={formularioPDF}
                       download="Requerimento_Único.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-primary-700 font-bold hover:bg-blue-100 transition-colors shadow-sm text-[11px]"
+                      className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-[#EAB308] rounded-lg text-primary-950 font-bold hover:bg-secondary-500 transition-colors shadow text-xs"
                     >
                       <Download className="w-3.5 h-3.5" /> Requerimento Único (PDF)
                     </a>
@@ -244,16 +249,16 @@ function ContestacaoMulta() {
                 </div>
 
                 <div className="flex gap-3 items-start text-xs">
-                  <div className="w-5 h-5 rounded-full bg-primary-100 text-primary-700 font-bold flex items-center justify-center shrink-0 mt-0.5">2</div>
+                  <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0 mt-0.5">2</div>
                   <div className="space-y-1">
-                    <span className="font-bold block text-gray-800">Confirme sua Identidade (Selfie)</span>
-                    <span className="text-gray-600 block">
+                    <span className="font-bold block text-white">Confirme sua Identidade (Selfie)</span>
+                    <span className="text-primary-100 block">
                       Tire uma foto sua segurando o documento oficial com foto ao lado do seu rosto, conforme o modelo abaixo. A imagem deve ter resolução nítida e sem desfoque.
                     </span>
                     
                     {/* Silhouette Box representation */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center max-w-[200px] mx-auto mt-2">
-                      <svg viewBox="0 0 100 100" className="w-20 h-20 text-gray-400 mx-auto" fill="currentColor">
+                    <div className="bg-white/10 border border-white/15 rounded-xl p-3 text-center max-w-[200px] mx-auto mt-3">
+                      <svg viewBox="0 0 100 100" className="w-20 h-20 text-primary-100 mx-auto" fill="currentColor">
                         {/* Body base */}
                         <path d="M50 50c-13.8 0-25 11.2-25 25v5h50v-5c0-13.8-11.2-25-25-25z" fill="#D1D5DB" />
                         {/* Head */}
@@ -267,33 +272,33 @@ function ContestacaoMulta() {
                         {/* Hand holding it */}
                         <circle cx="62" cy="33" r="3" fill="#E5E7EB" />
                       </svg>
-                      <span className="text-[9px] font-bold text-gray-400 block mt-1 uppercase">Exemplo de Foto</span>
+                      <span className="text-[9px] font-bold text-primary-100 block mt-1 uppercase">Exemplo de Foto</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex gap-3 items-start text-xs">
-                  <div className="w-5 h-5 rounded-full bg-primary-100 text-primary-700 font-bold flex items-center justify-center shrink-0 mt-0.5">3</div>
+                  <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0 mt-0.5">3</div>
                   <div>
-                    <span className="font-bold block text-gray-800">Envie Tudo Digitalizado</span>
-                    <span className="text-gray-600 block">
+                    <span className="font-bold block text-white">Envie Tudo Digitalizado</span>
+                    <span className="text-primary-100 block">
                       Requerimento preenchido + Documentos originais obrigatórios escaneados em PDF ou fotos nítidas.
                     </span>
                   </div>
                 </div>
 
                 <div className="flex gap-3 items-start text-xs">
-                  <div className="w-5 h-5 rounded-full bg-primary-100 text-primary-700 font-bold flex items-center justify-center shrink-0 mt-0.5">4</div>
+                  <div className="w-8 h-8 rounded-full bg-secondary-500 text-primary-950 font-bold flex items-center justify-center shrink-0 mt-0.5">4</div>
                   <div>
-                    <span className="font-bold block text-gray-800">Aguarde o Julgamento</span>
-                    <span className="text-gray-600 block">
+                    <span className="font-bold block text-white">Aguarde o Julgamento</span>
+                    <span className="text-primary-100 block">
                       Em um prazo de 2 a 7 dias úteis você será informado do seu protocolo para acompanhamento do pedido.
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="text-[10px] text-gray-500 italic pt-2 border-t border-gray-100">
+              <div className="text-[10px] text-primary-100 italic pt-4 border-t border-primary-800">
                 *** NOTA IMPORTANTE: O procedimento para pessoa jurídica deverá respeitar o exigido na Resolução nº 918/2022 do CONTRAN.
               </div>
             </div>
@@ -303,7 +308,7 @@ function ContestacaoMulta() {
         {/* Right column: Form Wizard */}
         <div className="lg:w-7/12">
           {!protocoloGerado ? (
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-md">
               
               {/* Form Title & Step Indicators */}
               <div className="mb-6">
@@ -361,7 +366,7 @@ function ContestacaoMulta() {
                         value={nome}
                         onChange={(e) => setNome(e.target.value)}
                         maxLength={150}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
                     </div>
@@ -374,7 +379,7 @@ function ContestacaoMulta() {
                         onChange={(e) => setCpf(e.target.value.replace(/\D/g, ''))}
                         maxLength={11}
                         inputMode="numeric"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
                     </div>
@@ -389,7 +394,7 @@ function ContestacaoMulta() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         maxLength={100}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
                     </div>
@@ -401,13 +406,13 @@ function ContestacaoMulta() {
                         value={telefone}
                         onChange={(e) => setTelefone(e.target.value)}
                         maxLength={20}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:items-end">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Placa do Veículo *</label>
                       <input
@@ -416,7 +421,7 @@ function ContestacaoMulta() {
                         value={placa}
                         onChange={(e) => setPlaca(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())}
                         maxLength={7}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
                     </div>
@@ -428,7 +433,7 @@ function ContestacaoMulta() {
                         value={numeroAit}
                         onChange={(e) => setNumeroAit(e.target.value.toUpperCase())}
                         maxLength={20}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm"
                         required
                       />
                     </div>
@@ -437,7 +442,7 @@ function ContestacaoMulta() {
                       <select
                         value={tipoRecurso}
                         onChange={(e) => setTipoRecurso(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm cursor-pointer font-bold text-gray-700"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all text-sm cursor-pointer font-bold text-gray-700"
                         required
                       >
                         <option value="Defesa Prévia">Defesa Prévia</option>
@@ -464,7 +469,7 @@ function ContestacaoMulta() {
                   <div className="pt-4 flex justify-end">
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary-600 text-white font-bold rounded-xl shadow-md hover:bg-primary-700 transition-colors text-sm border-0 cursor-pointer"
+                      className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary-600 text-white font-bold rounded-lg shadow hover:bg-primary-700 transition-colors text-sm border-0 cursor-pointer"
                     >
                       Avançar para Documentos <ArrowRight className="w-4 h-4" />
                     </button>
@@ -616,7 +621,7 @@ function ContestacaoMulta() {
                     <button
                       type="button"
                       onClick={() => setEtapa(1)}
-                      className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-150 rounded-xl transition-colors border border-gray-200 bg-white cursor-pointer"
+                      className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 bg-white cursor-pointer"
                     >
                       <ArrowLeft className="w-4 h-4 inline-block mr-1.5 align-text-bottom" /> Voltar
                     </button>
@@ -624,7 +629,7 @@ function ContestacaoMulta() {
                     <button
                       type="submit"
                       disabled={enviando}
-                      className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 border-0 cursor-pointer"
+                      className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow transition-colors disabled:opacity-50 border-0 cursor-pointer"
                     >
                       {enviando ? 'Enviando...' : 'Enviar Contestação'}
                     </button>
@@ -635,7 +640,7 @@ function ContestacaoMulta() {
           ) : (
             
             /* Success Screen (Step 3) */
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 text-center space-y-6">
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-xl text-center space-y-6 max-w-xl mx-auto">
               <div className="w-16 h-16 bg-green-150 text-green-600 rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle className="w-10 h-10" />
               </div>

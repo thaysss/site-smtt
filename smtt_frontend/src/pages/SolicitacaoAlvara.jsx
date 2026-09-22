@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 function SolicitacaoAlvara() {
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
 
   // Estados do formulário
   const [tipoServico, setTipoServico] = useState('Renovação de Alvará');
@@ -262,7 +266,7 @@ function SolicitacaoAlvara() {
                   <a
                     href="/formulario-alvara.pdf"
                     download
-                    className="inline-flex items-center gap-2 mt-3 bg-white text-primary-950 font-bold text-xs px-4 py-2 rounded-lg hover:bg-secondary-500 hover:text-primary-950 transition-colors shadow"
+                    className="inline-flex items-center gap-2 mt-3 bg-[#EAB308] text-primary-950 font-bold text-xs px-4 py-2 rounded-lg hover:bg-secondary-500 hover:text-primary-950 transition-colors shadow"
                   >
                     <i className="fa-solid fa-file-pdf text-red-600"></i> Download Requerimento (PDF)
                   </a>
