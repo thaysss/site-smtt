@@ -31,12 +31,20 @@ const CAMPOS_EDICAO_INFRACAO = [
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
 const FASES_INFRACAO = [
   'Autuação',
+  'Notificação de Autuação',
   'Defesa em Análise',
   'Defesa Deferida (Cancelada)',
   'Defesa Indeferida',
   'Penalidade',
   'Quitada',
 ];
+const PROXIMA_FASE_INFRACAO = {
+  'Autuação': 'Notificação de Autuação',
+  'Notificação de Autuação': 'Penalidade',
+  'Defesa Indeferida': 'Penalidade',
+  'Penalidade': 'Quitada',
+};
+
 const montarUrlArquivo = (caminho) => {
   if (!caminho) return '';
   if (/^https?:\/\//i.test(caminho)) return caminho;
@@ -98,6 +106,7 @@ function AdminPainel({ defaultTab }) {
   const [infracaoEditando, setInfracaoEditando] = useState(null);
   const [infracaoValores, setInfracaoValores] = useState({});
   const [infracaoSalvando, setInfracaoSalvando] = useState(false);
+  const [infracaoPromovendo, setInfracaoPromovendo] = useState(null);
   const [alvaras, setAlvaras] = useState([]);
 
   // ESTADOS DO SISTEMA DE NOTÍCIAS
@@ -548,7 +557,7 @@ function AdminPainel({ defaultTab }) {
         numero_nait: naitNumero,
         data_expedicao: naitDataExpedicao || null
       });
-      alert("NAIT vinculada com sucesso!");
+      alert("NAIT vinculada e infração promovida para Notificação de Autuação!");
       setModalNaitAberta(false);
       carregarInfracoes();
     } catch (err) {
@@ -575,6 +584,23 @@ function AdminPainel({ defaultTab }) {
       carregarInfracoes();
     } catch (err) {
       alert(err.response?.data?.erro || "Erro ao salvar NIP.");
+    }
+  };
+
+  const promoverInfracao = async (infracao) => {
+    const proximaFase = PROXIMA_FASE_INFRACAO[infracao.fase_atual || 'Autuação'];
+    if (!proximaFase || infracaoPromovendo) return;
+    if (!window.confirm(`Promover a multa ${infracao.numero_ait} para ${proximaFase}?`)) return;
+
+    try {
+      setInfracaoPromovendo(infracao.id);
+      await api.put(`/admin/infracoes/${infracao.id}`, { fase_atual: proximaFase });
+      setMensagem(`Multa ${infracao.numero_ait} promovida para ${proximaFase}.`);
+      await carregarInfracoes();
+    } catch (error) {
+      alert(error.response?.data?.erro || 'Não foi possível promover a multa.');
+    } finally {
+      setInfracaoPromovendo(null);
     }
   };
 
@@ -1406,7 +1432,19 @@ function AdminPainel({ defaultTab }) {
                           </div>
                         </button>
 
-                        <div className="px-5 pb-3 flex justify-end"><AdminRegistroActions category="infracoes" id={inf.id} onEdit={() => abrirEdicaoInfracao(inf)} onSaved={carregarInfracoes} /></div>
+                        <div className="px-5 pb-3 flex flex-wrap justify-end gap-2">
+                          {PROXIMA_FASE_INFRACAO[inf.fase_atual || 'Autuação'] && !cancelada && (
+                            <button
+                              type="button"
+                              onClick={() => promoverInfracao(inf)}
+                              disabled={infracaoPromovendo === inf.id}
+                              className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-800 disabled:cursor-wait disabled:opacity-60"
+                            >
+                              {infracaoPromovendo === inf.id ? 'Promovendo...' : `Promover para ${PROXIMA_FASE_INFRACAO[inf.fase_atual || 'Autuação']}`}
+                            </button>
+                          )}
+                          <AdminRegistroActions category="infracoes" id={inf.id} onEdit={() => abrirEdicaoInfracao(inf)} onSaved={carregarInfracoes} />
+                        </div>
 
                         {estaAberto && (
                           <div className="infracao-card-details">

@@ -12,7 +12,7 @@ from app.models.portal import AlertaTransito, Noticia
 from app.models.servicos import AutoInfracao, Protocolo, RecursoMulta, SolicitacaoAlvara, SolicitacaoEvento, Veiculo, RecursoAnexo
 from app.utils.uploads import delete_upload, save_upload_bytes
 from flask_jwt_extended import get_jwt
-from app.utils.cargos import FASES_INFRACAO, cargo_das_claims, pode_acessar_registro
+from app.utils.cargos import FASES_INFRACAO, cargo_das_claims, pode_acessar_registro, promover_fase_infracao
 
 RECURSOS = {
     'eventos': (SolicitacaoEvento, 'Solicitações de eventos', 'nome_solicitante cpf_cnpj email telefone data_evento local_evento descricao resposta_analise'),
@@ -214,6 +214,12 @@ def registrar_gestao(bp):
                 if recurso == 'infracoes' and valores.get('fase_atual') not in (None, *FASES_INFRACAO):
                     db.session.rollback()
                     return jsonify(erro='Fase da multa inválida.'), 400
+                if recurso == 'infracoes':
+                    item.fase_atual = promover_fase_infracao(
+                        item.fase_atual,
+                        item.numero_nait,
+                        item.numero_nip,
+                    )
                 if isinstance(item, AlertaTransito):
                     if item.status == 'Ativo':
                         item.data_fim = None

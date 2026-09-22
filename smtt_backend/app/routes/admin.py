@@ -17,7 +17,7 @@ from app.routes.admin_registros import registrar_gestao
 registrar_gestao(admin_bp)
 
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
-from app.utils.cargos import FASES_INFRACAO, cargo_das_claims, pode_acessar, pode_acessar_registro
+from app.utils.cargos import FASES_INFRACAO, cargo_das_claims, pode_acessar, pode_acessar_registro, promover_fase_infracao
 
 def _recurso_da_requisicao():
     partes = [parte for parte in request.path.removeprefix('/api/admin/').split('/') if parte]
@@ -149,7 +149,11 @@ def registrar_infracao():
         linha_digitavel=dados.get('linha_digitavel'),
         nosso_numero=dados.get('nosso_numero'),
         data_vencimento_boleto=data_vencimento_boleto,
-        fase_atual=dados.get('fase_atual', 'Autuação')
+        fase_atual=promover_fase_infracao(
+            dados.get('fase_atual', 'Autuação'),
+            dados.get('numero_nait'),
+            dados.get('numero_nip'),
+        )
     )
     
     db.session.add(nova_infracao)
@@ -205,6 +209,12 @@ def atualizar_infracao(id):
             infracao.valor_final = float(dados['valor_final'])
         except (ValueError, TypeError):
             pass
+
+    infracao.fase_atual = promover_fase_infracao(
+        infracao.fase_atual,
+        infracao.numero_nait,
+        infracao.numero_nip,
+    )
             
     db.session.commit()
     return jsonify({"mensagem": "Infração atualizada com sucesso!", "infracao": infracao.to_dict()}), 200

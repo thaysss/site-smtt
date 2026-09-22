@@ -81,6 +81,19 @@ class TestAdminRegistros(unittest.TestCase):
         self.assertEqual(fine.local_cometimento, 'Centro')
         self.assertEqual(self.request('put', 'infracoes', fine.id, json={'valor_final': '0', 'data_hora_infracao': '2026-10-01T12:30:00'}).status_code, 200)
 
+    def test_infraction_phase_is_promoted_by_fiscal_documents(self):
+        _, fine, _, _ = self.seed()
+
+        response = self.request('put', 'infracoes', fine.id, json={'numero_nait': 'NAIT-1'})
+        self.assertEqual(response.status_code, 200)
+        db.session.refresh(fine)
+        self.assertEqual(fine.fase_atual, 'Notificação de Autuação')
+
+        response = self.request('put', 'infracoes', fine.id, json={'numero_nip': 'NIP-1'})
+        self.assertEqual(response.status_code, 200)
+        db.session.refresh(fine)
+        self.assertEqual(fine.fase_atual, 'Penalidade')
+
     def test_delete_request_removes_exclusive_protocol(self):
         _, _, protocol, item = self.seed()
         item_id, protocol_id = item.id, protocol.id

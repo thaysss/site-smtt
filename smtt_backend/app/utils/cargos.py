@@ -9,12 +9,25 @@ CARGOS = {
 
 FASES_INFRACAO = {
     'Autuação',
+    'Notificação de Autuação',
     'Defesa em Análise',
     'Defesa Deferida (Cancelada)',
     'Defesa Indeferida',
     'Penalidade',
     'Quitada',
 }
+
+def promover_fase_infracao(fase_atual, numero_nait=None, numero_nip=None):
+    """Promove a fase pelos documentos emitidos sem reabrir estados finais."""
+    fase = fase_atual or 'Autuação'
+    if fase in {'Defesa Deferida (Cancelada)', 'Quitada'}:
+        return fase
+    if str(numero_nip or '').strip():
+        return 'Penalidade'
+    if fase == 'Autuação' and str(numero_nait or '').strip():
+        return 'Notificação de Autuação'
+    return fase
+
 
 PERMISSOES = {
     'administrador': {'*'},
