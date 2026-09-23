@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CheckCircle, Eye, EyeOff, ShieldCheck, UserPlus } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { CheckCircle, Eye, EyeOff, Pencil, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import api from '../services/api';
 import { CARGOS } from '../utils/adminPermissions';
@@ -12,6 +12,37 @@ function AdminUsuarios() {
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [servidores, setServidores] = useState([]);
+  const [carregandoServidores, setCarregandoServidores] = useState(true);
+  const [editandoId, setEditandoId] = useState(null);
+  const [edicao, setEdicao] = useState({ nome: '', matricula: '', cargo: '' });
+
+  const carregarServidores = useCallback(async () => {
+    setCarregandoServidores(true);
+    try {
+      const { data } = await api.get('/auth/admin/servidores');
+      setServidores(data);
+    } catch (requestError) {
+      setErro(requestError.response?.data?.erro || 'Não foi possível carregar os servidores.');
+    } finally {
+      setCarregandoServidores(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let ativo = true;
+    api.get('/auth/admin/servidores')
+      .then(({ data }) => {
+        if (ativo) setServidores(data);
+      })
+      .catch((requestError) => {
+        if (ativo) setErro(requestError.response?.data?.erro || 'Não foi possível carregar os servidores.');
+      })
+      .finally(() => {
+        if (ativo) setCarregandoServidores(false);
+      });
+    return () => { ativo = false; };
+  }, []);
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -38,8 +69,34 @@ function AdminUsuarios() {
       });
       setMensagem(data.mensagem || 'Servidor cadastrado com senha temporária.');
       setForm(initialForm);
+      await carregarServidores();
     } catch (requestError) {
       setErro(requestError.response?.data?.erro || 'Não foi possível cadastrar o administrador.');
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const iniciarEdicao = (servidor) => {
+    setEditandoId(servidor.id);
+    setEdicao({ nome: servidor.nome, matricula: servidor.matricula, cargo: servidor.perfil });
+    setErro('');
+    setMensagem('');
+  };
+
+  const salvarEdicao = async (servidorId) => {
+    setEnviando(true);
+    setErro('');
+    setMensagem('');
+    try {
+      const { data } = await api.put(`/auth/admin/servidores/${servidorId}`, edicao);
+      setServidores((atuais) => atuais.map((servidor) => (
+        servidor.id === servidorId ? data.servidor : servidor
+      )));
+      setEditandoId(null);
+      setMensagem(data.mensagem || 'Dados do servidor atualizados com sucesso.');
+    } catch (requestError) {
+      setErro(requestError.response?.data?.erro || 'Não foi possível atualizar o servidor.');
     } finally {
       setEnviando(false);
     }
@@ -110,6 +167,41 @@ function AdminUsuarios() {
               {CARGOS.map((cargo) => <li key={cargo.value}><strong>{cargo.label}:</strong> {cargo.descricao}</li>)}
             </ul>
           </aside>
+        </section>
+
+        <section className="admin-users-list-card">
+          <div className="admin-users-list-heading">
+            <div>
+              <span><Users size={18} /> Servidores cadastrados</span>
+              <p>Edite o nome, a matrícula ou o cargo de um servidor.</p>
+            </div>
+            <strong>{servidores.length}</strong>
+          </div>
+
+          {carregandoServidores ? <p className="admin-users-empty">Carregando servidores...</p> : servidores.length === 0 ? (
+            <p className="admin-users-empty">Nenhum servidor cadastrado.</p>
+          ) : (
+            <div className="admin-users-table-wrap">
+              <table className="admin-users-table">
+                <thead><tr><th>Nome</th><th>Matrícula</th><th>Cargo</th><th>Senha</th><th aria-label="Ações" /></tr></thead>
+                <tbody>
+                  {servidores.map((servidor) => {
+                    const editando = editandoId === servidor.id;
+                    return <tr key={servidor.id}>
+                      <td>{editando ? <input value={edicao.nome} maxLength={150} onChange={(event) => setEdicao((atual) => ({ ...atual, nome: event.target.value }))} aria-label="Nome do servidor" /> : servidor.nome}</td>
+                      <td>{editando ? <input value={edicao.matricula} maxLength={20} onChange={(event) => setEdicao((atual) => ({ ...atual, matricula: event.target.value }))} aria-label="Matrícula do servidor" /> : servidor.matricula}</td>
+                      <td>{editando ? <select value={edicao.cargo} onChange={(event) => setEdicao((atual) => ({ ...atual, cargo: event.target.value }))} aria-label="Cargo do servidor">{CARGOS.map((cargo) => <option key={cargo.value} value={cargo.value}>{cargo.label}</option>)}</select> : servidor.cargo}</td>
+                      <td><span className={`admin-users-status ${servidor.senha_temporaria ? 'pending' : 'active'}`}>{servidor.senha_temporaria ? 'Troca pendente' : 'Definida'}</span></td>
+                      <td className="admin-users-row-actions">{editando ? <>
+                        <button type="button" className="save" onClick={() => salvarEdicao(servidor.id)} disabled={enviando} aria-label="Salvar alterações"><Save size={17} /></button>
+                        <button type="button" onClick={() => setEditandoId(null)} disabled={enviando} aria-label="Cancelar edição"><X size={17} /></button>
+                      </> : <button type="button" onClick={() => iniciarEdicao(servidor)} aria-label={`Editar ${servidor.nome}`}><Pencil size={17} /></button>}</td>
+                    </tr>;
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       </main>
     </div>

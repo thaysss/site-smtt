@@ -207,6 +207,59 @@ class TestAdminAuthentication(unittest.TestCase):
         self.assertEqual(short_password.status_code, 400)
         self.assertIn('8 caracteres', short_password.get_json()['erro'])
 
+    def test_admin_can_list_and_update_servers(self):
+        servidor = Servidor(nome='Servidor Antigo', matricula='100', cargo='Analista', senha_temporaria=False)
+        servidor.set_senha('senha-segura')
+        db.session.add(servidor)
+        db.session.commit()
+        token = create_access_token(identity='admin-externo', additional_claims={'role': 'administrador'})
+        headers = {'Authorization': f'Bearer {token}'}
+
+        listed = self.client.get('/api/auth/admin/servidores', headers=headers)
+        updated = self.client.put(f'/api/auth/admin/servidores/{servidor.id}', headers=headers, json={
+            'nome': 'Servidor Atualizado',
+            'matricula': '101',
+            'cargo': 'supervisor',
+        })
+
+        self.assertEqual(listed.status_code, 200)
+        self.assertEqual(listed.get_json()[0]['matricula'], '100')
+        self.assertEqual(updated.status_code, 200)
+        db.session.refresh(servidor)
+        self.assertEqual(servidor.nome, 'Servidor Atualizado')
+        self.assertEqual(servidor.matricula, '101')
+        self.assertEqual(servidor.cargo, 'Supervisor')
+
+    def test_server_update_rejects_duplicate_registration(self):
+        primeiro = Servidor(nome='Primeiro', matricula='200', cargo='Analista', senha_temporaria=False)
+        segundo = Servidor(nome='Segundo', matricula='201', cargo='Supervisor', senha_temporaria=False)
+        primeiro.set_senha('senha-segura')
+        segundo.set_senha('senha-segura')
+        db.session.add_all([primeiro, segundo])
+        db.session.commit()
+        token = create_access_token(identity='admin-externo', additional_claims={'role': 'administrador'})
+
+        response = self.client.put(f'/api/auth/admin/servidores/{segundo.id}', headers={
+            'Authorization': f'Bearer {token}',
+        }, json={'nome': 'Segundo', 'matricula': '200', 'cargo': 'supervisor'})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Matrícula', response.get_json()['erro'])
+
+    def test_admin_cannot_change_own_role(self):
+        servidor = Servidor(nome='Administrador', matricula='300', cargo='Administrador', senha_temporaria=False)
+        servidor.set_senha('senha-segura')
+        db.session.add(servidor)
+        db.session.commit()
+        token = create_access_token(identity=str(servidor.id), additional_claims={'role': 'administrador'})
+
+        response = self.client.put(f'/api/auth/admin/servidores/{servidor.id}', headers={
+            'Authorization': f'Bearer {token}',
+        }, json={'nome': 'Administrador', 'matricula': '300', 'cargo': 'analista'})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(servidor.cargo, 'Administrador')
+
     def test_renavam_check_digit(self):
         self.assertTrue(renavam_valido('12345678900'))
         self.assertFalse(renavam_valido('12345678901'))

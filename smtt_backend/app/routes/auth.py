@@ -173,6 +173,69 @@ def cadastro_admin():
     db.session.commit()
     return jsonify({"mensagem": "Servidor cadastrado com sucesso"}), 201
 
+
+def _servidor_para_json(servidor):
+    cargo_chave, cargo = normalizar_cargo(servidor.cargo)
+    return {
+        "id": servidor.id,
+        "nome": servidor.nome,
+        "matricula": servidor.matricula,
+        "cargo": cargo or servidor.cargo,
+        "perfil": cargo_chave,
+        "senha_temporaria": servidor.senha_temporaria,
+    }
+
+
+@auth_bp.route('/admin/servidores', methods=['GET'])
+@jwt_required()
+def listar_servidores_admin():
+    if cargo_das_claims(get_jwt()) != "administrador":
+        return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
+
+    servidores = Servidor.query.order_by(Servidor.nome.asc(), Servidor.id.asc()).all()
+    return jsonify([_servidor_para_json(servidor) for servidor in servidores]), 200
+
+
+@auth_bp.route('/admin/servidores/<int:servidor_id>', methods=['PUT'])
+@jwt_required()
+def atualizar_servidor_admin(servidor_id):
+    claims = get_jwt()
+    if cargo_das_claims(claims) != "administrador":
+        return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
+
+    servidor = db.session.get(Servidor, servidor_id)
+    if not servidor:
+        return jsonify({"erro": "Servidor não encontrado."}), 404
+
+    dados = request.get_json(silent=True) or {}
+    nome = str(dados.get('nome', '')).strip()
+    matricula = str(dados.get('matricula', '')).strip()
+    cargo_chave, cargo = normalizar_cargo(dados.get('cargo', ''))
+
+    if not nome or not matricula or not cargo_chave:
+        return jsonify({"erro": "Nome, matrícula e cargo válidos são obrigatórios."}), 400
+    if len(nome) > 150 or len(matricula) > 20 or len(cargo) > 50:
+        return jsonify({"erro": "Um ou mais campos excedem o tamanho permitido."}), 400
+    matricula_em_uso = Servidor.query.filter(
+        Servidor.matricula == matricula,
+        Servidor.id != servidor.id,
+    ).first()
+    if matricula_em_uso:
+        return jsonify({"erro": "Matrícula já cadastrada."}), 400
+
+    cargo_atual, _ = normalizar_cargo(servidor.cargo)
+    if str(claims.get('sub')) == str(servidor.id) and cargo_chave != cargo_atual:
+        return jsonify({"erro": "Não é possível alterar o próprio cargo durante a sessão atual."}), 400
+
+    servidor.nome = nome
+    servidor.matricula = matricula
+    servidor.cargo = cargo
+    db.session.commit()
+    return jsonify({
+        "mensagem": "Dados do servidor atualizados com sucesso.",
+        "servidor": _servidor_para_json(servidor),
+    }), 200
+
 @auth_bp.route('/admin/login', methods=['POST'])
 def login_admin():
     dados = request.get_json(silent=True) or {}

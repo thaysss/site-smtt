@@ -689,6 +689,26 @@ body.alto-contraste .text-gray-900 {
 .admin-users-info h2 { margin: 15px 0 8px; color: #fff; font-size: 1.1rem; }
 .admin-users-info p, .admin-users-info li { font-size: .88rem; line-height: 1.6; }
 .admin-users-info ul { padding-left: 20px; margin-bottom: 0; }
+.admin-users-list-card { max-width: 1040px; margin: 24px auto 0; overflow: hidden; border: 1px solid var(--admin-border); border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(0, 33, 71, .06); }
+.admin-users-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 26px; border-bottom: 1px solid var(--admin-border); }
+.admin-users-list-heading span { display: flex; align-items: center; gap: 9px; color: #17233c; font-weight: 800; }
+.admin-users-list-heading p { margin: 5px 0 0; color: var(--admin-muted); font-size: .85rem; }
+.admin-users-list-heading > strong { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; color: var(--admin-action); background: #eaf2fc; }
+.admin-users-table-wrap { overflow-x: auto; }
+.admin-users-table { width: 100%; border-collapse: collapse; }
+.admin-users-table th, .admin-users-table td { padding: 14px 18px; border-bottom: 1px solid #edf0f4; text-align: left; vertical-align: middle; }
+.admin-users-table th { color: var(--admin-muted); background: #f8fafc; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
+.admin-users-table td { color: #293548; font-size: .88rem; }
+.admin-users-table tbody tr:last-child td { border-bottom: 0; }
+.admin-users-table input, .admin-users-table select { width: 100%; min-width: 130px; height: 38px; padding: 0 10px; border: 1px solid var(--admin-border); border-radius: 7px; background: #fff; }
+.admin-users-status { display: inline-flex; padding: 5px 9px; border-radius: 999px; font-size: .72rem; font-weight: 750; white-space: nowrap; }
+.admin-users-status.pending { color: #92400e; background: #fef3c7; }
+.admin-users-status.active { color: #166534; background: #dcfce7; }
+.admin-users-row-actions { display: flex; justify-content: flex-end; gap: 7px; }
+.admin-users-row-actions button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--admin-border); border-radius: 8px; color: var(--admin-action); background: #fff; cursor: pointer; }
+.admin-users-row-actions button.save { color: #fff; border-color: var(--admin-action); background: var(--admin-action); }
+.admin-users-row-actions button:disabled { opacity: .55; cursor: wait; }
+.admin-users-empty { padding: 28px; margin: 0; color: var(--admin-muted); text-align: center; }
 
 @media (max-width: 900px) {
   .admin-users-shell { display: block; padding-top: 64px; }
@@ -703,6 +723,9 @@ body.alto-contraste .text-gray-900 {
   .admin-users-full-field { grid-column: auto; }
   .admin-users-form { padding: 20px; }
   .admin-users-actions button { width: 100%; justify-content: center; }
+  .admin-users-list-card { margin-top: 18px; }
+  .admin-users-list-heading { padding: 18px 20px; }
+  .admin-users-table th, .admin-users-table td { padding: 12px; }
 }
 
 /* Fluxo de cadastro de AIT */
