@@ -121,6 +121,7 @@ def create_app(test_config=None):
             ('POST', '/api/public/solicitacao-evento'): (10, 3600),
             ('POST', '/api/public/solicitacao-alvara'): (10, 3600),
             ('POST', '/api/public/contestacao'): (10, 3600),
+            ('POST', '/api/public/ouvidoria'): (10, 3600),
         }
         rule = limits.get((request.method, request.path))
         if request.method == 'GET' and request.path.startswith('/api/public/protocolos/'):

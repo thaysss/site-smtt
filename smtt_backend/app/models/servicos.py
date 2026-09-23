@@ -95,6 +95,36 @@ class Protocolo(db.Model):
     criado_em = db.Column(db.DateTime, default=get_brasilia_time)
 
 
+class MensagemOuvidoria(db.Model):
+    __tablename__ = 'mensagens_ouvidoria'
+
+    id = db.Column(db.Integer, primary_key=True)
+    protocolo_id = db.Column(db.Integer, db.ForeignKey('protocolos.id'), nullable=False, unique=True)
+    nome = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    assunto = db.Column(db.String(50), nullable=False)
+    mensagem = db.Column(db.Text, nullable=False)
+    resposta = db.Column(db.Text, nullable=True)
+    respondido_em = db.Column(db.DateTime, nullable=True)
+
+    protocolo = db.relationship('Protocolo', backref=db.backref('mensagem_ouvidoria', uselist=False), lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "protocolo_id": self.protocolo_id,
+            "numero_protocolo": self.protocolo.numero_protocolo if self.protocolo else None,
+            "nome": self.nome,
+            "email": self.email,
+            "assunto": self.assunto,
+            "mensagem": self.mensagem,
+            "resposta": self.resposta,
+            "status": self.protocolo.status if self.protocolo else None,
+            "criado_em": self.protocolo.criado_em.strftime("%d/%m/%Y %H:%M") if self.protocolo else None,
+            "respondido_em": self.respondido_em.strftime("%d/%m/%Y %H:%M") if self.respondido_em else None,
+        }
+
+
 class RecursoMulta(db.Model):
     __tablename__ = 'recursos_multas'
     

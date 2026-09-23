@@ -31,8 +31,8 @@ def promover_fase_infracao(fase_atual, numero_nait=None, numero_nip=None):
 
 PERMISSOES = {
     'administrador': {'*'},
-    'supervisor': {'dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'noticias', 'infracoes', 'veiculos', 'alertas'},
-    'analista': {'dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'noticias'},
+    'supervisor': {'dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'ouvidoria', 'noticias', 'infracoes', 'veiculos', 'alertas'},
+    'analista': {'dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'ouvidoria', 'noticias'},
     'agente_transito': {'dashboard', 'registros', 'infracoes', 'veiculos', 'alertas'},
 }
 

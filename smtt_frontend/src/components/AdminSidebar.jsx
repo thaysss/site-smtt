@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BellRing, CalendarDays, ChevronLeft, ChevronRight,
   FilePenLine, FolderOpen, IdCard, ListChecks, LogOut, Menu, Newspaper,
-  Search, X, LayoutDashboard, UserPlus,
+  Search, X, LayoutDashboard, UserPlus, MessagesSquare,
 } from 'lucide-react';
 import { canAccessAdmin } from '../utils/adminPermissions';
 
@@ -14,6 +14,7 @@ const menuItems = [
   { id: 'recursos', label: 'Recursos', icon: FolderOpen, isTab: true },
   { id: 'eventos', label: 'Eventos', icon: CalendarDays, isTab: true },
   { id: 'alvaras', label: 'Alvarás', icon: IdCard, isTab: true },
+  { id: 'ouvidoria', label: 'Ouvidoria', icon: MessagesSquare, isTab: true },
   { id: 'infracoes', label: 'Infrações lançadas', icon: ListChecks, isTab: true },
   { id: 'noticias', label: 'Notícias', icon: Newspaper, isTab: true },
   

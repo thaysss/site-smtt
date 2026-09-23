@@ -4,7 +4,7 @@ import uuid
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request
 from app.extensions import db
-from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento, SolicitacaoAlvara
+from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, TipoInfracaoCTB, SolicitacaoEvento, SolicitacaoAlvara, MensagemOuvidoria
 from app.models.portal import AlertaTransito, Noticia
 from datetime import datetime
 from app.utils.timezone import get_brasilia_time
@@ -471,6 +471,34 @@ def listar_eventos_admin():
     eventos = SolicitacaoEvento.query.order_by(SolicitacaoEvento.id.desc()).all()
     resultado = [e.to_dict() for e in eventos]
     return jsonify(resultado), 200
+
+
+@admin_bp.route('/ouvidoria', methods=['GET'])
+def listar_ouvidoria_admin():
+    mensagens = MensagemOuvidoria.query.order_by(MensagemOuvidoria.id.desc()).all()
+    return jsonify([mensagem.to_dict() for mensagem in mensagens]), 200
+
+
+@admin_bp.route('/ouvidoria/<int:id>', methods=['PUT'])
+def atualizar_ouvidoria_admin(id):
+    mensagem = db.get_or_404(MensagemOuvidoria, id)
+    dados = request.get_json(silent=True) or {}
+    status = str(dados.get('status', '')).strip()
+    resposta = str(dados.get('resposta', '')).strip()
+    status_permitidos = {'Recebida', 'Em atendimento', 'Respondida', 'Arquivada'}
+
+    if status not in status_permitidos:
+        return jsonify({"erro": "Status inválido."}), 400
+    if len(resposta) > 4000:
+        return jsonify({"erro": "A resposta deve ter no máximo 4000 caracteres."}), 400
+    if status == 'Respondida' and not resposta:
+        return jsonify({"erro": "Informe a resposta antes de concluir o atendimento."}), 400
+
+    mensagem.protocolo.status = status
+    mensagem.resposta = resposta or None
+    mensagem.respondido_em = get_brasilia_time() if status == 'Respondida' else None
+    db.session.commit()
+    return jsonify({"mensagem": "Atendimento atualizado com sucesso.", "registro": mensagem.to_dict()}), 200
 
 
 @admin_bp.route('/eventos/<int:id>/julgar', methods=['PUT'])

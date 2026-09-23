@@ -90,13 +90,13 @@ function ConsultaProtocolo() {
 
                 <div className="flex flex-col sm:flex-row justify-between items-center p-5 bg-blue-50 rounded-xl border border-blue-100">
                   <span className="text-primary-800 text-sm font-bold uppercase mb-2 sm:mb-0">
-                    {['Solicitação de Evento', 'Renovação de Alvará', 'Inclusão de Permissionário'].includes(resultado.tipo_servico) ? 'Situação do Pedido' : 'Situação '}
+                    {['Solicitação de Evento', 'Renovação de Alvará', 'Inclusão de Permissionário', 'Ouvidoria'].includes(resultado.tipo_servico) ? 'Situação do Pedido' : 'Situação '}
                   </span>
                   <div className="flex items-center gap-2">
-                    {(resultado.status_julgamento === 'Deferido' || resultado.status_julgamento === 'Aprovado') && <CheckCircle className="text-green-600 animate-scale-in" />}
+                    {(resultado.status_julgamento === 'Deferido' || resultado.status_julgamento === 'Aprovado' || resultado.status_julgamento === 'Respondida') && <CheckCircle className="text-green-600 animate-scale-in" />}
                     {(resultado.status_julgamento === 'Indeferido' || resultado.status_julgamento === 'Negado') && <XCircle className="text-red-600 animate-scale-in" />}
                     {resultado.status_julgamento === 'Em Análise' && <Clock className="text-yellow-600 animate-scale-in" />}
-                    <span className={`font-bold text-xl ${(resultado.status_julgamento === 'Deferido' || resultado.status_julgamento === 'Aprovado') ? 'text-green-600' : (resultado.status_julgamento === 'Indeferido' || resultado.status_julgamento === 'Negado') ? 'text-red-600' : 'text-yellow-600'}`}>
+                    <span className={`font-bold text-xl ${(resultado.status_julgamento === 'Deferido' || resultado.status_julgamento === 'Aprovado' || resultado.status_julgamento === 'Respondida') ? 'text-green-600' : (resultado.status_julgamento === 'Indeferido' || resultado.status_julgamento === 'Negado') ? 'text-red-600' : 'text-yellow-600'}`}>
                       {resultado.status_julgamento}
                     </span>
                   </div>
@@ -107,7 +107,7 @@ function ConsultaProtocolo() {
                     <div className="absolute top-0 left-0 w-1 h-full bg-primary-600"></div>
                     <div>
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">
-                        {['Solicitação de Evento', 'Renovação de Alvará', 'Inclusão de Permissionário'].includes(resultado.tipo_servico) ? 'Parecer Técnico SMTT' : 'Parecer Oficial da Junta'}
+                        {resultado.tipo_servico === 'Ouvidoria' ? 'Resposta da Ouvidoria' : ['Solicitação de Evento', 'Renovação de Alvará', 'Inclusão de Permissionário'].includes(resultado.tipo_servico) ? 'Parecer Técnico SMTT' : 'Parecer Oficial da Junta'}
                       </span>
                       <p className="text-gray-700 leading-relaxed italic">"{resultado.parecer_jari}"</p>
                     </div>
@@ -137,7 +137,7 @@ function ConsultaProtocolo() {
                       </div>
                     )}
 
-                    {!['Solicitação de Evento', 'Renovação de Alvará', 'Inclusão de Permissionário'].includes(resultado.tipo_servico) && (
+                    {!['Solicitação de Evento', 'Renovação de Alvará', 'Inclusão de Permissionário', 'Ouvidoria'].includes(resultado.tipo_servico) && (
                       <div className="pt-4 border-t border-gray-150">
                         {resultado.anexo_resposta_jari ? (
                           <a

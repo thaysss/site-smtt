@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SiteHeader from '../components/SiteHeader';
+import api from '../services/api';
 import './Home.css';
 
 function FaleConosco() {
@@ -14,6 +15,33 @@ function FaleConosco() {
   const [ouvidoriaMensagem, setOuvidoriaMensagem] = useState('');
   const [ouvidoriaLoading, setOuvidoriaLoading] = useState(false);
   const [ouvidoriaProtocolo, setOuvidoriaProtocolo] = useState(null);
+  const [ouvidoriaErro, setOuvidoriaErro] = useState('');
+  const [ouvidoriaWebsite, setOuvidoriaWebsite] = useState('');
+
+  const enviarOuvidoria = async (event) => {
+    event.preventDefault();
+    setOuvidoriaLoading(true);
+    setOuvidoriaErro('');
+    try {
+      const response = await api.post('/public/ouvidoria', {
+        nome: ouvidoriaNome,
+        email: ouvidoriaEmail,
+        assunto: ouvidoriaAssunto,
+        mensagem: ouvidoriaMensagem,
+        _website: ouvidoriaWebsite,
+      });
+      setOuvidoriaProtocolo(response.data.protocolo);
+      setOuvidoriaNome('');
+      setOuvidoriaEmail('');
+      setOuvidoriaAssunto('Sugestão');
+      setOuvidoriaMensagem('');
+      setOuvidoriaWebsite('');
+    } catch (error) {
+      setOuvidoriaErro(error.response?.data?.erro || 'Não foi possível enviar sua mensagem. Tente novamente.');
+    } finally {
+      setOuvidoriaLoading(false);
+    }
+  };
 
   // Efeito de Scroll (Botão Topo)
   useEffect(() => {
@@ -110,21 +138,11 @@ function FaleConosco() {
                   </div>
                 ) : (
                   <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setOuvidoriaLoading(true);
-                      setTimeout(() => {
-                        const randomNum = Math.floor(10000 + Math.random() * 90000);
-                        setOuvidoriaProtocolo(`OUV-2026-${randomNum}`);
-                        setOuvidoriaNome('');
-                        setOuvidoriaEmail('');
-                        setOuvidoriaAssunto('Sugestão');
-                        setOuvidoriaMensagem('');
-                        setOuvidoriaLoading(false);
-                      }, 1200);
-                    }}
+                    onSubmit={enviarOuvidoria}
                     className="space-y-4"
                   >
+                    {ouvidoriaErro && <div role="alert" className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{ouvidoriaErro}</div>}
+                    <input type="text" name="_website" value={ouvidoriaWebsite} onChange={(event) => setOuvidoriaWebsite(event.target.value)} tabIndex="-1" autoComplete="off" className="hidden" aria-hidden="true" />
                     <div>
                       <label className="text-[11px] font-bold text-slate-600 block mb-1.5 uppercase tracking-wide">Nome Completo</label>
                       <input

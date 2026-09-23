@@ -16,7 +16,7 @@ def get_alertas():
     return jsonify(resultado), 200
 
 # app/routes/public.py (Adicione os imports necessários no topo se faltar)
-from app.models.servicos import Protocolo, RecursoMulta, AutoInfracao, SolicitacaoEvento, SolicitacaoAlvara
+from app.models.servicos import Protocolo, RecursoMulta, AutoInfracao, SolicitacaoEvento, SolicitacaoAlvara, MensagemOuvidoria
 from flask import request
 from app.extensions import db
 import os
@@ -91,6 +91,15 @@ def consultar_protocolo(numero):
             "parecer_jari": alvara.resposta_analise if alvara else "Sua solicitação de alvará/permissionário está em análise pela equipe técnica da SMTT.",
             "caminho_alvara_emitido": alvara.caminho_alvara_emitido if alvara else None
         }), 200
+    elif protocolo.tipo_servico == 'Ouvidoria':
+        mensagem = MensagemOuvidoria.query.filter_by(protocolo_id=protocolo.id).first()
+        return jsonify({
+            "numero_protocolo": protocolo.numero_protocolo,
+            "data_abertura": protocolo.criado_em.strftime("%d/%m/%Y"),
+            "tipo_servico": protocolo.tipo_servico,
+            "status_julgamento": protocolo.status,
+            "parecer_jari": mensagem.resposta if mensagem and mensagem.resposta else "Sua mensagem foi recebida e será analisada pela equipe da SMTT.",
+        }), 200
     else:
         recurso = RecursoMulta.query.filter_by(protocolo_id=protocolo.id).first()
 
@@ -103,6 +112,61 @@ def consultar_protocolo(numero):
             "parecer_jari": recurso.justificativa_julgamento if recurso else "Sua defesa está em análise pela equipe técnica.",
             "anexo_resposta_jari": recurso.anexo_resposta_jari if recurso else None
         }), 200
+
+
+@public_bp.route('/ouvidoria', methods=['POST'])
+def enviar_mensagem_ouvidoria():
+    dados = request.get_json(silent=True) or {}
+    nome = str(dados.get('nome', '')).strip()
+    email = str(dados.get('email', '')).strip().lower()
+    assunto = str(dados.get('assunto', '')).strip()
+    mensagem = str(dados.get('mensagem', '')).strip()
+    assuntos_permitidos = {'Sugestão', 'Reclamação', 'Elogio', 'Informação', 'Denúncia'}
+
+    if not all((nome, email, assunto, mensagem)):
+        return jsonify({"erro": "Todos os campos devem ser preenchidos."}), 400
+    if assunto not in assuntos_permitidos:
+        return jsonify({"erro": "Assunto inválido."}), 400
+    if '@' not in email or email.startswith('@') or email.endswith('@'):
+        return jsonify({"erro": "Informe um e-mail válido."}), 400
+    erro_limite = validar_limites_campos([
+        ("nome", nome, 150),
+        ("e-mail", email, 100),
+        ("assunto", assunto, 50),
+        ("mensagem", mensagem, 2000),
+    ])
+    if erro_limite:
+        return erro_limite
+
+    for _ in range(10):
+        numero_protocolo = f"OUV{get_brasilia_time().strftime('%Y%m%d')}{random.randint(1000, 9999)}"
+        if not Protocolo.query.filter_by(numero_protocolo=numero_protocolo).first():
+            break
+    else:
+        return jsonify({"erro": "Não foi possível gerar o protocolo. Tente novamente."}), 503
+
+    protocolo = Protocolo(
+        numero_protocolo=numero_protocolo,
+        cidadao_id=None,
+        tipo_servico='Ouvidoria',
+        status='Recebida',
+    )
+    db.session.add(protocolo)
+    db.session.flush()
+    db.session.add(MensagemOuvidoria(
+        protocolo_id=protocolo.id,
+        nome=nome,
+        email=email,
+        assunto=assunto,
+        mensagem=mensagem,
+    ))
+    db.session.commit()
+    enviar_protocolo(email, nome, numero_protocolo, 'Ouvidoria')
+
+    return jsonify({
+        "mensagem": "Mensagem enviada com sucesso!",
+        "protocolo": numero_protocolo,
+    }), 201
 
 
 @public_bp.route('/solicitacao-evento', methods=['POST'])

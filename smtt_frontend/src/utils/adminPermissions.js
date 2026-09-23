@@ -7,8 +7,8 @@ export const CARGOS = [
 
 const PERMISSOES = {
   administrador: ['*'],
-  supervisor: ['dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'infracoes', 'noticias', 'lancar-infracao', 'alertas', 'veiculos'],
-  analista: ['dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'noticias'],
+  supervisor: ['dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'ouvidoria', 'infracoes', 'noticias', 'lancar-infracao', 'alertas', 'veiculos'],
+  analista: ['dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'ouvidoria', 'noticias'],
   agente_transito: ['dashboard', 'registros', 'infracoes', 'lancar-infracao', 'alertas', 'veiculos'],
 };
 
@@ -21,4 +21,4 @@ export const canAccessAdmin = (feature, perfil = getAdminPerfil()) => {
 };
 
 export const firstAllowedPanelTab = (perfil = getAdminPerfil()) =>
-  ['recursos', 'eventos', 'alvaras', 'infracoes', 'noticias'].find((item) => canAccessAdmin(item, perfil)) || 'registros';
+  ['recursos', 'eventos', 'alvaras', 'ouvidoria', 'infracoes', 'noticias'].find((item) => canAccessAdmin(item, perfil)) || 'registros';

@@ -14,6 +14,7 @@ import AdminRegistrosSection from '../components/AdminRegistrosSection';
 import AdminRegistroActions from '../components/AdminRegistroActions';
 import AdminDateFilter from '../components/AdminDateFilter';
 import AdminAlvarasSection from '../components/AdminAlvarasSection';
+import AdminOuvidoriaSection from '../components/AdminOuvidoriaSection';
 import { matchesDateFilter } from '../utils/dateFilters';
 import { canAccessAdmin, firstAllowedPanelTab } from '../utils/adminPermissions';
 
@@ -1091,6 +1092,8 @@ function AdminPainel({ defaultTab }) {
               );
             })()}
           </div>
+        ) : menuAtivo === 'ouvidoria' ? (
+          <AdminOuvidoriaSection />
         ) : menuAtivo === 'eventos' ? (
           <div className="eventos-consulta eventos-consulta--table">
             <nav className="eventos-breadcrumb" aria-label="Navegação estrutural">
