@@ -114,6 +114,7 @@ def create_app(test_config=None):
         limits = {
             ('POST', '/api/auth/login'): (8, 60),
             ('POST', '/api/auth/admin/login'): (8, 60),
+            ('POST', '/api/auth/admin/primeiro-acesso/senha'): (10, 60),
             ('POST', '/api/auth/cadastro'): (5, 3600),
             ('POST', '/api/auth/cadastro/confirmar'): (10, 3600),
             ('POST', '/api/auth/senha/esqueci'): (5, 3600),

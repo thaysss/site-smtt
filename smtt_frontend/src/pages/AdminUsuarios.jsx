@@ -36,7 +36,7 @@ function AdminUsuarios() {
         cargo: form.cargo,
         senha: form.senha,
       });
-      setMensagem(data.mensagem || 'Administrador cadastrado com sucesso.');
+      setMensagem(data.mensagem || 'Servidor cadastrado com senha temporária.');
       setForm(initialForm);
     } catch (requestError) {
       setErro(requestError.response?.data?.erro || 'Não foi possível cadastrar o administrador.');
@@ -84,14 +84,14 @@ function AdminUsuarios() {
                 </select>
               </label>
               <label>
-                Senha *
+                Senha temporária *
                 <span className="admin-users-password">
                   <input type={mostrarSenha ? 'text' : 'password'} name="senha" value={form.senha} onChange={updateField} minLength={8} required placeholder="Mínimo de 8 caracteres" autoComplete="new-password" />
                   <button type="button" onClick={() => setMostrarSenha((value) => !value)} aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>{mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                 </span>
               </label>
               <label>
-                Confirmar senha *
+                Confirmar senha temporária *
                 <input type={mostrarSenha ? 'text' : 'password'} name="confirmarSenha" value={form.confirmarSenha} onChange={updateField} minLength={8} required placeholder="Repita a senha" autoComplete="new-password" />
               </label>
             </div>
@@ -99,6 +99,7 @@ function AdminUsuarios() {
             <div className="admin-users-actions">
               <button type="submit" disabled={enviando}><UserPlus size={18} />{enviando ? 'Cadastrando...' : 'Cadastrar administrador'}</button>
             </div>
+            <p>O servidor deverá criar uma nova senha ao entrar pela primeira vez.</p>
           </form>
 
           <aside className="admin-users-info">

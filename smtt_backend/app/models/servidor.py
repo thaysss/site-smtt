@@ -10,6 +10,7 @@ class Servidor(db.Model):
     matricula = db.Column(db.String(20), unique=True, nullable=False)
     senha_hash = db.Column(db.String(255), nullable=False)
     cargo = db.Column(db.String(50), nullable=False, default='Analista')
+    senha_temporaria = db.Column(db.Boolean, nullable=False, default=True, server_default='true')
 
     def set_senha(self, senha):
         self.senha_hash = generate_password_hash(senha)

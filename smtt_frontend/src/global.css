@@ -6367,6 +6367,7 @@ body.alto-contraste .text-gray-900 {
 }
 
 .admin-login-form { gap: 18px; }
+.admin-login-password-hint { margin: -4px 0 0; color: #536c9b; font-size: 12px; line-height: 1.45; }
 .admin-login-form label { margin-bottom: 8px; color: #071843; font-size: 13px; }
 .admin-login-field > svg { color: #315b9a; }
 .admin-login-field input { height: 56px; border-color: #bdcbe0; border-radius: 9px; color: #071843; }

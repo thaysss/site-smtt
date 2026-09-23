@@ -131,6 +131,17 @@ def login():
 # Adicione este import no topo do arquivo auth.py
 from app.models.servidor import Servidor
 
+
+def _criar_token_admin(servidor):
+    cargo_chave, cargo = normalizar_cargo(servidor.cargo)
+    if not cargo_chave:
+        return None, None, None
+    token = create_access_token(
+        identity=str(servidor.id),
+        additional_claims={"role": cargo_chave, "cargo": cargo_chave},
+    )
+    return token, cargo_chave, cargo
+
 # Adicione estas rotas no final do arquivo auth.py
 @auth_bp.route('/admin/cadastro', methods=['POST'])
 @jwt_required()
@@ -156,7 +167,7 @@ def cadastro_admin():
     if Servidor.query.filter_by(matricula=matricula).first():
         return jsonify({"erro": "Matrícula já cadastrada"}), 400
 
-    novo_servidor = Servidor(nome=nome, matricula=matricula, cargo=cargo)
+    novo_servidor = Servidor(nome=nome, matricula=matricula, cargo=cargo, senha_temporaria=True)
     novo_servidor.set_senha(senha)
     db.session.add(novo_servidor)
     db.session.commit()
@@ -174,11 +185,67 @@ def login_admin():
     servidor = Servidor.query.filter_by(matricula=login_recebido).first()
 
     if servidor and servidor.verificar_senha(senha):
-        # Adiciona um "carimbo" no token identificando como admin
         cargo_chave, cargo = normalizar_cargo(servidor.cargo)
         if not cargo_chave:
             return jsonify({"erro": "O cargo deste servidor precisa ser atualizado por um administrador."}), 403
-        token = create_access_token(identity=str(servidor.id), additional_claims={"role": cargo_chave, "cargo": cargo_chave})
+
+        if servidor.senha_temporaria:
+            token = create_access_token(
+                identity=str(servidor.id),
+                additional_claims={"tipo": "troca_senha_admin"},
+                expires_delta=timedelta(minutes=15),
+            )
+            return jsonify({
+                "troca_senha_obrigatoria": True,
+                "token_troca_senha": token,
+                "nome": servidor.nome,
+            }), 200
+
+        token, cargo_chave, cargo = _criar_token_admin(servidor)
         return jsonify({"token": token, "nome": servidor.nome, "cargo": cargo, "perfil": cargo_chave}), 200
 
     return jsonify({"erro": "Matrícula ou senha inválidos"}), 401
+
+
+@auth_bp.route('/admin/primeiro-acesso/senha', methods=['POST'])
+@jwt_required()
+def trocar_senha_primeiro_acesso_admin():
+    claims = get_jwt()
+    if claims.get('tipo') != 'troca_senha_admin':
+        return jsonify({"erro": "Autorização inválida para troca de senha."}), 403
+
+    try:
+        servidor_id = int(claims['sub'])
+    except (KeyError, TypeError, ValueError):
+        return jsonify({"erro": "Autorização inválida para troca de senha."}), 403
+
+    servidor = db.session.get(Servidor, servidor_id)
+    if not servidor or not servidor.senha_temporaria:
+        return jsonify({"erro": "Esta troca de senha não está mais disponível. Faça login novamente."}), 409
+
+    dados = request.get_json(silent=True) or {}
+    nova_senha = dados.get('nova_senha', '')
+    confirmar_senha = dados.get('confirmar_senha', '')
+    if not isinstance(nova_senha, str) or not 8 <= len(nova_senha) <= 128:
+        return jsonify({"erro": "A nova senha deve ter entre 8 e 128 caracteres."}), 400
+    if nova_senha != confirmar_senha:
+        return jsonify({"erro": "As senhas informadas não coincidem."}), 400
+    if servidor.verificar_senha(nova_senha):
+        return jsonify({"erro": "A nova senha deve ser diferente da senha temporária."}), 400
+
+    cargo_chave, cargo = normalizar_cargo(servidor.cargo)
+    if not cargo_chave:
+        return jsonify({"erro": "O cargo deste servidor precisa ser atualizado por um administrador."}), 403
+
+    servidor.set_senha(nova_senha)
+    servidor.senha_temporaria = False
+    db.session.commit()
+
+    token, cargo_chave, cargo = _criar_token_admin(servidor)
+    return jsonify({
+        "mensagem": "Senha alterada com sucesso.",
+        "token": token,
+        "nome": servidor.nome,
+        "cargo": cargo,
+        "perfil": cargo_chave,
+    }), 200

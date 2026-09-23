@@ -85,9 +85,10 @@ class TestAdminAuthentication(unittest.TestCase):
         self.assertEqual(servidor.nome, 'Nova Administradora')
         self.assertEqual(servidor.cargo, 'Supervisor')
         self.assertTrue(servidor.verificar_senha('senha-segura'))
+        self.assertTrue(servidor.senha_temporaria)
 
     def test_login_includes_server_profile(self):
-        servidor = Servidor(nome='Agente Um', matricula='456', cargo='Agente de Trânsito')
+        servidor = Servidor(nome='Agente Um', matricula='456', cargo='Agente de Trânsito', senha_temporaria=False)
         servidor.set_senha('senha-segura')
         db.session.add(servidor)
         db.session.commit()
@@ -96,6 +97,59 @@ class TestAdminAuthentication(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()['perfil'], 'agente_transito')
+
+    def test_first_admin_login_requires_password_change(self):
+        servidor = Servidor(nome='Primeiro Acesso', matricula='789', cargo='Analista', senha_temporaria=True)
+        servidor.set_senha('senha-temporaria')
+        db.session.add(servidor)
+        db.session.commit()
+
+        response = self.client.post('/api/auth/admin/login', json={
+            'usuario': '789', 'senha': 'senha-temporaria',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertTrue(data['troca_senha_obrigatoria'])
+        self.assertIn('token_troca_senha', data)
+        self.assertNotIn('token', data)
+
+        blocked = self.client.get('/api/admin/alertas', headers={
+            'Authorization': f"Bearer {data['token_troca_senha']}",
+        })
+        self.assertEqual(blocked.status_code, 403)
+
+    def test_admin_can_change_temporary_password_and_receive_full_token(self):
+        servidor = Servidor(nome='Primeiro Acesso', matricula='790', cargo='Analista', senha_temporaria=True)
+        servidor.set_senha('senha-temporaria')
+        db.session.add(servidor)
+        db.session.commit()
+        token = create_access_token(identity=str(servidor.id), additional_claims={'tipo': 'troca_senha_admin'})
+
+        response = self.client.post('/api/auth/admin/primeiro-acesso/senha', headers={
+            'Authorization': f'Bearer {token}',
+        }, json={'nova_senha': 'nova-senha-segura', 'confirmar_senha': 'nova-senha-segura'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('token', response.get_json())
+        self.assertEqual(response.get_json()['perfil'], 'analista')
+        db.session.refresh(servidor)
+        self.assertFalse(servidor.senha_temporaria)
+        self.assertTrue(servidor.verificar_senha('nova-senha-segura'))
+
+    def test_first_access_rejects_temporary_password_reuse(self):
+        servidor = Servidor(nome='Primeiro Acesso', matricula='791', cargo='Analista', senha_temporaria=True)
+        servidor.set_senha('senha-temporaria')
+        db.session.add(servidor)
+        db.session.commit()
+        token = create_access_token(identity=str(servidor.id), additional_claims={'tipo': 'troca_senha_admin'})
+
+        response = self.client.post('/api/auth/admin/primeiro-acesso/senha', headers={
+            'Authorization': f'Bearer {token}',
+        }, json={'nova_senha': 'senha-temporaria', 'confirmar_senha': 'senha-temporaria'})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(servidor.senha_temporaria)
 
     def test_analyst_cannot_access_traffic_operations(self):
         token = create_access_token(identity='analista-1', additional_claims={'role': 'analista', 'cargo': 'analista'})

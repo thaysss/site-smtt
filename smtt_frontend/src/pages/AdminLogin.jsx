@@ -8,6 +8,11 @@ function AdminLogin() {
   const location = useLocation();
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [trocaObrigatoria, setTrocaObrigatoria] = useState(() => Boolean(sessionStorage.getItem('adminTrocaSenhaToken')));
+  const [nomePrimeiroAcesso, setNomePrimeiroAcesso] = useState(() => sessionStorage.getItem('adminPrimeiroAcessoNome') || '');
+  const [enviando, setEnviando] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState(() => {
     const params = new URLSearchParams(location.search);
@@ -28,16 +33,66 @@ function AdminLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErro('');
+    setEnviando(true);
     try {
       const response = await api.post('/auth/admin/login', { usuario, senha });
-      localStorage.setItem('adminToken', response.data.token);
-      localStorage.setItem('adminNome', response.data.nome);
-      localStorage.setItem('adminCargo', response.data.cargo);
-      localStorage.setItem('adminPerfil', response.data.perfil);
-      navigate('/admin/dashboard');
+      if (response.data.troca_senha_obrigatoria) {
+        sessionStorage.setItem('adminTrocaSenhaToken', response.data.token_troca_senha);
+        sessionStorage.setItem('adminPrimeiroAcessoNome', response.data.nome);
+        localStorage.removeItem('adminToken');
+        setNomePrimeiroAcesso(response.data.nome);
+        setTrocaObrigatoria(true);
+        setSenha('');
+        return;
+      }
+      concluirLogin(response.data);
     } catch (error) {
       setErro(error.response?.data?.erro || 'Credenciais inválidas.');
+    } finally {
+      setEnviando(false);
     }
+  };
+
+  const concluirLogin = (dados) => {
+    sessionStorage.removeItem('adminTrocaSenhaToken');
+    sessionStorage.removeItem('adminPrimeiroAcessoNome');
+    localStorage.setItem('adminToken', dados.token);
+    localStorage.setItem('adminNome', dados.nome);
+    localStorage.setItem('adminCargo', dados.cargo);
+    localStorage.setItem('adminPerfil', dados.perfil);
+    navigate('/admin/dashboard');
+  };
+
+  const handleTrocaSenha = async (e) => {
+    e.preventDefault();
+    setErro('');
+    if (novaSenha !== confirmarSenha) {
+      setErro('As senhas informadas não coincidem.');
+      return;
+    }
+    setEnviando(true);
+    try {
+      const token = sessionStorage.getItem('adminTrocaSenhaToken');
+      const response = await api.post('/auth/admin/primeiro-acesso/senha', {
+        nova_senha: novaSenha,
+        confirmar_senha: confirmarSenha,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      concluirLogin(response.data);
+    } catch (error) {
+      setErro(error.response?.data?.erro || 'Não foi possível alterar a senha. Faça login novamente.');
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const voltarAoLogin = () => {
+    sessionStorage.removeItem('adminTrocaSenhaToken');
+    sessionStorage.removeItem('adminPrimeiroAcessoNome');
+    setTrocaObrigatoria(false);
+    setNomePrimeiroAcesso('');
+    setNovaSenha('');
+    setConfirmarSenha('');
+    setErro('');
   };
 
   return (
@@ -72,15 +127,15 @@ function AdminLogin() {
 
           <div className="admin-login-heading">
             <span className="admin-login-heading-icon"><LockKeyhole size={23} /></span>
-            <span>Área administrativa</span>
+            <span>{trocaObrigatoria ? 'Primeiro acesso' : 'Área administrativa'}</span>
             <i aria-hidden="true" />
-            <h2>Bem-vindo de volta</h2>
-            <p>Acesse sua conta institucional<br />para continuar.</p>
+            <h2>{trocaObrigatoria ? 'Crie uma nova senha' : 'Bem-vindo de volta'}</h2>
+            <p>{trocaObrigatoria ? `Olá, ${nomePrimeiroAcesso}. Troque a senha temporária para continuar.` : <>Acesse sua conta institucional<br />para continuar.</>}</p>
           </div>
 
           {erro && <div className="admin-login-error" role="alert">{erro}</div>}
 
-          <form onSubmit={handleLogin} className="admin-login-form">
+          {!trocaObrigatoria ? <form onSubmit={handleLogin} className="admin-login-form">
             <div>
               <label htmlFor="admin-usuario">Usuário ou matrícula</label>
               <div className="admin-login-field">
@@ -104,12 +159,31 @@ function AdminLogin() {
               <label><input type="checkbox" /> <span>Lembrar meu acesso</span></label>
               <button type="button">Esqueci minha senha</button>
             </div>
-            <button type="submit" className="admin-login-submit"><LogIn size={19} /> Entrar no sistema</button>
+            <button type="submit" className="admin-login-submit" disabled={enviando}><LogIn size={19} /> {enviando ? 'Entrando...' : 'Entrar no sistema'}</button>
             <div className="admin-login-divider"><span>ou</span></div>
             <button type="button" onClick={() => navigate('/')} className="admin-login-back">
               <Globe2 size={19} /> Acessar Portal Público
             </button>
-          </form>
+          </form> : <form onSubmit={handleTrocaSenha} className="admin-login-form">
+            <div>
+              <label htmlFor="admin-nova-senha">Nova senha</label>
+              <div className="admin-login-field">
+                <LockKeyhole size={20} />
+                <input id="admin-nova-senha" type={mostrarSenha ? 'text' : 'password'} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} minLength={8} maxLength={128} autoComplete="new-password" placeholder="Mínimo de 8 caracteres" required autoFocus />
+                <button type="button" onClick={() => setMostrarSenha((value) => !value)} aria-label={mostrarSenha ? 'Ocultar senhas' : 'Mostrar senhas'}>{mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}</button>
+              </div>
+            </div>
+            <div>
+              <label htmlFor="admin-confirmar-senha">Confirmar nova senha</label>
+              <div className="admin-login-field">
+                <LockKeyhole size={20} />
+                <input id="admin-confirmar-senha" type={mostrarSenha ? 'text' : 'password'} value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} minLength={8} maxLength={128} autoComplete="new-password" placeholder="Repita a nova senha" required />
+              </div>
+            </div>
+            <p className="admin-login-password-hint">Use uma senha diferente da temporária, com pelo menos 8 caracteres.</p>
+            <button type="submit" className="admin-login-submit" disabled={enviando}><ShieldCheck size={19} /> {enviando ? 'Salvando...' : 'Salvar nova senha'}</button>
+            <button type="button" onClick={voltarAoLogin} className="admin-login-back">Voltar ao login</button>
+          </form>}
 
           <div className="admin-login-restricted">
             <ShieldCheck />

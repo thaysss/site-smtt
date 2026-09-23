@@ -26,7 +26,8 @@ with app.app_context():
         novo_servidor = Servidor(
             nome=admin_nome,
             matricula=admin_matricula,
-            cargo=admin_cargo
+            cargo=admin_cargo,
+            senha_temporaria=True,
         )
         novo_servidor.set_senha(admin_senha) 
         
