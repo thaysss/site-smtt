@@ -143,7 +143,7 @@ function SolicitacaoEvento() {
             <div className="border-t border-primary-800 pt-6 mt-8">
               <h4 className="font-bold text-sm text-secondary-500 mb-2">Importante:</h4>
               <p className="text-xs text-primary-100 leading-relaxed">
-                As solicitações devem ser enviadas com no mínimo <strong>5 dias úteis</strong> de antecedência da data prevista do evento para permitir o planejamento das equipes de fiscalização e pintura de trânsito.
+                As solicitações devem ser enviadas com no mínimo <strong>15 dias úteis</strong> de antecedência da data prevista do evento para permitir o planejamento das equipes de fiscalização e pintura de trânsito.
               </p>
             </div>
           </div>
