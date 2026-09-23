@@ -58,6 +58,9 @@ with app.app_context():
         db.session.execute(text("ALTER TABLE solicitacoes_eventos ALTER COLUMN local_evento DROP NOT NULL;"))
         db.session.execute(text("ALTER TABLE solicitacoes_eventos ADD COLUMN IF NOT EXISTS anexo_resposta VARCHAR(255);"))
 
+        # Cria novas tabelas declaradas pelos modelos (inclui codigos_verificacao).
+        db.create_all()
+
         # Ativa RLS em todas as tabelas da aplicacao. O Flask usa o papel
         # proprietario; outros papeis ficam sem acesso sem politica explicita.
         if db.engine.dialect.name == "postgresql":

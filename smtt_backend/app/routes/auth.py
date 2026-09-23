@@ -1,8 +1,12 @@
 # app/routes/auth.py
 from flask import Blueprint, request, jsonify
 import re
+import secrets
+from datetime import datetime, timedelta
 from app.extensions import db
-from app.models.cidadao import Cidadao
+from app.models.cidadao import Cidadao, CodigoVerificacao
+from app.services.email import enviar_codigo_verificacao
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 from app.utils.cargos import CARGOS, cargo_das_claims, normalizar_cargo
 
@@ -25,14 +29,93 @@ def cadastro_cidadao():
         return jsonify({"erro": "Um ou mais campos excedem o tamanho permitido."}), 400
     if not isinstance(senha, str) or len(senha) < 8 or len(senha) > 128:
         return jsonify({"erro": "A senha deve ter entre 8 e 128 caracteres."}), 400
-    if Cidadao.query.filter_by(cpf=cpf).first():
+    if Cidadao.query.filter((Cidadao.cpf == cpf) | (Cidadao.email == email)).first():
         return jsonify({"erro": "Não foi possível concluir o cadastro com os dados informados."}), 400
 
-    novo_cidadao = Cidadao(nome_completo=nome, cpf=cpf, email=email, telefone=telefone, endereco=endereco)
-    novo_cidadao.set_senha(senha)
-    db.session.add(novo_cidadao)
+    CodigoVerificacao.query.filter_by(cpf=cpf, finalidade='cadastro', usado_em=None).update({"usado_em": datetime.now()})
+    codigo = f'{secrets.randbelow(1_000_000):06d}'
+    verificacao = CodigoVerificacao(
+        finalidade='cadastro', cpf=cpf, email=email,
+        codigo_hash=generate_password_hash(codigo), expira_em=datetime.now() + timedelta(minutes=10),
+        nome_completo=nome, telefone=telefone, endereco=endereco,
+        senha_hash=generate_password_hash(senha),
+    )
+    db.session.add(verificacao)
     db.session.commit()
-    return jsonify({"mensagem": "Usuário criado com sucesso!"}), 201
+    if not enviar_codigo_verificacao(email, nome, codigo, 'cadastro'):
+        return jsonify({"erro": "Não foi possível enviar o código agora. Tente novamente."}), 503
+    return jsonify({"mensagem": "Enviamos um código de verificação para o seu e-mail.", "verificacao_necessaria": True}), 202
+
+
+def _codigo_ativo(cpf, finalidade):
+    return CodigoVerificacao.query.filter_by(cpf=cpf, finalidade=finalidade, usado_em=None).order_by(CodigoVerificacao.id.desc()).first()
+
+
+@auth_bp.route('/cadastro/confirmar', methods=['POST'])
+def confirmar_cadastro():
+    dados = request.get_json(silent=True) or {}
+    cpf = re.sub(r'\D', '', str(dados.get('cpf', '')))
+    codigo = re.sub(r'\D', '', str(dados.get('codigo', '')))
+    verificacao = _codigo_ativo(cpf, 'cadastro')
+    agora = datetime.now()
+    if not verificacao or verificacao.expira_em < agora or verificacao.tentativas >= 5:
+        return jsonify({"erro": "Código inválido ou expirado. Solicite um novo código."}), 400
+    verificacao.tentativas += 1
+    if len(codigo) != 6 or not check_password_hash(verificacao.codigo_hash, codigo):
+        db.session.commit()
+        return jsonify({"erro": "Código inválido ou expirado."}), 400
+    if Cidadao.query.filter((Cidadao.cpf == cpf) | (Cidadao.email == verificacao.email)).first():
+        return jsonify({"erro": "Não foi possível concluir o cadastro com os dados informados."}), 400
+    cidadao = Cidadao(nome_completo=verificacao.nome_completo, cpf=cpf, email=verificacao.email,
+                       telefone=verificacao.telefone, endereco=verificacao.endereco, senha_hash=verificacao.senha_hash)
+    verificacao.usado_em = agora
+    db.session.add(cidadao)
+    db.session.commit()
+    return jsonify({"mensagem": "E-mail confirmado. Sua conta foi criada com sucesso!"}), 201
+
+
+@auth_bp.route('/senha/esqueci', methods=['POST'])
+def esqueci_senha():
+    dados = request.get_json(silent=True) or {}
+    cpf = re.sub(r'\D', '', str(dados.get('cpf', '')))
+    email = str(dados.get('email', '')).strip().lower()
+    resposta = {"mensagem": "Se os dados estiverem cadastrados, enviaremos um código para o e-mail informado."}
+    usuario = Cidadao.query.filter_by(cpf=cpf, email=email).first()
+    if not usuario:
+        return jsonify(resposta), 200
+    CodigoVerificacao.query.filter_by(cpf=cpf, finalidade='recuperacao', usado_em=None).update({"usado_em": datetime.now()})
+    codigo = f'{secrets.randbelow(1_000_000):06d}'
+    db.session.add(CodigoVerificacao(finalidade='recuperacao', cpf=cpf, email=email,
+                   codigo_hash=generate_password_hash(codigo), expira_em=datetime.now() + timedelta(minutes=10)))
+    db.session.commit()
+    enviar_codigo_verificacao(email, usuario.nome_completo, codigo, 'recuperacao')
+    return jsonify(resposta), 200
+
+
+@auth_bp.route('/senha/redefinir', methods=['POST'])
+def redefinir_senha():
+    dados = request.get_json(silent=True) or {}
+    cpf = re.sub(r'\D', '', str(dados.get('cpf', '')))
+    email = str(dados.get('email', '')).strip().lower()
+    codigo = re.sub(r'\D', '', str(dados.get('codigo', '')))
+    nova_senha = dados.get('nova_senha', '')
+    if not isinstance(nova_senha, str) or not 8 <= len(nova_senha) <= 128:
+        return jsonify({"erro": "A nova senha deve ter entre 8 e 128 caracteres."}), 400
+    verificacao = _codigo_ativo(cpf, 'recuperacao')
+    agora = datetime.now()
+    if not verificacao or verificacao.email != email or verificacao.expira_em < agora or verificacao.tentativas >= 5:
+        return jsonify({"erro": "Código inválido ou expirado. Solicite um novo código."}), 400
+    verificacao.tentativas += 1
+    if len(codigo) != 6 or not check_password_hash(verificacao.codigo_hash, codigo):
+        db.session.commit()
+        return jsonify({"erro": "Código inválido ou expirado."}), 400
+    usuario = Cidadao.query.filter_by(cpf=cpf, email=email).first()
+    if not usuario:
+        return jsonify({"erro": "Código inválido ou expirado."}), 400
+    usuario.set_senha(nova_senha)
+    verificacao.usado_em = agora
+    db.session.commit()
+    return jsonify({"mensagem": "Senha redefinida com sucesso. Você já pode entrar."}), 200
 @auth_bp.route('/login', methods=['POST'])
 def login():
     dados = request.get_json(silent=True) or {}

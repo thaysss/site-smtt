@@ -23,6 +23,15 @@ class Config:
     S3_PREFIX = os.getenv('S3_PREFIX', 'uploads').strip('/')
     S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL') or None
     S3_PRESIGNED_URL_EXPIRES = int(os.getenv('S3_PRESIGNED_URL_EXPIRES', 900))
+    MAIL_SERVER = os.getenv('MAIL_SERVER')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'true').lower() == 'true'
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', 'false').lower() == 'true'
+    MAIL_TIMEOUT = int(os.getenv('MAIL_TIMEOUT', 10))
+    MAIL_SUPPRESS_SEND = os.getenv('MAIL_SUPPRESS_SEND', 'true').lower() == 'true'
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
@@ -54,9 +63,16 @@ class ProductionConfig(Config):
             invalid.append('CORS_ALLOWED_ORIGINS')
         if cls.STORAGE_BACKEND == 's3' and not cls.S3_BUCKET:
             invalid.append('S3_BUCKET')
+        if cls.MAIL_SUPPRESS_SEND:
+            invalid.append('MAIL_SUPPRESS_SEND')
+        if not cls.MAIL_SERVER:
+            invalid.append('MAIL_SERVER')
+        if not cls.MAIL_DEFAULT_SENDER and not cls.MAIL_USERNAME:
+            invalid.append('MAIL_DEFAULT_SENDER')
         if invalid:
             raise RuntimeError('Configuração de produção inválida: ' + ', '.join(invalid))
 class TestingConfig(Config):
     """Configurações específicas para execução de testes unitários."""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    MAIL_SUPPRESS_SEND = True

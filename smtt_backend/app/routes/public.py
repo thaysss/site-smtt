@@ -25,6 +25,7 @@ from datetime import datetime
 import uuid
 from app.utils.timezone import get_brasilia_time
 from app.utils.uploads import save_upload
+from app.services.email import enviar_protocolo
 from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
@@ -169,6 +170,7 @@ def enviar_solicitacao_evento():
     )
     db.session.add(nova_solicitacao)
     db.session.commit()
+    enviar_protocolo(email, nome, numero_protocolo, 'Solicitação de Evento')
 
     return jsonify({
         "mensagem": "Solicitação de evento enviada com sucesso!",
@@ -382,6 +384,7 @@ def enviar_solicitacao_alvara():
 
     db.session.add(nova_solicitacao)
     db.session.commit()
+    enviar_protocolo(email, nome, numero_protocolo, tipo_servico)
 
     return jsonify({
         "mensagem": "Solicitação enviada com sucesso!",
@@ -529,6 +532,7 @@ def enviar_recurso_multa_publico():
                 db.session.add(novo_anexo)
 
         db.session.commit()
+        enviar_protocolo(email_solicitante, nome_solicitante, numero_protocolo, f"Recurso - {tipo_recurso}")
     except ValueError as ve:
         return jsonify({"erro": str(ve)}), 400
 

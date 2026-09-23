@@ -6,6 +6,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, RecursoAnexo
+from app.models.cidadao import Cidadao
+from app.services.email import enviar_protocolo
 import random
 from datetime import datetime
 import uuid
@@ -269,6 +271,9 @@ def abrir_recurso(id):
         infracao.fase_atual = f"Em Análise ({tipo_recurso})"
         
         db.session.commit()
+        cidadao = db.session.get(Cidadao, int(cidadao_id))
+        if cidadao:
+            enviar_protocolo(cidadao.email, cidadao.nome_completo, numero_protocolo, 'Recurso JARI')
     except ValueError as ve:
         return jsonify({"erro": str(ve)}), 400
 

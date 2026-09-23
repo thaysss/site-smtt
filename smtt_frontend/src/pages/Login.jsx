@@ -1,59 +1,24 @@
-// src/pages/Login.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  FileDigit,
-  LoaderCircle,
-  Lock,
-  Mail,
-  MapPin,
-  Phone,
-  ShieldCheck,
-  User,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, FileDigit, LoaderCircle, Lock, Mail, MapPin, Phone, ShieldCheck, User } from 'lucide-react';
 
-const formatCpf = (value) => value
-  .replace(/\D/g, '')
-  .slice(0, 11)
-  .replace(/(\d{3})(\d)/, '$1.$2')
-  .replace(/(\d{3})(\d)/, '$1.$2')
-  .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-
+const formatCpf = (value) => value.replace(/\D/g, '').slice(0, 11).replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 const formatPhone = (value) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
-  if (digits.length <= 10) {
-    return digits
-      .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{4})(\d)/, '$1-$2');
-  }
-
-  return digits
-    .replace(/(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d)/, '$1-$2');
+  return digits.length <= 10 ? digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2') : digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
 };
 
 function FormField({ id, label, icon: Icon, className = '', ...inputProps }) {
-  return (
-    <div className={`citizen-auth-group ${className}`}>
-      <label htmlFor={id}>{label}</label>
-      <div className="citizen-auth-field">
-        <Icon size={19} aria-hidden="true" />
-        <input id={id} {...inputProps} />
-      </div>
-    </div>
-  );
+  return <div className={`citizen-auth-group ${className}`}><label htmlFor={id}>{label}</label><div className="citizen-auth-field"><Icon size={19} aria-hidden="true" /><input id={id} {...inputProps} /></div></div>;
 }
 
 function Login() {
-  const [isCadastro, setIsCadastro] = useState(false);
+  const [modo, setModo] = useState('login');
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [codigo, setCodigo] = useState('');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -61,154 +26,67 @@ function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const location = useLocation();
-  const [erro, setErro] = useState(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('message') === 'session_expired') {
-      return 'Sua sessão expirou. Faça login novamente para continuar.';
-    }
-    return location.state?.mensagem || '';
-  });
+  const [erro, setErro] = useState(() => new URLSearchParams(location.search).get('message') === 'session_expired' ? 'Sua sessão expirou. Faça login novamente para continuar.' : (location.state?.mensagem || ''));
   const [sucesso, setSucesso] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('message') === 'session_expired') {
-      navigate(location.pathname, { replace: true });
-    } else if (location.state?.mensagem) {
-      navigate(location.pathname, { replace: true, state: {} });
-    }
+    if (new URLSearchParams(location.search).get('message') === 'session_expired') navigate(location.pathname, { replace: true });
+    else if (location.state?.mensagem) navigate(location.pathname, { replace: true, state: {} });
   }, [location, navigate]);
 
-  const trocarModo = (cadastro) => {
-    setIsCadastro(cadastro);
-    setErro('');
-    setSucesso('');
-    setMostrarSenha(false);
-  };
+  const trocarModo = (novoModo) => { setModo(novoModo); setErro(''); setSucesso(''); setCodigo(''); setMostrarSenha(false); };
+  const cpfNumerico = cpf.replace(/\D/g, '');
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    setErro('');
-    setSucesso('');
-    setEnviando(true);
-
-    const cpfNumerico = cpf.replace(/\D/g, '');
-    const telefoneNumerico = telefone.replace(/\D/g, '');
-
-    if (cpfNumerico.length !== 11) {
-      setErro('Digite um CPF com 11 números.');
-      setEnviando(false);
-      return;
-    }
-
+    event.preventDefault(); setErro(''); setSucesso(''); setEnviando(true);
+    if (cpfNumerico.length !== 11) { setErro('Digite um CPF com 11 números.'); setEnviando(false); return; }
     try {
-      if (isCadastro) {
-        await api.post('/auth/cadastro', {
-          nome: nome.trim(),
-          cpf: cpfNumerico,
-          email: email.trim().toLowerCase(),
-          senha,
-          telefone: telefoneNumerico,
-          endereco: endereco.trim(),
-        });
-        setSucesso('Conta criada com sucesso! Agora entre com seu CPF e senha.');
-        setIsCadastro(false);
-        setSenha('');
-        setMostrarSenha(false);
+      if (modo === 'cadastro') {
+        const response = await api.post('/auth/cadastro', { nome: nome.trim(), cpf: cpfNumerico, email: email.trim().toLowerCase(), senha, telefone: telefone.replace(/\D/g, ''), endereco: endereco.trim() });
+        setSucesso(response.data.mensagem); setModo('confirmar'); setCodigo('');
+      } else if (modo === 'confirmar') {
+        const response = await api.post('/auth/cadastro/confirmar', { cpf: cpfNumerico, codigo });
+        setSucesso(response.data.mensagem); setModo('login'); setSenha(''); setCodigo('');
+      } else if (modo === 'esqueci') {
+        const response = await api.post('/auth/senha/esqueci', { cpf: cpfNumerico, email: email.trim().toLowerCase() });
+        setSucesso(response.data.mensagem); setModo('redefinir'); setCodigo('');
+      } else if (modo === 'redefinir') {
+        const response = await api.post('/auth/senha/redefinir', { cpf: cpfNumerico, email: email.trim().toLowerCase(), codigo, nova_senha: novaSenha });
+        setSucesso(response.data.mensagem); setModo('login'); setCodigo(''); setNovaSenha('');
       } else {
         const response = await api.post('/auth/login', { cpf: cpfNumerico, senha });
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('nomeUsuario', response.data.nome);
-        navigate('/painel');
+        localStorage.setItem('token', response.data.token); localStorage.setItem('nomeUsuario', response.data.nome); navigate('/painel');
       }
     } catch (error) {
-      setErro(error.response?.data?.erro || (isCadastro ? 'Não foi possível criar a conta.' : 'CPF ou senha inválidos.'));
-    } finally {
-      setEnviando(false);
-    }
+      setErro(error.response?.data?.erro || 'Não foi possível concluir a solicitação. Tente novamente.');
+    } finally { setEnviando(false); }
   };
 
-  return (
-    <div className="citizen-auth-page">
-      <header className="citizen-auth-header">
-        <button type="button" className="citizen-auth-logo" onClick={() => navigate('/')} aria-label="Ir para a página inicial">
-          <img src="/logo-smtt.png" alt="SMTT Propriá" />
-        </button>
-        <button type="button" className="citizen-auth-back" onClick={() => navigate('/')}>
-          <ArrowLeft size={17} aria-hidden="true" />
-          <span>Voltar ao início</span>
-        </button>
-      </header>
+  const cadastro = modo === 'cadastro';
+  const titulo = { login: 'Entrar no portal', cadastro: 'Criar conta', confirmar: 'Confirmar e-mail', esqueci: 'Recuperar senha', redefinir: 'Criar nova senha' }[modo];
+  const descricao = { login: 'Use o CPF cadastrado e sua senha de acesso.', cadastro: 'Preencha seus dados. Enviaremos um código ao seu e-mail.', confirmar: 'Digite o código de 6 números enviado ao seu e-mail.', esqueci: 'Informe CPF e e-mail cadastrados para receber um código.', redefinir: 'Digite o código recebido e escolha sua nova senha.' }[modo];
 
-      <main className="citizen-auth-main">
-        <section className={`citizen-auth-card ${isCadastro ? 'is-register' : ''}`}>
-          <aside className="citizen-auth-intro">
-            <div>
-              
-              <h1>{isCadastro ? 'Crie seu acesso aos serviços digitais' : 'Seus serviços em um só lugar'}</h1>
-              <p>{isCadastro
-                ? 'Informe seus dados para acompanhar solicitações e utilizar os serviços online da SMTT.'
-                : 'Entre com segurança para consultar e acompanhar suas solicitações.'}</p>
-            </div>
-            <ul className="citizen-auth-benefits" aria-label="Benefícios do portal">
-              <li><CheckCircle2 size={18} /> Acompanhamento de protocolos</li>
-              <li><CheckCircle2 size={18} /> Dados protegidos e acesso seguro</li>
-              <li><CheckCircle2 size={18} /> Serviços disponíveis pela internet</li>
-            </ul>
-          </aside>
-
-          <div className="citizen-auth-form-panel">
-            <div className="citizen-auth-heading">
-              <span>{isCadastro ? 'Novo cadastro' : 'Bem-vindo de volta'}</span>
-              <h2>{isCadastro ? 'Criar conta' : 'Entrar no portal'}</h2>
-              <p>{isCadastro
-                ? 'Preencha todos os campos abaixo com seus dados reais.'
-                : 'Use o CPF cadastrado e sua senha de acesso.'}</p>
-            </div>
-
-            {erro && <div className="citizen-auth-message is-error" role="alert"><AlertCircle size={18} /><span>{erro}</span></div>}
-            {sucesso && <div className="citizen-auth-message is-success" role="status"><CheckCircle2 size={18} /><span>{sucesso}</span></div>}
-
-            <form onSubmit={handleSubmit} className="citizen-auth-form">
-              {isCadastro && (
-                <>
-                  <FormField id="nome-completo" label="Nome completo" icon={User} className="is-full" type="text" value={nome} onChange={(event) => setNome(event.target.value)} placeholder="Digite seu nome completo" autoComplete="name" minLength={3} maxLength={150} required />
-                  <FormField id="email" label="E-mail" icon={Mail} type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nome@exemplo.com" autoComplete="email" maxLength={100} required />
-                  <FormField id="telefone" label="Telefone" icon={Phone} type="tel" inputMode="numeric" value={telefone} onChange={(event) => setTelefone(formatPhone(event.target.value))} placeholder="(79) 99999-9999" autoComplete="tel" minLength={14} maxLength={15} required />
-                  <FormField id="endereco" label="Endereço" icon={MapPin} className="is-full" type="text" value={endereco} onChange={(event) => setEndereco(event.target.value)} placeholder="Rua, número e bairro" autoComplete="street-address" minLength={5} maxLength={255} required />
-                </>
-              )}
-
-              <FormField id="cpf" label="CPF" icon={FileDigit} type="text" inputMode="numeric" value={cpf} onChange={(event) => setCpf(formatCpf(event.target.value))} placeholder="000.000.000-00" autoComplete="username" minLength={14} maxLength={14} required />
-
-              <div className="citizen-auth-group">
-                <label htmlFor="senha">Senha</label>
-                <div className="citizen-auth-field has-action">
-                  <Lock size={19} aria-hidden="true" />
-                  <input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(event) => setSenha(event.target.value)} placeholder={isCadastro ? 'Mínimo de 8 caracteres' : 'Digite sua senha'} autoComplete={isCadastro ? 'new-password' : 'current-password'} minLength={isCadastro ? 8 : undefined} maxLength={128} required />
-                  <button type="button" onClick={() => setMostrarSenha((valor) => !valor)} aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'} title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>
-                    {mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}
-                  </button>
-                </div>
-                {isCadastro && <small>Use pelo menos 6 caracteres.</small>}
-              </div>
-
-              <button type="submit" className="citizen-auth-submit is-full" disabled={enviando}>
-                {enviando && <LoaderCircle size={19} className="citizen-auth-spinner" />}
-                {enviando ? 'Aguarde...' : (isCadastro ? 'Criar minha conta' : 'Entrar no painel')}
-              </button>
-            </form>
-
-            <div className="citizen-auth-switch">
-              <span>{isCadastro ? 'Já possui uma conta?' : 'Ainda não possui cadastro?'}</span>
-              <button type="button" onClick={() => trocarModo(!isCadastro)}>{isCadastro ? 'Fazer login' : 'Criar conta gratuitamente'}</button>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  );
+  return <div className="citizen-auth-page">
+    <header className="citizen-auth-header"><button type="button" className="citizen-auth-logo" onClick={() => navigate('/')} aria-label="Ir para a página inicial"><img src="/logo-smtt.png" alt="SMTT Propriá" /></button><button type="button" className="citizen-auth-back" onClick={() => navigate('/')}><ArrowLeft size={17} /><span>Voltar ao início</span></button></header>
+    <main className="citizen-auth-main"><section className={`citizen-auth-card ${cadastro ? 'is-register' : ''}`}>
+      <aside className="citizen-auth-intro"><div><h1>{cadastro ? 'Crie seu acesso aos serviços digitais' : 'Seus serviços em um só lugar'}</h1><p>Acesse e acompanhe suas solicitações com segurança.</p></div><ul className="citizen-auth-benefits"><li><CheckCircle2 size={18} /> Acompanhamento de protocolos</li><li><ShieldCheck size={18} /> Verificação segura por e-mail</li><li><CheckCircle2 size={18} /> Serviços disponíveis pela internet</li></ul></aside>
+      <div className="citizen-auth-form-panel"><div className="citizen-auth-heading"><span>Portal do cidadão</span><h2>{titulo}</h2><p>{descricao}</p></div>
+        {erro && <div className="citizen-auth-message is-error" role="alert"><AlertCircle size={18} /><span>{erro}</span></div>}
+        {sucesso && <div className="citizen-auth-message is-success" role="status"><CheckCircle2 size={18} /><span>{sucesso}</span></div>}
+        <form onSubmit={handleSubmit} className="citizen-auth-form">
+          {cadastro && <><FormField id="nome-completo" label="Nome completo" icon={User} className="is-full" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={150} required /><FormField id="email" label="E-mail" icon={Mail} type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={100} required /><FormField id="telefone" label="Telefone" icon={Phone} value={telefone} onChange={(e) => setTelefone(formatPhone(e.target.value))} maxLength={15} required /><FormField id="endereco" label="Endereço" icon={MapPin} className="is-full" value={endereco} onChange={(e) => setEndereco(e.target.value)} maxLength={255} required /></>}
+          {(modo === 'esqueci' || modo === 'redefinir') && <FormField id="email-recuperacao" label="E-mail cadastrado" icon={Mail} type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={100} required />}
+          <FormField id="cpf" label="CPF" icon={FileDigit} value={cpf} onChange={(e) => setCpf(formatCpf(e.target.value))} inputMode="numeric" maxLength={14} required />
+          {(modo === 'confirmar' || modo === 'redefinir') && <FormField id="codigo" label="Código de verificação" icon={ShieldCheck} value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" minLength={6} maxLength={6} required />}
+          {(modo === 'login' || cadastro) && <div className="citizen-auth-group"><label htmlFor="senha">Senha</label><div className="citizen-auth-field has-action"><Lock size={19} /><input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenha(e.target.value)} minLength={cadastro ? 8 : undefined} maxLength={128} required /><button type="button" onClick={() => setMostrarSenha(!mostrarSenha)}>{mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}</button></div>{cadastro && <small>Use pelo menos 8 caracteres.</small>}</div>}
+          {modo === 'redefinir' && <FormField id="nova-senha" label="Nova senha" icon={Lock} type="password" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} minLength={8} maxLength={128} required />}
+          <button type="submit" className="citizen-auth-submit is-full" disabled={enviando}>{enviando && <LoaderCircle size={19} className="citizen-auth-spinner" />}{enviando ? 'Aguarde...' : titulo}</button>
+        </form>
+        <div className="citizen-auth-switch">{modo === 'login' ? <><button type="button" onClick={() => trocarModo('esqueci')}>Esqueci minha senha</button><button type="button" onClick={() => trocarModo('cadastro')}>Criar conta gratuitamente</button></> : <button type="button" onClick={() => trocarModo('login')}>Voltar para o login</button>}</div>
+      </div>
+    </section></main>
+  </div>;
 }
 
 export default Login;
