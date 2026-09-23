@@ -68,7 +68,7 @@ function SiteHeader() {
                 </button>
                 <div className="absolute left-0 mt-2 w-60 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
                   <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Sobre a SMTT</a>
-                  <button onClick={() => navigate('/#equipe')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Equipe Diretiva</button>
+                  
                 </div>
               </div>
 
@@ -207,9 +207,7 @@ function SiteHeader() {
               <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
                 <i className="fa-solid fa-circle-info text-gray-400 w-5"></i> Sobre a SMTT
               </a>
-              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/#equipe'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
-                <i className="fa-solid fa-users text-gray-400 w-5"></i> Equipe Diretiva
-              </button>
+              
               <button onClick={() => { setIsMobileMenuOpen(false); navigate('/#legislacao'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
                 <i className="fa-solid fa-gavel text-gray-400 w-5"></i> Legislação
               </button>

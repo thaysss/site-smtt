@@ -200,7 +200,7 @@ function Home() {
                 </button>
                 <div className="absolute left-0 mt-2 w-60 bg-white border border-slate-150 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 p-1.5 text-left normal-case font-medium">
                   <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Sobre a SMTT</a>
-                  <button onClick={() => setModalConteudo('equipe')} className="w-full text-left block px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-700 rounded-lg transition-all font-medium">Equipe Diretiva</button>
+                  
                 </div>
               </div>
 
@@ -339,9 +339,7 @@ function Home() {
               <a href="https://www.propria.se.gov.br/orgao/autarquia/superintend%C3%AAncia-municipal-de-transporte-e-tr%C3%A2nsito" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3">
                 <i className="fa-solid fa-circle-info text-gray-400 w-5"></i> Sobre a SMTT
               </a>
-              <button onClick={() => { setIsMobileMenuOpen(false); setModalConteudo('equipe'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
-                <i className="fa-solid fa-users text-gray-400 w-5"></i> Equipe Diretiva
-              </button>
+              
               <button onClick={() => { setIsMobileMenuOpen(false); setModalConteudo('legislacao'); }} className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all flex items-center gap-3 text-left">
                 <i className="fa-solid fa-gavel text-gray-400 w-5"></i> Legislação
               </button>
@@ -1176,38 +1174,7 @@ function Home() {
                 </div>
               )}
 
-              {modalConteudo === 'equipe' && (
-                <div>
-                  <h3 id="modal-titulo" className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <i className="fa-solid fa-users text-primary-600"></i> Equipe Diretiva
-                  </h3>
-                  <div className="text-gray-600 text-sm space-y-4 leading-relaxed">
-                    <p>
-                      A gestão administrativa e operacional da Superintendência Municipal de Transportes e Trânsito é composta pela seguinte estrutura de liderança:
-                    </p>
-                    <ul className="space-y-3 pt-2">
-                      <li className="flex items-center gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-150">
-                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-950 flex items-center justify-center font-extrabold shrink-0">
-                          SP
-                        </div>
-                        <div>
-                          <strong className="text-gray-900 block text-xs">Superintendente Geral</strong>
-                          <span className="text-[11px] text-gray-500">Direção Geral de Operações e Planejamento</span>
-                        </div>
-                      </li>
-                      <li className="flex items-center gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-150">
-                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-950 flex items-center justify-center font-extrabold shrink-0">
-                          CO
-                        </div>
-                        <div>
-                          <strong className="text-gray-900 block text-xs">Coordenação Operacional</strong>
-                          <span className="text-[11px] text-gray-500">Liderança de Agentes e Fiscalização de Campo</span>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              )}
+              
 
               {modalConteudo === 'ouvidoria' && (
                 <div>
