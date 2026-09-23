@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
-  Car, AlertCircle, FileText, Download,
-  Upload, Plus, ShieldAlert, CheckCircle, FileDigit, X, ExternalLink, Compass,
-  Info, LogOut, UserRound, Clock3
+  Car, AlertCircle, FileText, Download, Upload, Plus, ShieldAlert, CheckCircle,
+  FileDigit, X, ExternalLink, Compass, Info, LogOut, UserRound, Clock3, Home,
+  Menu, Bell, CalendarDays, IdCard, Users, ChevronRight, ArrowRight, HelpCircle,
+  ClipboardList, Megaphone, RefreshCw
 } from 'lucide-react';
 import formularioPDF from '../assets/requerimento.pdf';
 
@@ -88,6 +89,10 @@ const getInfracaoInfoByCodigo = (codigo) => {
 function Painel() {
   const [veiculos, setVeiculos] = useState([]);
   const [multas, setMultas] = useState([]);
+  const [alertas, setAlertas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erroDados, setErroDados] = useState('');
+  const [menuAberto, setMenuAberto] = useState(false);
 
   // Estados para o formulário de novo veículo
   const [placa, setPlaca] = useState('');
@@ -110,20 +115,29 @@ function Painel() {
 
   const navigate = useNavigate();
   const nomeUsuario = localStorage.getItem('nomeUsuario');
+  const cpfUsuario = localStorage.getItem('cpfUsuario') || '';
   const [arquivoCidadao, setArquivoCidadao] = useState(null);
 
   async function carregarDados() {
     try {
-      const respVeiculos = await api.get('/servicos/veiculos');
-      setVeiculos(respVeiculos.data);
-
-      const respMultas = await api.get('/servicos/infracoes');
-      setMultas(respMultas.data);
+      setErroDados('');
+      const [respVeiculos, respMultas, respAlertas] = await Promise.all([
+        api.get('/servicos/veiculos'),
+        api.get('/servicos/infracoes'),
+        api.get('/public/alertas')
+      ]);
+      setVeiculos(Array.isArray(respVeiculos.data) ? respVeiculos.data : []);
+      setMultas(Array.isArray(respMultas.data) ? respMultas.data : []);
+      setAlertas(Array.isArray(respAlertas.data) ? respAlertas.data : []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       if (error.response?.status === 401) {
         handleLogout('Sua sessão expirou. Por favor, faça login novamente.');
+      } else {
+        setErroDados('Não foi possível atualizar seus dados agora. Tente novamente.');
       }
+    } finally {
+      setCarregando(false);
     }
   };
 
@@ -465,6 +479,7 @@ function Painel() {
   function handleLogout(mensagemOpcional) {
     localStorage.removeItem('token');
     localStorage.removeItem('nomeUsuario');
+    localStorage.removeItem('cpfUsuario');
     const msg = typeof mensagemOpcional === 'string' ? mensagemOpcional : null;
     navigate('/login', { state: { mensagem: msg } });
   };
@@ -514,39 +529,89 @@ function Painel() {
     return 1;
   };
 
+  const primeiroNome = (nomeUsuario || 'Cidadão').trim().split(/\s+/)[0];
+  const cpfMascarado = cpfUsuario.length === 11 ? `***.${cpfUsuario.slice(3, 6)}.${cpfUsuario.slice(6, 9)}-**` : 'Não disponibilizado';
+  const protocolos = multas
+    .filter((multa) => multa.recurso?.protocolo)
+    .map((multa) => ({
+      numero: multa.recurso.protocolo,
+      tipo: multa.recurso.tipo_recurso || 'Recurso de infração',
+      status: multa.recurso.resultado_julgamento || multa.fase_atual || 'Em análise',
+      data: multa.recurso.data_julgamento || multa.data_hora_infracao?.split(' ')[0] || ''
+    }));
+  const irParaSecao = (id) => {
+    setMenuAberto(false);
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
+  const servicosDestaque = [
+    { titulo: 'Acompanhar protocolo', texto: 'Consulte o andamento das suas solicitações.', icon: ClipboardList, cor: 'blue', acao: () => navigate('/consultar') },
+    { titulo: 'Solicitar serviços', texto: 'Protocolos, autorizações e demais solicitações.', icon: FileText, cor: 'violet', acao: () => irParaSecao('servicos') },
+    { titulo: 'Consultar infrações', texto: 'Verifique autuações dos seus veículos.', icon: ShieldAlert, cor: 'amber', acao: () => irParaSecao('infracoes') },
+    { titulo: 'Meus veículos', texto: 'Vincule e consulte veículos do seu perfil.', icon: Car, cor: 'green', acao: () => irParaSecao('veiculos') }
+  ];
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white pb-20">
+    <div className="citizen-portal-shell">
+      <button className={`citizen-sidebar-backdrop ${menuAberto ? 'is-visible' : ''}`} type="button" onClick={() => setMenuAberto(false)} aria-label="Fechar menu" />
+      <aside className={`citizen-sidebar ${menuAberto ? 'is-open' : ''}`} aria-label="Navegação principal">
+        <button type="button" className="citizen-sidebar-brand" onClick={() => navigate('/')} aria-label="Ir para o site da SMTT"><img src="/logo-smtt.png" alt="SMTT Propriá" /></button>
+        <nav>
+          <button type="button" className="is-active" onClick={() => irParaSecao('inicio')}><Home size={19} /> <span>Início</span></button>
+          <button type="button" onClick={() => irParaSecao('protocolos')}><ClipboardList size={19} /> <span>Meus protocolos</span></button>
+          <button type="button" onClick={() => irParaSecao('servicos')}><FileText size={19} /> <span>Solicitações</span></button>
+          <button type="button" onClick={() => irParaSecao('infracoes')}><ShieldAlert size={19} /> <span>Infrações</span></button>
+          <button type="button" onClick={() => irParaSecao('veiculos')}><Car size={19} /> <span>Veículos</span></button>
+          <button type="button" onClick={() => navigate('/contestacao-multa')}><Users size={19} /> <span>Condutor</span></button>
+          <button type="button" onClick={() => navigate('/solicitacao-alvara')}><IdCard size={19} /> <span>Credenciais</span></button>
+          <button type="button" onClick={() => navigate('/fale-conosco')}><CalendarDays size={19} /> <span>Agendamentos</span></button>
+          <button type="button" onClick={() => irParaSecao('avisos')}><Bell size={19} /> <span>Notificações</span>{alertas.length > 0 && <b>{alertas.length}</b>}</button>
+          <button type="button" onClick={() => navigate('/fale-conosco')}><HelpCircle size={19} /> <span>Ajuda</span></button>
+        </nav>
+        <div className="citizen-sidebar-city"><img src="/prefe.jpg" alt="Prefeitura de Propriá" /></div>
+      </aside>
 
-      {/* Header */}
-      <header className="bg-white/95 border-b border-slate-200 py-3 px-4 sm:px-6 sticky top-0 z-50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <button type="button" className="flex items-center gap-3 text-left" onClick={() => navigate('/')} aria-label="Voltar para a página inicial">
-            <img src="/logo-smtt.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
-            <div className="border-l border-gray-300 pl-3 hidden sm:block">
-              <span className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-bold block">SMTT Propriá</span>
-              <span className="text-sm text-slate-800 font-extrabold block">Área do Cidadão</span>
-            </div>
-          </button>
-
-          <div className="flex items-center gap-3 sm:gap-5">
-            <div className="hidden md:flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center"><UserRound className="w-4 h-4" /></div>
-              <div className="leading-tight"><span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">Conta do cidadão</span><strong className="text-sm text-slate-800">{nomeUsuario || 'Cidadão'}</strong></div>
-            </div>
-            <button onClick={() => handleLogout()} className="flex items-center gap-2 text-sm text-slate-600 hover:text-red-700 transition-colors font-bold border border-slate-200 hover:border-red-200 hover:bg-red-50 px-3.5 py-2 rounded-xl bg-white" aria-label="Sair da Área do Cidadão">
-              <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Sair</span>
-            </button>
-          </div>
-        </div>
+      <header className="citizen-portal-header">
+        <div className="citizen-portal-title"><button type="button" onClick={() => setMenuAberto(true)} aria-label="Abrir menu" aria-expanded={menuAberto}><Menu size={23} /></button><span><strong>Portal do Cidadão</strong><small>Serviços de trânsito, de forma simples e digital.</small></span></div>
+        <div className="citizen-portal-account"><button type="button" className="citizen-notification-button" onClick={() => irParaSecao('avisos')} aria-label={`${alertas.length} avisos importantes`}><Bell size={21} />{alertas.length > 0 && <i />}</button><span className="citizen-account-avatar"><UserRound size={22} /></span><span><small>Olá, {primeiroNome}</small><strong>{nomeUsuario || 'Cidadão'}</strong></span><button type="button" className="citizen-logout" onClick={() => handleLogout()} aria-label="Sair"><LogOut size={18} /></button></div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
+      <main className="citizen-portal-main">
+        <section id="inicio" className="citizen-dashboard-grid">
+          <div className="citizen-dashboard-center">
+            <article className="citizen-welcome-banner"><div><span>Bem-vindo(a)</span><h1>{nomeUsuario || 'Cidadão'}</h1><strong>É um prazer ter você por aqui!</strong><i></i><p>Acesse os serviços da SMTT de Propriá de forma rápida, segura e digital.</p></div><aside>Trânsito mais seguro para uma cidade melhor.<b></b></aside></article>
 
-        <nav className="flex items-center gap-2 overflow-x-auto pb-2 mb-4" aria-label="Navegação da Área do Cidadão">
-          <a href="#resumo" className="shrink-0 px-4 py-2 rounded-full bg-primary-600 text-white text-xs font-bold">Visão geral</a>
-          <a href="#veiculos" className="shrink-0 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-700 text-xs font-bold transition-colors">Meus veículos</a>
-          <a href="#servicos" className="shrink-0 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-700 text-xs font-bold transition-colors">Serviços</a>
-          <a href="#infracoes" className="shrink-0 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-primary-300 hover:text-primary-700 text-xs font-bold transition-colors">Infrações</a>
+            {erroDados && <div className="citizen-data-state is-error" role="alert"><AlertCircle size={19} /><span>{erroDados}</span><button type="button" onClick={carregarDados}><RefreshCw size={16} /> Tentar novamente</button></div>}
+            {carregando && <div className="citizen-data-state" role="status"><RefreshCw className="citizen-spin" size={19} /> Atualizando seus dados...</div>}
+
+            <div className="citizen-section-heading"><h2>Serviços em destaque</h2><button type="button" onClick={() => irParaSecao('servicos')}>Ver todos os serviços <ArrowRight size={15} /></button></div>
+            <div className="citizen-featured-services">
+              {servicosDestaque.map((servico) => { const Icone = servico.icon; return <button type="button" key={servico.titulo} className={`is-${servico.cor}`} onClick={servico.acao}><span><Icone size={27} /></span><strong>{servico.titulo}</strong><small>{servico.texto}</small><i><ChevronRight size={18} /></i></button>; })}
+            </div>
+
+            <div className="citizen-section-heading"><h2>Outros serviços</h2></div>
+            <div className="citizen-quick-services">
+              <button type="button" onClick={() => navigate('/solicitacao-alvara')}><IdCard /><span><strong>Credencial e alvará</strong><small>Solicite ou renove sua credencial.</small></span><ChevronRight /></button>
+              <button type="button" onClick={() => navigate('/contestacao-multa')}><ShieldAlert /><span><strong>Defesa de autuação</strong><small>Apresente sua defesa de forma online.</small></span><ChevronRight /></button>
+              <button type="button" onClick={() => navigate('/contestacao-multa')}><Users /><span><strong>Indicação de condutor</strong><small>Acesse o serviço de contestação.</small></span><ChevronRight /></button>
+              <button type="button" onClick={() => irParaSecao('veiculos')}><Car /><span><strong>Consulta de veículos</strong><small>Consulte os veículos vinculados.</small></span><ChevronRight /></button>
+              <button type="button" onClick={() => navigate('/solicitacao-evento')}><CalendarDays /><span><strong>Autorização de eventos</strong><small>Solicite apoio ou interdição de via.</small></span><ChevronRight /></button>
+              <button type="button" onClick={() => navigate('/fale-conosco')}><HelpCircle /><span><strong>Dúvidas frequentes</strong><small>Fale com a equipe da SMTT.</small></span><ChevronRight /></button>
+            </div>
+
+            <article className="citizen-road-banner"><strong>Respeito no trânsito<br />movimenta uma cidade melhor.</strong><i></i><img src="/logo-smtt.png" alt="SMTT Propriá" /></article>
+          </div>
+
+          <aside className="citizen-dashboard-side">
+            <section className="citizen-side-card citizen-profile-card"><header><h2>Meu perfil</h2></header><div><span><UserRound size={30} /></span><p><strong>{nomeUsuario || 'Cidadão'}</strong><small>CPF: {cpfMascarado}</small><small>Cidadão</small></p></div></section>
+            <section id="protocolos" className="citizen-side-card citizen-protocol-card"><header><h2>Meus protocolos</h2><button type="button" onClick={() => navigate('/consultar')}>Consultar <ArrowRight size={14} /></button></header>{carregando ? <p className="citizen-side-empty">Carregando protocolos...</p> : protocolos.length === 0 ? <p className="citizen-side-empty">Você ainda não possui protocolos vinculados a recursos.</p> : <ul>{protocolos.slice(0, 3).map((protocolo) => <li key={protocolo.numero}><i /><span><strong>#{protocolo.numero}</strong><small>{protocolo.tipo}</small></span><span><b>{protocolo.status}</b><small>{protocolo.data}</small></span></li>)}</ul>}</section>
+            <section id="avisos" className="citizen-side-card citizen-alert-card"><header><h2><Megaphone size={20} /> Avisos importantes</h2></header>{carregando ? <p className="citizen-side-empty">Carregando avisos...</p> : alertas.length === 0 ? <p className="citizen-side-empty">Nenhum aviso ativo no momento.</p> : <ul>{alertas.slice(0, 4).map((alerta) => <li key={alerta.id}><i /><span><strong>{alerta.rua_bairro || 'Aviso da SMTT'}</strong><small>{alerta.descricao}</small></span></li>)}</ul>}</section>
+          </aside>
+        </section>
+
+        <nav className="citizen-content-nav" aria-label="Ferramentas da Área do Cidadão">
+          <button type="button" onClick={() => irParaSecao('resumo')}>Resumo</button>
+          <button type="button" onClick={() => irParaSecao('veiculos')}>Meus veículos</button>
+          <button type="button" onClick={() => irParaSecao('servicos')}>Solicitações</button>
+          <button type="button" onClick={() => irParaSecao('infracoes')}>Infrações</button>
         </nav>
 
         {/* SEÇÃO DE RESUMO (KPIs) */}

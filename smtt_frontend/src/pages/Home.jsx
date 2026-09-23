@@ -18,7 +18,7 @@ function Home() {
   const [servicoIndisponivel, setServicoIndisponivel] = useState('');
   const modalRef = useRef(null);
 
-  const [activeHeroTab, setActiveHeroTab] = useState('placa'); // 'placa' ou 'avisos'
+  const [activeHeroTab, setActiveHeroTab] = useState('avisos'); // 'placa' ou 'avisos'
 
   // Estados de Dados (Busca, Alertas e Notícias)
   const [alertas, setAlertas] = useState([]);
@@ -49,14 +49,21 @@ function Home() {
     return () => mediaQuery.removeEventListener('change', atualizarPreferencia);
   }, []);
 
+  const selecionarSlide = (slide) => {
+    setCurrentSlide(slide);
+    setActiveHeroTab(slide === 0 ? 'avisos' : 'placa');
+  };
+
   // Efeito do Slider Hero (pausa ao digitar e respeita a preferência de movimento reduzido)
   useEffect(() => {
     if (placaBusca.length > 0 || reduzirMovimento) return;
     const slideInterval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % 2); // Alterna entre 0 e 1
+      const proximoSlide = (currentSlide + 1) % 2;
+      setCurrentSlide(proximoSlide);
+      setActiveHeroTab(proximoSlide === 0 ? 'avisos' : 'placa');
     }, 6000);
     return () => clearInterval(slideInterval);
-  }, [placaBusca, reduzirMovimento]);
+  }, [placaBusca, reduzirMovimento, currentSlide]);
 
   useEffect(() => {
     if (!modalConteudo) return undefined;
@@ -633,8 +640,8 @@ function Home() {
 
           {/* Slider Dots */}
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3.5 z-30">
-            <button onClick={() => setCurrentSlide(0)} className={`w-3.5 h-1.5 rounded-full transition-all duration-300 ${currentSlide === 0 ? 'bg-secondary-500 w-7' : 'bg-white/45'}`} aria-label="Slide 1"></button>
-            <button onClick={() => setCurrentSlide(1)} className={`w-3.5 h-1.5 rounded-full transition-all duration-300 ${currentSlide === 1 ? 'bg-secondary-500 w-7' : 'bg-white/45'}`} aria-label="Slide 2"></button>
+            <button onClick={() => selecionarSlide(0)} className={`w-3.5 h-1.5 rounded-full transition-all duration-300 ${currentSlide === 0 ? 'bg-secondary-500 w-7' : 'bg-white/45'}`} aria-label="Slide 1"></button>
+            <button onClick={() => selecionarSlide(1)} className={`w-3.5 h-1.5 rounded-full transition-all duration-300 ${currentSlide === 1 ? 'bg-secondary-500 w-7' : 'bg-white/45'}`} aria-label="Slide 2"></button>
           </div>
         </section>
 

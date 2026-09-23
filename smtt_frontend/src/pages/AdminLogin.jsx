@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { UserRound, LockKeyhole, Eye, EyeOff, ShieldCheck, LogIn, Globe2, TrafficCone, UsersRound, Leaf } from 'lucide-react';
+import { UserRound, LockKeyhole, Eye, EyeOff, ShieldCheck, LogIn, Globe2 } from 'lucide-react';
 
 function AdminLogin() {
   const location = useLocation();

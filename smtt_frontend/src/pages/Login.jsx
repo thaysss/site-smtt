@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, FileDigit, LoaderCircle, Lock, Mail, MapPin, Phone, ShieldCheck, User } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Eye, EyeOff, FileDigit, FileText, LoaderCircle, Lock, Mail, MapPin, Phone, ShieldCheck, User, UsersRound } from 'lucide-react';
 
 const formatCpf = (value) => value.replace(/\D/g, '').slice(0, 11).replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 const formatPhone = (value) => {
@@ -56,7 +56,7 @@ function Login() {
         setSucesso(response.data.mensagem); setModo('login'); setCodigo(''); setNovaSenha('');
       } else {
         const response = await api.post('/auth/login', { cpf: cpfNumerico, senha });
-        localStorage.setItem('token', response.data.token); localStorage.setItem('nomeUsuario', response.data.nome); navigate('/painel');
+        localStorage.setItem('token', response.data.token); localStorage.setItem('nomeUsuario', response.data.nome); localStorage.setItem('cpfUsuario', cpfNumerico); navigate('/painel');
       }
     } catch (error) {
       setErro(error.response?.data?.erro || 'Não foi possível concluir a solicitação. Tente novamente.');
@@ -68,22 +68,29 @@ function Login() {
   const descricao = { login: 'Use o CPF cadastrado e sua senha de acesso.', cadastro: 'Preencha seus dados. Enviaremos um código ao seu e-mail.', confirmar: 'Digite o código de 6 números enviado ao seu e-mail.', esqueci: 'Informe CPF e e-mail cadastrados para receber um código.', redefinir: 'Digite o código recebido e escolha sua nova senha.' }[modo];
 
   return <div className="citizen-auth-page">
-    <header className="citizen-auth-header"><button type="button" className="citizen-auth-logo" onClick={() => navigate('/')} aria-label="Ir para a página inicial"><img src="/logo-smtt.png" alt="SMTT Propriá" /></button><button type="button" className="citizen-auth-back" onClick={() => navigate('/')}><ArrowLeft size={17} /><span>Voltar ao início</span></button></header>
+    <button type="button" className="citizen-auth-back" onClick={() => navigate('/')}><ArrowLeft size={17} /><span>Voltar ao site</span></button>
     <main className="citizen-auth-main"><section className={`citizen-auth-card ${cadastro ? 'is-register' : ''}`}>
-      <aside className="citizen-auth-intro"><div><h1>{cadastro ? 'Crie seu acesso aos serviços digitais' : 'Seus serviços em um só lugar'}</h1><p>Acesse e acompanhe suas solicitações com segurança.</p></div><ul className="citizen-auth-benefits"><li><CheckCircle2 size={18} /> Acompanhamento de protocolos</li><li><ShieldCheck size={18} /> Verificação segura por e-mail</li><li><CheckCircle2 size={18} /> Serviços disponíveis pela internet</li></ul></aside>
-      <div className="citizen-auth-form-panel"><div className="citizen-auth-heading"><span>Portal do cidadão</span><h2>{titulo}</h2><p>{descricao}</p></div>
+      <aside className="citizen-auth-intro">
+        <div className="citizen-auth-brand"><img src="/SMTT.png" alt="SMTT Propriá" /><span>Trânsito mais seguro<br />para uma cidade melhor.</span></div>
+        <div className="citizen-auth-pitch"><h1>Mobilidade que conecta <strong>pessoas</strong> e <strong>oportunidades</strong></h1><p>Serviços públicos digitais, seguros e mais próximos de você.</p></div>
+        <ul className="citizen-auth-benefits"><li><UsersRound size={21} /><span><strong>Serviços online</strong>Mais praticidade para o cidadão</span></li><li><FileText size={21} /><span><strong>Acesso rápido</strong>Consulte, solicite e acompanhe</span></li><li><ShieldCheck size={21} /><span><strong>Trânsito mais seguro</strong>Compromisso com você</span></li></ul>
+        <div className="citizen-auth-signature"><i></i><strong>SMTT Propriá/SE</strong><span>Trabalho, organização e segurança<br />por uma cidade que avança.</span></div>
+      </aside>
+      <div className="citizen-auth-form-panel"><div className="citizen-auth-city"><img src="/logo-pequena.jpeg" alt="Brasão de Propriá" /></div><div className="citizen-auth-heading"><span>Portal do Cidadão</span><h2>{modo === 'login' ? 'Bem-vindo(a)' : titulo}</h2><p>{modo === 'login' ? <>Acesse sua conta para utilizar os serviços da<br /><strong>SMTT de Propriá.</strong></> : descricao}</p></div>
         {erro && <div className="citizen-auth-message is-error" role="alert"><AlertCircle size={18} /><span>{erro}</span></div>}
         {sucesso && <div className="citizen-auth-message is-success" role="status"><CheckCircle2 size={18} /><span>{sucesso}</span></div>}
-        <form onSubmit={handleSubmit} className="citizen-auth-form">
+        <form onSubmit={handleSubmit} className={`citizen-auth-form ${cadastro ? 'is-register' : ''}`}>
           {cadastro && <><FormField id="nome-completo" label="Nome completo" icon={User} className="is-full" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={150} required /><FormField id="email" label="E-mail" icon={Mail} type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={100} required /><FormField id="telefone" label="Telefone" icon={Phone} value={telefone} onChange={(e) => setTelefone(formatPhone(e.target.value))} maxLength={15} required /><FormField id="endereco" label="Endereço" icon={MapPin} className="is-full" value={endereco} onChange={(e) => setEndereco(e.target.value)} maxLength={255} required /></>}
           {(modo === 'esqueci' || modo === 'redefinir') && <FormField id="email-recuperacao" label="E-mail cadastrado" icon={Mail} type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={100} required />}
-          <FormField id="cpf" label="CPF" icon={FileDigit} value={cpf} onChange={(e) => setCpf(formatCpf(e.target.value))} inputMode="numeric" maxLength={14} required />
+          <FormField id="cpf" label={modo === 'login' ? 'Usuário' : 'CPF'} icon={modo === 'login' ? User : FileDigit} value={cpf} onChange={(e) => setCpf(formatCpf(e.target.value))} inputMode="numeric" maxLength={14} placeholder={modo === 'login' ? 'Digite seu usuário ou CPF' : '000.000.000-00'} required />
           {(modo === 'confirmar' || modo === 'redefinir') && <FormField id="codigo" label="Código de verificação" icon={ShieldCheck} value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" minLength={6} maxLength={6} required />}
-          {(modo === 'login' || cadastro) && <div className="citizen-auth-group"><label htmlFor="senha">Senha</label><div className="citizen-auth-field has-action"><Lock size={19} /><input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenha(e.target.value)} minLength={cadastro ? 8 : undefined} maxLength={128} required /><button type="button" onClick={() => setMostrarSenha(!mostrarSenha)}>{mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}</button></div>{cadastro && <small>Use pelo menos 8 caracteres.</small>}</div>}
+          {(modo === 'login' || cadastro) && <div className="citizen-auth-group"><label htmlFor="senha">Senha</label><div className="citizen-auth-field has-action"><Lock size={19} /><input id="senha" type={mostrarSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Digite sua senha" minLength={cadastro ? 8 : undefined} maxLength={128} required /><button type="button" onClick={() => setMostrarSenha(!mostrarSenha)} aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}>{mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}</button></div>{cadastro && <small>Use pelo menos 8 caracteres.</small>}</div>}
           {modo === 'redefinir' && <FormField id="nova-senha" label="Nova senha" icon={Lock} type="password" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} minLength={8} maxLength={128} required />}
-          <button type="submit" className="citizen-auth-submit is-full" disabled={enviando}>{enviando && <LoaderCircle size={19} className="citizen-auth-spinner" />}{enviando ? 'Aguarde...' : titulo}</button>
+          {modo === 'login' && <button type="button" className="citizen-auth-forgot" onClick={() => trocarModo('esqueci')}>Esqueceu sua senha?</button>}
+          <button type="submit" className="citizen-auth-submit is-full" disabled={enviando}>{enviando ? <LoaderCircle size={19} className="citizen-auth-spinner" /> : <ArrowRight size={19} />}{enviando ? 'Aguarde...' : (modo === 'login' ? 'Entrar' : titulo)}</button>
         </form>
-        <div className="citizen-auth-switch">{modo === 'login' ? <><button type="button" onClick={() => trocarModo('esqueci')}>Esqueci minha senha</button><button type="button" onClick={() => trocarModo('cadastro')}>Criar conta gratuitamente</button></> : <button type="button" onClick={() => trocarModo('login')}>Voltar para o login</button>}</div>
+        <div className="citizen-auth-switch">{modo === 'login' ? <button type="button" className="citizen-auth-create" onClick={() => trocarModo('cadastro')}><span><strong>Não tem uma conta?</strong> Saiba como acessar os serviços como cidadão.</span><ArrowRight size={18} /></button> : <button type="button" onClick={() => trocarModo('login')}>Voltar para o login</button>}</div>
+        <footer className="citizen-auth-footer">SMTT — Superintendência Municipal de Transportes e Trânsito de Propriá/SE<br /><span>Trânsito mais seguro para todos</span></footer>
       </div>
     </section></main>
   </div>;
