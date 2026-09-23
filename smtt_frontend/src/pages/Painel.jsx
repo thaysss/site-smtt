@@ -566,7 +566,7 @@ function Painel() {
           <button type="button" onClick={() => irParaSecao('avisos')}><Bell size={19} /> <span>Notificações</span>{alertas.length > 0 && <b>{alertas.length}</b>}</button>
           <button type="button" onClick={() => navigate('/fale-conosco')}><HelpCircle size={19} /> <span>Ajuda</span></button>
         </nav>
-        <div className="citizen-sidebar-city"><img src="/prefe.jpg" alt="Prefeitura de Propriá" /></div>
+        <div className="citizen-sidebar-city"><img src="/logo-prefe.jpg" alt="Prefeitura de Propriá" /></div>
       </aside>
 
       <header className="citizen-portal-header">
@@ -597,7 +597,7 @@ function Painel() {
               <button type="button" onClick={() => navigate('/fale-conosco')}><HelpCircle /><span><strong>Dúvidas frequentes</strong><small>Fale com a equipe da SMTT.</small></span><ChevronRight /></button>
             </div>
 
-            <article className="citizen-road-banner"><strong>Respeito no trânsito<br />movimenta uma cidade melhor.</strong><i></i><img src="/logo-smtt.png" alt="SMTT Propriá" /></article>
+            
           </div>
 
           <aside className="citizen-dashboard-side">
