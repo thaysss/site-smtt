@@ -137,7 +137,7 @@ function AdminLogin() {
 
           {!trocaObrigatoria ? <form onSubmit={handleLogin} className="admin-login-form">
             <div>
-              <label htmlFor="admin-usuario">Usuário ou matrícula</label>
+              <label htmlFor="admin-usuario">Usuário </label>
               <div className="admin-login-field">
                 <UserRound size={20} />
                 <input id="admin-usuario" type="text" value={usuario} onChange={(e) => setUsuario(e.target.value)} placeholder="Ex: 123456" autoComplete="username" required />
