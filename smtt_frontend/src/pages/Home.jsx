@@ -1005,9 +1005,14 @@ function Home() {
                   </div>
 
                   <a href="tel:+5579996654115">
-                    (79) 99665-4115
-                  </a>
+                    (79) 99665-4115 <br />
+                    153 <br /> 
+                    3322-1919
+                
+                    
+                  </a> 
                 </div>
+                
 
                 <div className="home-footer-contact-row">
                   <div className="home-footer-contact-icon">
