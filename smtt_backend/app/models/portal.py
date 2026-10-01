@@ -33,6 +33,7 @@ class Noticia(db.Model):
     conteudo = db.Column(db.Text, nullable=False)
     categoria = db.Column(db.String(100), default='Geral')
     imagem_url = db.Column(db.String(255))
+    imagens_urls = db.Column(db.JSON, nullable=False, default=list, server_default='[]')
     criado_em = db.Column(db.DateTime, default=get_brasilia_time)
 
     def to_dict(self):
@@ -43,5 +44,6 @@ class Noticia(db.Model):
             "conteudo": self.conteudo,
             "categoria": self.categoria,
             "imagem_url": self.imagem_url,
+            "imagens_urls": self.imagens_urls or [],
             "criado_em": self.criado_em.strftime("%d/%m/%Y %H:%M") if self.criado_em else None
         }

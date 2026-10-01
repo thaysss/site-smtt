@@ -46,6 +46,7 @@ with app.app_context():
         db.session.execute(text("ALTER TABLE noticias ADD COLUMN IF NOT EXISTS subtitulo VARCHAR(255);"))
         db.session.execute(text("ALTER TABLE noticias ADD COLUMN IF NOT EXISTS categoria VARCHAR(100) DEFAULT 'Geral';"))
         db.session.execute(text("ALTER TABLE noticias ADD COLUMN IF NOT EXISTS imagem_url VARCHAR(255);"))
+        db.session.execute(text("ALTER TABLE noticias ADD COLUMN IF NOT EXISTS imagens_urls JSON NOT NULL DEFAULT '[]'::json;"))
         db.session.execute(text("ALTER TABLE noticias ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP WITHOUT TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW());"))
         
         # 6. Coluna caminho_alvara_emitido na tabela solicitacoes_alvara

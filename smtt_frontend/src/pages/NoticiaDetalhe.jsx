@@ -1,5 +1,5 @@
 // src/pages/NoticiaDetalhe.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import SiteHeader from '../components/SiteHeader';
@@ -10,6 +10,60 @@ const montarUrlArquivo = (caminho) => {
   if (/^https?:\/\//i.test(caminho)) return caminho;
   return `${apiBaseUrl}${caminho}`;
 };
+
+function FotoAmpliavel({ src, titulo }) {
+  const dialogRef = useRef(null);
+  const [aberta, setAberta] = useState(false);
+
+  useEffect(() => {
+    if (!aberta) return;
+    const dialog = dialogRef.current;
+    const overflowAnterior = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = 'hidden';
+    return () => {
+      dialog.close();
+      document.body.style.overflow = overflowAnterior;
+    };
+  }, [aberta]);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setAberta(true)}
+        aria-label={`Ampliar foto: ${titulo}`}
+        aria-haspopup="dialog"
+        className="relative block w-full h-full cursor-zoom-in focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary-600 focus-visible:-outline-offset-4"
+      >
+        <img src={src} alt={titulo} className="w-full h-full object-cover" />
+        <span className="absolute bottom-3 right-3 flex items-center gap-2 rounded-lg bg-black/75 px-3 py-2 text-sm font-semibold text-white">
+          <i className="fa-solid fa-expand" aria-hidden="true" /> Ampliar foto
+        </span>
+      </button>
+      <dialog
+        ref={dialogRef}
+        aria-label={`Foto ampliada: ${titulo}`}
+        onClose={() => setAberta(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setAberta(false);
+        }}
+        className="fixed inset-0 m-auto h-full max-h-none w-full max-w-none bg-transparent p-4 text-white backdrop:bg-black/90 sm:p-8"
+      >
+        <button
+          type="button"
+          autoFocus
+          onClick={() => setAberta(false)}
+          aria-label="Fechar foto ampliada"
+          className="absolute right-4 top-4 z-10 flex items-center gap-2 rounded-lg bg-black/80 px-4 py-3 font-semibold hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+        >
+          <i className="fa-solid fa-xmark" aria-hidden="true" /> Fechar
+        </button>
+        {aberta && <img src={src} alt={titulo} className="pointer-events-none mx-auto h-full w-full object-contain pb-4 pt-16" />}
+      </dialog>
+    </>
+  );
+}
 
 function NoticiaDetalhe() {
   const { id } = useParams();
@@ -139,17 +193,26 @@ function NoticiaDetalhe() {
             {/* Imagem de Capa da Notícia */}
             <div className="w-full h-64 md:h-96 rounded-2xl overflow-hidden mb-8 shadow-sm">
               {noticia.imagem_url ? (
-                <img 
-                  src={montarUrlArquivo(noticia.imagem_url)} 
-                  alt={noticia.titulo} 
-                  className="w-full h-full object-cover"
-                />
+                <FotoAmpliavel key={id} src={montarUrlArquivo(noticia.imagem_url)} titulo={noticia.titulo} />
               ) : (
                 <div className={`w-full h-full ${getPlaceholderBg(noticia.categoria)} flex items-center justify-center`}>
                   <i className={`fa-solid ${getPlaceholderIcon(noticia.categoria)} text-7xl`}></i>
                 </div>
               )}
             </div>
+
+            {noticia.imagens_urls?.length > 0 && (
+              <section className="mb-8" aria-labelledby="galeria-noticia">
+                <h2 id="galeria-noticia" className="mb-4 text-xl font-bold text-gray-900">Galeria de fotos</h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {noticia.imagens_urls.map((url, index) => (
+                    <div key={`${id}-${url}-${index}`} className="h-64 overflow-hidden rounded-2xl shadow-sm">
+                      <FotoAmpliavel src={montarUrlArquivo(url)} titulo={`${noticia.titulo} — foto ${index + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Conteúdo Principal (parágrafos dinâmicos) */}
             <div className="text-slate-700 leading-8 text-[17px] space-y-6">

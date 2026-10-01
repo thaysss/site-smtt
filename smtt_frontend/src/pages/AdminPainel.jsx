@@ -117,6 +117,8 @@ function AdminPainel({ defaultTab }) {
   const [subtituloNews, setSubtituloNews] = useState('');
   const [conteudoNews, setConteudoNews] = useState('');
   const [categoriaNews, setCategoriaNews] = useState('Geral');
+  const [fotosNews, setFotosNews] = useState([]);
+  const [fotosMantidasNews, setFotosMantidasNews] = useState([]);
   const [imagemNews, setImagemNews] = useState(null);
   const [imagemPreviewNews, setImagemPreviewNews] = useState('');
   const [previewNoticiaAberta, setPreviewNoticiaAberta] = useState(false);
@@ -724,6 +726,8 @@ function AdminPainel({ defaultTab }) {
   };
 
   const limparFormNoticia = () => {
+    setFotosNews([]);
+    setFotosMantidasNews([]);
     liberarPreviewImagemNews();
     setNoticiaFoco(null);
     setTituloNews('');
@@ -738,6 +742,8 @@ function AdminPainel({ defaultTab }) {
   };
 
   const prepararNovaNoticia = () => {
+    setFotosNews([]);
+    setFotosMantidasNews([]);
     liberarPreviewImagemNews();
     let rascunho = null;
     try {
@@ -759,6 +765,8 @@ function AdminPainel({ defaultTab }) {
   };
 
   const prepararEdicaoNoticia = (n) => {
+    setFotosNews([]);
+    setFotosMantidasNews(n.imagens_urls || []);
     liberarPreviewImagemNews();
     setNoticiaFoco(n);
     setTituloNews(n.titulo);
@@ -773,8 +781,8 @@ function AdminPainel({ defaultTab }) {
 
   const selecionarImagemNews = (e) => {
     const arquivo = e.target.files?.[0] || null;
-    if (arquivo && !['image/png', 'image/jpeg', 'image/webp'].includes(arquivo.type)) {
-      alert('Selecione uma imagem PNG, JPG ou WebP.');
+    if (arquivo && !['image/png', 'image/jpeg'].includes(arquivo.type)) {
+      alert('Selecione uma imagem PNG ou JPG.');
       e.target.value = '';
       return;
     }
@@ -788,6 +796,30 @@ function AdminPainel({ defaultTab }) {
     setImagemPreviewNews(arquivo ? URL.createObjectURL(arquivo) : '');
   };
 
+  const selecionarFotosNews = async (e) => {
+    const arquivos = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (fotosMantidasNews.length + fotosNews.length + arquivos.length > 9) {
+      alert('A galeria pode ter no máximo 9 fotos, além da capa.');
+      return;
+    }
+    if (arquivos.some((arquivo) => !['image/png', 'image/jpeg'].includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024)) {
+      alert('Selecione fotos PNG ou JPG de até 5 MB cada.');
+      return;
+    }
+    try {
+      const fotos = await Promise.all(arquivos.map((arquivo) => new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onload = () => resolve({ arquivo, preview: leitor.result });
+        leitor.onerror = reject;
+        leitor.readAsDataURL(arquivo);
+      })));
+      setFotosNews((atuais) => [...atuais, ...fotos]);
+    } catch {
+      alert('Não foi possível carregar as fotos selecionadas.');
+    }
+  };
+
   const salvarRascunhoNoticia = () => {
     localStorage.setItem('smtt-noticia-rascunho', JSON.stringify({
       titulo: tituloNews,
@@ -795,7 +827,7 @@ function AdminPainel({ defaultTab }) {
       conteudo: conteudoNews,
       categoria: categoriaNews
     }));
-    setMensagem('Rascunho salvo neste dispositivo. A imagem deverá ser selecionada novamente.');
+    setMensagem('Rascunho salvo neste dispositivo. As fotos deverão ser selecionadas novamente.');
   };
 
   const aplicarFormatoNoticia = (inicio, fim = inicio, textoPadrao = '') => {
@@ -826,6 +858,8 @@ function AdminPainel({ defaultTab }) {
       formData.append('subtitulo', subtituloNews);
       formData.append('conteudo', conteudoNews);
       formData.append('categoria', categoriaNews);
+      formData.append('imagens_mantidas', JSON.stringify(fotosMantidasNews));
+      fotosNews.forEach(({ arquivo }) => formData.append('imagens', arquivo));
       if (imagemNews) {
         formData.append('imagem', imagemNews);
       }
@@ -1662,8 +1696,8 @@ function AdminPainel({ defaultTab }) {
 
                     <div className="news-field">
                       <label>Imagem de capa</label>
-                      <small>PNG, JPG ou WebP · máximo recomendado de 5 MB · proporção 1,9:1.</small>
-                      <input id="news-cover-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={selecionarImagemNews} hidden />
+                      <small>PNG ou JPG · até 5 MB · proporção 1,9:1.</small>
+                      <input id="news-cover-input" type="file" accept="image/png,image/jpeg" onChange={selecionarImagemNews} hidden />
                       <label htmlFor="news-cover-input" className={`news-image-dropzone ${imagemPreviewNews ? 'has-image' : ''}`}>
                         {imagemPreviewNews ? (
                           <>
@@ -1681,6 +1715,26 @@ function AdminPainel({ defaultTab }) {
                       {modoEdicaoNews && noticiaFoco?.imagem_url && !imagemNews && (
                         <small>A imagem atual será mantida se nenhum novo arquivo for selecionado.</small>
                       )}
+                    </div>
+
+                    <div className="news-field">
+                      <label htmlFor="news-gallery-input">Mais fotos da notícia</label>
+                      <small>Até 9 fotos extras em PNG ou JPG, de até 5 MB cada. Você pode selecionar várias de uma vez.</small>
+                      <input id="news-gallery-input" type="file" accept="image/png,image/jpeg" multiple onChange={selecionarFotosNews} />
+                      <div className="grid grid-cols-2 gap-3">
+                        {fotosMantidasNews.map((url, index) => (
+                          <div key={url}>
+                            <img src={montarUrlArquivo(url)} alt={`Foto da galeria ${index + 1}`} className="h-24 w-full rounded-lg object-cover" />
+                            <button type="button" className="news-button news-button-outline" onClick={() => setFotosMantidasNews((atuais) => atuais.filter((foto) => foto !== url))}>Remover foto {index + 1}</button>
+                          </div>
+                        ))}
+                        {fotosNews.map((foto, index) => (
+                          <div key={`${foto.arquivo.name}-${index}`}>
+                            <img src={foto.preview} alt={`Nova foto ${index + 1}`} className="h-24 w-full rounded-lg object-cover" />
+                            <button type="button" className="news-button news-button-outline" onClick={() => setFotosNews((atuais) => atuais.filter((_, i) => i !== index))}>Remover nova foto {index + 1}</button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="news-publication-status">
@@ -1729,6 +1783,9 @@ function AdminPainel({ defaultTab }) {
                         <button type="button" aria-label="Fechar pré-visualização" onClick={() => setPreviewNoticiaAberta(false)}><i className="fa-solid fa-xmark" /></button>
                       </header>
                       {imagemPreviewNews && <img className="news-preview-cover" src={imagemPreviewNews} alt="" />}
+                      {[...fotosMantidasNews.map(montarUrlArquivo), ...fotosNews.map((foto) => foto.preview)].map((src, index) => (
+                        <img key={`${src}-${index}`} className="news-preview-cover" src={src} alt={`Foto da galeria ${index + 1}`} />
+                      ))}
                       <div className="news-preview-body">
                         <span>{categoriaNews}</span>
                         <h2 id="news-preview-title">{tituloNews}</h2>

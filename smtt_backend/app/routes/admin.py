@@ -1,5 +1,6 @@
 # app/routes/admin.py
 import os
+import json
 import uuid
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request
@@ -601,56 +602,96 @@ def _validar_campos_noticia(titulo, subtitulo, conteudo, categoria):
             return f"{campo} deve ter no máximo {limite} caracteres."
     return None
 
+def _preparar_fotos_noticia(noticia=None):
+    atuais = list(noticia.imagens_urls or []) if noticia else []
+    mantidas = atuais
+    if 'imagens_mantidas' in request.form:
+        try:
+            mantidas = json.loads(request.form['imagens_mantidas'])
+        except (ValueError, TypeError):
+            return None, 'Lista de fotos inválida.'
+        if (not isinstance(mantidas, list)
+                or any(not isinstance(url, str) or url not in atuais for url in mantidas)
+                or len(set(mantidas)) != len(mantidas)):
+            return None, 'Selecione apenas fotos já vinculadas à notícia.'
+    capas = [f for f in request.files.getlist('imagem') if f.filename]
+    extras = [f for f in request.files.getlist('imagens') if f.filename]
+    if len(capas) > 1 or len(mantidas) + len(extras) > 9:
+        return None, 'Envie uma capa e no máximo 9 fotos na galeria.'
+    if any(not validate_upload(f, {'.png', '.jpg', '.jpeg'}) for f in capas + extras):
+        return None, 'Envie imagens PNG ou JPEG válidas de até 10 MB por foto.'
+    return (mantidas, capas, extras), None
+
+
+def _salvar_fotos_noticia(noticia, fotos):
+    mantidas, capas, extras = fotos
+    antigas = list(noticia.imagens_urls or [])
+    removidas = [url for url in antigas if url not in mantidas]
+    novas = []
+    try:
+        def salvar(file):
+            ext = os.path.splitext(secure_filename(file.filename))[1].lower()
+            url = save_upload(file, f"noticias/news_{uuid.uuid4().hex}{ext}")
+            novas.append(url)
+            return url
+
+        if capas:
+            capa_antiga = noticia.imagem_url
+            noticia.imagem_url = salvar(capas[0])
+            if capa_antiga:
+                removidas.append(capa_antiga)
+        noticia.imagens_urls = mantidas + [salvar(file) for file in extras]
+        db.session.add(noticia)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        for url in novas:
+            try:
+                delete_upload(url)
+            except Exception:
+                pass
+        raise
+    # Só remove os arquivos antigos depois da confirmação no banco.
+    for url in set(removidas):
+        try:
+            delete_upload(url)
+        except Exception:
+            from flask import current_app
+            current_app.logger.exception('Falha ao remover foto antiga de notícia')
+
+
 @admin_bp.route('/noticias', methods=['POST'])
 def criar_noticia_admin():
     titulo = request.form.get('titulo')
     subtitulo = request.form.get('subtitulo', '')
     conteudo = request.form.get('conteudo')
     categoria = request.form.get('categoria', 'Geral')
-    
     if not titulo or not conteudo:
         return jsonify({"erro": "Título e Conteúdo são obrigatórios."}), 400
-    erro_limite = _validar_campos_noticia(titulo, subtitulo, conteudo, categoria)
-    if erro_limite:
-        return jsonify({"erro": erro_limite}), 400
-        
-    imagem_url = None
-    if 'imagem' in request.files:
-        file = request.files['imagem']
-        if file and file.filename != '':
-            filename = secure_filename(file.filename)
-            ext = os.path.splitext(filename)[1]
-            filename = f"news_{int(datetime.now().timestamp())}_{random.randint(1000,9999)}{ext}"
-            
-            if not validate_upload(file, {'.png', '.jpg', '.jpeg'}):
-                return jsonify({"erro": "Envie uma imagem PNG ou JPEG válida de até 10 MB."}), 400
-            imagem_url = save_upload(file, f"noticias/{filename}")
-            
-    noticia = Noticia(
-        titulo=titulo,
-        subtitulo=subtitulo,
-        conteudo=conteudo,
-        categoria=categoria,
-        imagem_url=imagem_url
-    )
-    db.session.add(noticia)
-    db.session.commit()
-    
+    erro = _validar_campos_noticia(titulo, subtitulo, conteudo, categoria)
+    if erro:
+        return jsonify({"erro": erro}), 400
+    fotos, erro = _preparar_fotos_noticia()
+    if erro:
+        return jsonify({"erro": erro}), 400
+    noticia = Noticia(titulo=titulo, subtitulo=subtitulo, conteudo=conteudo, categoria=categoria)
+    _salvar_fotos_noticia(noticia, fotos)
     return jsonify({"mensagem": "Notícia criada com sucesso!", "noticia": noticia.to_dict()}), 201
 
 
 @admin_bp.route('/noticias/<int:id>', methods=['PUT'])
 def editar_noticia_admin(id):
     noticia = Noticia.query.get_or_404(id)
-    
     titulo = request.form.get('titulo')
     subtitulo = request.form.get('subtitulo', '')
     conteudo = request.form.get('conteudo')
     categoria = request.form.get('categoria', 'Geral')
-    erro_limite = _validar_campos_noticia(titulo, subtitulo, conteudo, categoria)
-    if erro_limite:
-        return jsonify({"erro": erro_limite}), 400
-    
+    erro = _validar_campos_noticia(titulo, subtitulo, conteudo, categoria)
+    if erro:
+        return jsonify({"erro": erro}), 400
+    fotos, erro = _preparar_fotos_noticia(noticia)
+    if erro:
+        return jsonify({"erro": erro}), 400
     if titulo:
         noticia.titulo = titulo
     if subtitulo is not None:
@@ -659,31 +700,20 @@ def editar_noticia_admin(id):
         noticia.conteudo = conteudo
     if categoria:
         noticia.categoria = categoria
-        
-    if 'imagem' in request.files:
-        file = request.files['imagem']
-        if file and file.filename != '':
-            filename = secure_filename(file.filename)
-            ext = os.path.splitext(filename)[1]
-            filename = f"news_{int(datetime.now().timestamp())}_{random.randint(1000,9999)}{ext}"
-            
-            if not validate_upload(file, {'.png', '.jpg', '.jpeg'}):
-                return jsonify({"erro": "Envie uma imagem PNG ou JPEG válida de até 10 MB."}), 400
-            nova_imagem_url = save_upload(file, f"noticias/{filename}")
-            delete_upload(noticia.imagem_url)
-            noticia.imagem_url = nova_imagem_url
-            
-    db.session.commit()
+    _salvar_fotos_noticia(noticia, fotos)
     return jsonify({"mensagem": "Notícia editada com sucesso!", "noticia": noticia.to_dict()}), 200
 
 
 @admin_bp.route('/noticias/<int:id>', methods=['DELETE'])
 def excluir_noticia_admin(id):
     noticia = Noticia.query.get_or_404(id)
-    
-    if noticia.imagem_url:
-        delete_upload(noticia.imagem_url)
-                
+    urls = list(noticia.imagens_urls or []) + ([noticia.imagem_url] if noticia.imagem_url else [])
     db.session.delete(noticia)
     db.session.commit()
+    for url in set(urls):
+        try:
+            delete_upload(url)
+        except Exception:
+            from flask import current_app
+            current_app.logger.exception('Falha ao remover foto de notícia excluída')
     return jsonify({"mensagem": "Notícia excluída com sucesso!"}), 200

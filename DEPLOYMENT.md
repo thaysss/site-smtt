@@ -46,3 +46,13 @@ A role precisa apenas destas ações no prefixo configurado:
 ```
 
 Para desenvolvimento sem S3, mantenha `STORAGE_BACKEND=local`. Nesse modo, monte um volume persistente em `/app/app/static/uploads`; o diretório é ignorado pelo Git.
+
+## Galeria de fotos das notícias
+
+Antes de publicar o backend com suporte à galeria, execute o SQL completo de
+`smtt_backend/sql/20261001_noticias_multiplas_fotos.sql` no SQL Editor do Supabase.
+Depois publique o backend e o frontend, nesta ordem. A capa permanece em
+`imagem_url` e as fotos extras ficam em `imagens_urls`. O cadastro permite uma
+capa e até nove fotos extras (PNG/JPEG), com seleção múltipla e remoção da galeria.
+O rollback em `smtt_backend/sql/20261001_noticias_multiplas_fotos_rollback.sql`
+recusa remover a coluna se houver fotos extras, evitando perda de dados.
