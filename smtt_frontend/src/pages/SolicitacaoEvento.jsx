@@ -223,7 +223,7 @@ function SolicitacaoEvento() {
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Data do Evento *</label>
                     <input
-                      type="text"
+                      type="datetime-local"
                       placeholder="Ex: 25/07/2026 - 18h às 22h"
                       value={dataEvento}
                       onChange={(e) => setDataEvento(e.target.value)}

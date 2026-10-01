@@ -292,7 +292,7 @@ function ContestacaoMulta() {
                   <div>
                     <span className="font-bold block text-white">Aguarde o Julgamento</span>
                     <span className="text-primary-100 block">
-                      Em um prazo de 2 a 7 dias úteis você será informado do seu protocolo para acompanhamento do pedido.
+                      Em um prazo de 15 dias úteis você será informado do seu protocolo para acompanhamento do pedido.
                     </span>
                   </div>
                 </div>
