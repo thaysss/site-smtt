@@ -54,16 +54,16 @@ function Home() {
     setActiveHeroTab(slide === 0 ? 'avisos' : 'placa');
   };
 
-  // Efeito do Slider Hero (pausa ao digitar e respeita a preferência de movimento reduzido)
+  // Mantém os avisos visíveis durante a leitura, até a navegação manual.
   useEffect(() => {
-    if (placaBusca.length > 0 || reduzirMovimento) return;
+    if (activeHeroTab === 'avisos' || placaBusca.length > 0 || reduzirMovimento) return;
     const slideInterval = setInterval(() => {
       const proximoSlide = (currentSlide + 1) % 2;
       setCurrentSlide(proximoSlide);
       setActiveHeroTab(proximoSlide === 0 ? 'avisos' : 'placa');
     }, 6000);
     return () => clearInterval(slideInterval);
-  }, [placaBusca, reduzirMovimento, currentSlide]);
+  }, [activeHeroTab, placaBusca, reduzirMovimento, currentSlide]);
 
   useEffect(() => {
     if (!modalConteudo) return undefined;

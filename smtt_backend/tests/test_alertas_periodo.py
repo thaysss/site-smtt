@@ -37,3 +37,14 @@ class TestAlertasPeriodo(unittest.TestCase):
                 resposta = self.client.post('/api/admin/alertas', headers=self.headers, json={'rua_bairro': 'Centro', 'descricao': 'Obras', 'interdicao_inicio': inicio, 'interdicao_fim': fim})
                 self.assertEqual(resposta.status_code, 400)
         self.assertEqual(AlertaTransito.query.count(), 0)
+
+    def test_descricao_longa_preservada(self):
+        self.assertIsInstance(AlertaTransito.__table__.c.descricao.type, db.Text)
+        descricao = 'Interdição temporária para realização de evento. ' * 30
+        resposta = self.client.post('/api/admin/alertas', headers=self.headers, json={
+            'rua_bairro': 'Avenida João Barbosa Porto', 'descricao': descricao,
+            'interdicao_inicio': '2026-10-02T17:00', 'interdicao_fim': '2026-10-03T14:00',
+        })
+        self.assertEqual(resposta.status_code, 201)
+        self.assertEqual(AlertaTransito.query.one().descricao, descricao)
+        self.assertEqual(self.client.get('/api/public/alertas').get_json()[0]['descricao'], descricao)

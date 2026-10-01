@@ -7,7 +7,7 @@ class AlertaTransito(db.Model):
     __tablename__ = 'alertas_transito'
     
     id = db.Column(db.Integer, primary_key=True)
-    descricao = db.Column(db.String(255), nullable=False)
+    descricao = db.Column(db.Text, nullable=False)
     rua_bairro = db.Column(db.String(150), nullable=False)
     data_inicio = db.Column(db.DateTime, nullable=False)
     data_fim = db.Column(db.DateTime)
