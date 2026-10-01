@@ -402,7 +402,7 @@ function Home() {
               {currentSlide === 0 ? (
                 <div className="animate-fadeInUp">
                   
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-sora font-extrabold tracking-tight mb-6 leading-[1.1] text-[#12345B]">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-jakarta font-extrabold tracking-tight mb-6 leading-[1.1] text-[#12345B]">
                     No trânsito,<br />
                     <span className="text-secondary-500">escolha a vida.</span>
                   </h2>
@@ -414,7 +414,7 @@ function Home() {
               ) : (
                 <div className="animate-fadeInUp">
                   
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-sora font-extrabold tracking-tight mb-6 leading-[1.1] text-white">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-jakarta font-extrabold tracking-tight mb-6 leading-[1.1] text-white">
                     SMTT Ativa<br />
                     <span className="text-secondary-500">no Trânsito de Propriá.</span>
                   </h2>
@@ -501,7 +501,7 @@ function Home() {
                             {/* Faixa Azul Mercosul */}
                             <div className="w-full bg-[#003399] px-3 py-1 flex justify-between items-center text-white select-none">
                               <span className="text-[7px] font-extrabold tracking-tighter opacity-80">MERCOSUL</span>
-                              <span className="font-sora font-black text-[9px] tracking-[0.2em] text-white">BRASIL</span>
+                              <span className="font-jakarta font-black text-[9px] tracking-[0.2em] text-white">BRASIL</span>
                               <div className="w-5 h-3 bg-green-600 relative overflow-hidden flex items-center justify-center rounded-[1px] border border-green-700 scale-75">
                                 <div className="w-2.5 h-2.5 bg-yellow-400 rotate-45 flex items-center justify-center">
                                   <div className="w-1.5 h-1.5 bg-blue-800 rounded-full"></div>
@@ -647,7 +647,7 @@ function Home() {
         <section id="servicos" className="py-20 bg-[#f8fafc] relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="home-section-heading mb-12">
-              <h2 className="text-3xl font-sora font-extrabold text-slate-900">Portal de Serviços Online</h2>
+              <h2 className="text-3xl font-jakarta font-extrabold text-slate-900">Portal de Serviços Online</h2>
               <div className="h-1 w-16 bg-secondary-500 mx-auto mt-3.5 rounded-full"></div>
               <p className="text-sm text-slate-500 mt-3 max-w-md mx-auto">Encontre o serviço que você precisa, sem sair de casa.</p>
             </div>
@@ -730,7 +730,7 @@ function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-end mb-12">
               <div>
-                <h2 className="text-3xl font-sora font-extrabold text-slate-900">Últimas Notícias</h2>
+                <h2 className="text-3xl font-jakarta font-extrabold text-slate-900">Últimas Notícias</h2>
                 <div className="h-1 w-16 bg-secondary-500 mt-3 rounded-full"></div>
               </div>
               <a

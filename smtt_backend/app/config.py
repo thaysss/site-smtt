@@ -1,5 +1,6 @@
 # app/config.py
 import os
+import secrets
 from datetime import timedelta
 from dotenv import load_dotenv
 
@@ -8,8 +9,8 @@ load_dotenv()
 
 class Config:
     """Configurações base comuns a todos os ambientes."""
-    SECRET_KEY = os.getenv('SECRET_KEY', 'chave-padrao-de-seguranca')
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'chave-padrao-de-seguranca')
+    SECRET_KEY = os.getenv('SECRET_KEY') or secrets.token_hex(32)
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY') or SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
     CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '*')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -35,6 +36,9 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
+        "pool_size": int(os.getenv("DB_POOL_SIZE", 5)),
+        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", 0)),
+        "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", 30)),
     }
 
 class DevelopmentConfig(Config):
@@ -53,9 +57,9 @@ class ProductionConfig(Config):
     def validate(cls):
         """Fail fast before accepting traffic with unsafe production settings."""
         invalid = []
-        if not cls.SECRET_KEY or cls.SECRET_KEY == 'chave-padrao-de-seguranca':
+        if not cls.SECRET_KEY or len(cls.SECRET_KEY) < 32 or cls.SECRET_KEY in {'chave-padrao-de-seguranca', 'gere-uma-chave-aleatoria-forte-aqui'}:
             invalid.append('SECRET_KEY')
-        if not cls.JWT_SECRET_KEY or cls.JWT_SECRET_KEY == 'chave-padrao-de-seguranca':
+        if not cls.JWT_SECRET_KEY or len(cls.JWT_SECRET_KEY) < 32 or cls.JWT_SECRET_KEY in {'chave-padrao-de-seguranca', 'gere-uma-chave-aleatoria-forte-aqui'}:
             invalid.append('JWT_SECRET_KEY')
         if not cls.SQLALCHEMY_DATABASE_URI:
             invalid.append('DATABASE_URL')

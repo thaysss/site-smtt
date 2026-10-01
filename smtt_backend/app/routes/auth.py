@@ -121,7 +121,7 @@ def login():
     dados = request.get_json(silent=True) or {}
     cpf = re.sub(r'\D', '', str(dados.get('cpf', '')))
     senha = dados.get('senha', '')
-    if len(cpf) != 11 or not isinstance(senha, str):
+    if len(cpf) != 11 or not isinstance(senha, str) or not 1 <= len(senha) <= 128:
         return jsonify({"erro": "CPF ou senha inválidos"}), 401
     usuario = Cidadao.query.filter_by(cpf=cpf).first()
     if usuario and usuario.verificar_senha(senha):
@@ -162,8 +162,8 @@ def cadastro_admin():
         return jsonify({"erro": "Cargo inválido.", "cargos": list(CARGOS.values())}), 400
     if len(nome) > 150 or len(matricula) > 20 or len(cargo) > 50:
         return jsonify({"erro": "Um ou mais campos excedem o tamanho permitido."}), 400
-    if not isinstance(senha, str) or len(senha) < 8:
-        return jsonify({"erro": "A senha deve ter pelo menos 8 caracteres."}), 400
+    if not isinstance(senha, str) or not 8 <= len(senha) <= 128:
+        return jsonify({"erro": "A senha deve ter entre 8 e 128 caracteres."}), 400
     if Servidor.query.filter_by(matricula=matricula).first():
         return jsonify({"erro": "Matrícula já cadastrada"}), 400
 
@@ -241,7 +241,7 @@ def login_admin():
     dados = request.get_json(silent=True) or {}
     login_recebido = str(dados.get('usuario', '')).strip()
     senha = dados.get('senha', '')
-    if not login_recebido or len(login_recebido) > 20 or not isinstance(senha, str):
+    if not login_recebido or len(login_recebido) > 20 or not isinstance(senha, str) or not 1 <= len(senha) <= 128:
         return jsonify({"erro": "Matrícula ou senha inválidos"}), 401
 
     # 2. Procuramos esse valor na coluna 'matricula' do banco de dados

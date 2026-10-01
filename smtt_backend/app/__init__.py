@@ -20,8 +20,8 @@ _rate_limit_lock = Lock()
 
 
 def _client_ip():
-    forwarded = request.headers.get('X-Forwarded-For', '')
-    return (forwarded.split(',')[0].strip() if forwarded else request.remote_addr) or 'unknown'
+    # Forwarded headers are untrusted unless normalized by trusted infrastructure.
+    return request.remote_addr or 'unknown'
 
 
 def _rate_limit_exceeded(key, limit, window_seconds):
@@ -69,6 +69,12 @@ def create_app(test_config=None):
             })
     CORS(app, origins=cors_origins, supports_credentials=False, allow_headers=['Authorization', 'Content-Type'], methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
         
+    # SQLite does not support QueuePool options used for PostgreSQL.
+    if str(app.config.get('SQLALCHEMY_DATABASE_URI', '')).startswith('sqlite:'):
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            key: value for key, value in app.config['SQLALCHEMY_ENGINE_OPTIONS'].items()
+            if key not in {'pool_size', 'max_overflow', 'pool_timeout'}
+        }
     db.init_app(app)
     
     jwt.init_app(app) # Inicializa o gerenciador de Tokens
@@ -103,6 +109,16 @@ def create_app(test_config=None):
     # 2. Before/After Request Hooks for tracing and metrics
     @app.before_request
     def before_request():
+        req_id = request.headers.get('X-Request-ID', '')
+        if not req_id or len(req_id) > 128 or not all(c.isascii() and (c.isalnum() or c in '-_.') for c in req_id):
+            req_id = uuid.uuid4().hex
+        g.request_id = req_id
+        request_id_var.set(req_id)
+        g.request_start_time = time.time()
+        if request.path.startswith('/api/') and request.is_json:
+            payload = request.get_json(silent=True)
+            if not isinstance(payload, dict):
+                return jsonify({'erro': 'O corpo JSON deve ser um objeto válido.'}), 400
         if request.method == 'POST' and request.path.startswith(('/api/auth/', '/api/public/')):
             honeypot = request.form.get('_website') if request.form else None
             if request.is_json:
@@ -134,11 +150,6 @@ def create_app(test_config=None):
             response.headers['Retry-After'] = str(rule[1])
             return response
 
-        # Inject Request ID
-        req_id = request.headers.get('X-Request-ID') or uuid.uuid4().hex
-        g.request_id = req_id
-        request_id_var.set(req_id)
-        g.request_start_time = time.time()
 
     @app.after_request
     def after_request(response):
@@ -187,6 +198,7 @@ def create_app(test_config=None):
     # 3. Global exception handler with detailed trace logging
     @app.errorhandler(Exception)
     def handle_exception(e):
+        db.session.rollback()
         tb_text = traceback.format_exc()
         req_id = getattr(g, 'request_id', '-')
         

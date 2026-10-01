@@ -75,7 +75,7 @@ function Privacidade() {
           
           {/* Navigation Sidebar */}
           <aside className="lg:col-span-3 sticky top-28 border-r border-slate-200 pr-6 hidden lg:block">
-            <h3 className="font-sora font-semibold text-xs text-slate-500 uppercase tracking-wider mb-4">Tópicos do Documento</h3>
+            <h3 className="font-jakarta font-semibold text-xs text-slate-500 uppercase tracking-wider mb-4">Tópicos do Documento</h3>
             <nav className="space-y-0.5">
               {sections.map((section) => (
                 <button
@@ -104,7 +104,7 @@ function Privacidade() {
             {/* Secção 1 */}
             <section id="introducao" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">1. Compromisso com a Privacidade e LGPD</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">1. Compromisso com a Privacidade e LGPD</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 A <strong>Superintendência Municipal de Transportes e Trânsito (SMTT) de Propriá/SE</strong> valoriza a segurança, privacidade e confidencialidade dos dados pessoais de todos os cidadãos proprietários e usuários de nossos canais eletrônicos.
@@ -117,7 +117,7 @@ function Privacidade() {
             {/* Secção 2 */}
             <section id="coleta" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">2. Dados Pessoais Coletados</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">2. Dados Pessoais Coletados</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 Para o cumprimento das atribuições legais de mobilidade urbana, segurança viária e prestação de serviços municipais, coletamos os seguintes tipos de dados pessoais:
@@ -133,7 +133,7 @@ function Privacidade() {
             {/* Secção 3 */}
             <section id="uso" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">3. Finalidades do Tratamento de Dados</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">3. Finalidades do Tratamento de Dados</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 O tratamento de dados pessoais pela SMTT Propriá/SE é fundamentado em bases legais adequadas, principalmente no <strong>exercício regular de direitos e deveres do poder público municipal</strong> (Artigo 7º, III, da LGPD). Os dados são coletados especificamente para:
@@ -150,7 +150,7 @@ function Privacidade() {
             {/* Secção 4 */}
             <section id="compartilhamento" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">4. Compartilhamento de Dados com Terceiros</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">4. Compartilhamento de Dados com Terceiros</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 A SMTT Propriá/SE <strong>não vende, aluga ou cede dados pessoais</strong> coletados em seu portal digital. O compartilhamento de dados ocorre de forma restrita e somente nas seguintes situações:
@@ -165,7 +165,7 @@ function Privacidade() {
             {/* Secção 5 */}
             <section id="seguranca" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">5. Segurança e Proteção das Informações</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">5. Segurança e Proteção das Informações</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 Para garantir a integridade dos dados, adotamos medidas técnicas, administrativas e organizacionais rígidas de segurança da informação:
@@ -181,7 +181,7 @@ function Privacidade() {
             {/* Secção 6 */}
             <section id="direitos" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">6. Seus Direitos como Titular de Dados</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">6. Seus Direitos como Titular de Dados</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 Em conformidade com a LGPD (Artigo 18), o cidadão possui total controle sobre seus dados e pode requerer à SMTT Propriá/SE:
@@ -198,7 +198,7 @@ function Privacidade() {
             {/* Secção 7 */}
             <section id="cookies" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">7. Política de Cookies</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">7. Política de Cookies</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 Utilizamos cookies de navegação apenas para garantir o funcionamento correto e seguro de nosso portal eletrônico (cookies necessários), tais como:
@@ -215,7 +215,7 @@ function Privacidade() {
             {/* Secção 8 */}
             <section id="contato" className="scroll-mt-32 space-y-4">
               <div className="pb-3 border-b border-slate-200">
-                <h2 className="font-sora text-xl font-semibold text-primary-950">8. DPO e Ouvidoria SMTT</h2>
+                <h2 className="font-jakarta text-xl font-semibold text-primary-950">8. DPO e Ouvidoria SMTT</h2>
               </div>
               <p className="text-slate-700 text-[15px]">
                 Para exercer seus direitos de privacidade, tirar dúvidas relacionadas ao tratamento de dados pessoais no portal ou relatar qualquer inconformidade legal, o cidadão pode acionar o nosso Encarregado de Proteção de Dados (DPO - Data Protection Officer).

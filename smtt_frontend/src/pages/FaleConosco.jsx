@@ -63,7 +63,7 @@ function FaleConosco() {
         <header className="border-b border-slate-200 bg-slate-50 py-12 md:py-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary-700 mb-3">Atendimento ao cidadão</p>
-            <h1 className="font-sora text-4xl md:text-5xl font-semibold tracking-tight text-primary-950">Fale Conosco</h1>
+            <h1 className="font-jakarta text-4xl md:text-5xl font-semibold tracking-tight text-primary-950">Fale Conosco</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600">
               Use os canais oficiais da SMTT para enviar dúvidas, sugestões, reclamações, elogios ou pedidos de informação.
             </p>
@@ -78,7 +78,7 @@ function FaleConosco() {
               {/* Info Column */}
               <div className="lg:col-span-5 border-t-4 border-primary-800 bg-slate-50 p-6 md:p-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.1em] text-primary-700 mb-3">Ouvidoria Digital</p>
-                <h2 className="text-2xl font-sora font-semibold text-primary-950 leading-tight">Canais de Atendimento</h2>
+                <h2 className="text-2xl font-jakarta font-semibold text-primary-950 leading-tight">Canais de Atendimento</h2>
                 <div className="h-px w-full bg-slate-300 mt-4"></div>
                 
                 <p className="text-sm text-slate-500 mt-4 leading-relaxed">
@@ -111,7 +111,7 @@ function FaleConosco() {
 
               {/* Form Column */}
               <div className="lg:col-span-7 border border-slate-200 bg-white p-6 md:p-8">
-                <h3 className="text-xl font-semibold text-primary-950 mb-2 font-sora">Formulário de Ouvidoria</h3>
+                <h3 className="text-xl font-semibold text-primary-950 mb-2 font-jakarta">Formulário de Ouvidoria</h3>
                 <p className="text-xs text-slate-500 mb-6 leading-relaxed">
                   Envie sua solicitação diretamente para o nosso setor administrativo. O prazo de resposta padrão é de até 5 dias úteis.
                 </p>
@@ -121,7 +121,7 @@ function FaleConosco() {
                     <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                       <i className="fa-solid fa-circle-check text-3xl"></i>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 font-sora">Mensagem Enviada!</h3>
+                    <h3 className="text-xl font-bold text-slate-900 font-jakarta">Mensagem Enviada!</h3>
                     <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
                       Agradecemos o seu contato. Sua mensagem foi protocolada com sucesso e será analisada pela nossa equipe.
                     </p>
