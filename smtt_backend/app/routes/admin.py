@@ -9,6 +9,7 @@ from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, 
 from app.models.portal import AlertaTransito, Noticia
 from datetime import datetime
 from app.utils.timezone import get_brasilia_time
+from app.services.email import enviar_resposta_ouvidoria
 from app.utils.uploads import delete_upload, save_upload, validate_upload
 import random
 
@@ -330,11 +331,21 @@ def listar_alertas_admin():
 
 @admin_bp.route('/alertas', methods=['POST'])
 def publicar_alerta():
-    dados = request.get_json()
+    dados = request.get_json(silent=True) or {}
+    try:
+        # datetime-local representa o horário civil de Brasília, sem conversão pelo navegador.
+        inicio = datetime.strptime(dados.get('interdicao_inicio', ''), '%Y-%m-%dT%H:%M')
+        fim = datetime.strptime(dados.get('interdicao_fim', ''), '%Y-%m-%dT%H:%M')
+    except (ValueError, TypeError):
+        return jsonify({"erro": "Informe data e hora de início e fim da interdição no horário de Brasília."}), 400
+    if fim <= inicio:
+        return jsonify({"erro": "O fim da interdição deve ser posterior ao início."}), 400
     novo_alerta = AlertaTransito(
         rua_bairro=dados.get('rua_bairro'),
         descricao=dados.get('descricao'),
         data_inicio=get_brasilia_time(),
+        interdicao_inicio=inicio,
+        interdicao_fim=fim,
         status='Ativo'
     )
     db.session.add(novo_alerta)
@@ -495,11 +506,23 @@ def atualizar_ouvidoria_admin(id):
     if status == 'Respondida' and not resposta:
         return jsonify({"erro": "Informe a resposta antes de concluir o atendimento."}), 400
 
+    enviar_resposta = status == 'Respondida' and (
+        mensagem.protocolo.status != 'Respondida' or mensagem.resposta != resposta
+    )
+    if enviar_resposta and not enviar_resposta_ouvidoria(
+        mensagem.email, mensagem.nome, mensagem.protocolo.numero_protocolo, resposta
+    ):
+        return jsonify({"erro": "Não foi possível enviar a resposta por e-mail. O atendimento não foi alterado. Verifique a configuração de e-mail e tente novamente."}), 502
+
     mensagem.protocolo.status = status
     mensagem.resposta = resposta or None
-    mensagem.respondido_em = get_brasilia_time() if status == 'Respondida' else None
+    if status != 'Respondida':
+        mensagem.respondido_em = None
+    elif enviar_resposta:
+        mensagem.respondido_em = get_brasilia_time()
     db.session.commit()
-    return jsonify({"mensagem": "Atendimento atualizado com sucesso.", "registro": mensagem.to_dict()}), 200
+    aviso = "Resposta enviada por e-mail ao cidadão e atendimento atualizado." if enviar_resposta else "Atendimento atualizado com sucesso."
+    return jsonify({"mensagem": aviso, "registro": mensagem.to_dict()}), 200
 
 
 @admin_bp.route('/eventos/<int:id>/julgar', methods=['PUT'])

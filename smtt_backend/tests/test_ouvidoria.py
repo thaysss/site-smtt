@@ -30,8 +30,9 @@ class TestOuvidoria(unittest.TestCase):
         db.drop_all()
         self.context.pop()
 
+    @patch('app.routes.admin.enviar_resposta_ouvidoria', return_value=True)
     @patch('app.routes.public.enviar_protocolo', return_value=True)
-    def test_fluxo_completo_da_ouvidoria(self, enviar_email):
+    def test_fluxo_completo_da_ouvidoria(self, enviar_email, enviar_resposta):
         resposta = self.client.post('/api/public/ouvidoria', json={
             'nome': 'Maria da Silva',
             'email': 'MARIA@example.com',
@@ -61,11 +62,42 @@ class TestOuvidoria(unittest.TestCase):
         self.assertEqual(atualizacao.get_json()['registro']['status'], 'Respondida')
         self.assertIsNotNone(atualizacao.get_json()['registro']['respondido_em'])
 
+        enviar_resposta.assert_called_once_with(
+            'maria@example.com', 'Maria da Silva', protocolo_numero,
+            'A sugestão foi encaminhada ao setor técnico.',
+        )
+        repetida = self.client.put(
+            f'/api/admin/ouvidoria/{registro.id}', headers=self.headers,
+            json={'status': 'Respondida', 'resposta': registro.resposta},
+        )
+        self.assertEqual(repetida.status_code, 200)
+        enviar_resposta.assert_called_once()
+
         consulta = self.client.get(f'/api/public/protocolos/{protocolo_numero}')
         self.assertEqual(consulta.status_code, 200)
         self.assertEqual(consulta.get_json()['tipo_servico'], 'Ouvidoria')
         self.assertEqual(consulta.get_json()['status_julgamento'], 'Respondida')
         self.assertIn('encaminhada', consulta.get_json()['parecer_jari'])
+
+    @patch('app.routes.admin.enviar_resposta_ouvidoria', return_value=False)
+    @patch('app.routes.public.enviar_protocolo', return_value=True)
+    def test_falha_no_email_permite_tentar_novamente(self, protocolo_email, resposta_email):
+        self.client.post('/api/public/ouvidoria', json={
+            'nome': 'Maria', 'email': 'maria@example.com',
+            'assunto': 'Sugestão', 'mensagem': 'Criar faixa de pedestres.',
+        })
+        registro = MensagemOuvidoria.query.one()
+        url = f'/api/admin/ouvidoria/{registro.id}'
+        dados = {'status': 'Respondida', 'resposta': 'Pedido encaminhado.'}
+        falha = self.client.put(url, headers=self.headers, json=dados)
+        self.assertEqual(falha.status_code, 502)
+        db.session.refresh(registro)
+        self.assertEqual(registro.protocolo.status, 'Recebida')
+        self.assertIsNone(registro.resposta)
+        self.assertIsNone(registro.respondido_em)
+        resposta_email.return_value = True
+        self.assertEqual(self.client.put(url, headers=self.headers, json=dados).status_code, 200)
+        self.assertEqual(resposta_email.call_count, 2)
 
     def test_valida_dados_e_autorizacao(self):
         invalida = self.client.post('/api/public/ouvidoria', json={

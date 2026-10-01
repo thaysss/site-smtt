@@ -12,6 +12,8 @@ import { matchesDateFilter } from '../utils/dateFilters';
 function AdminAlertas() {
   const [ruaBairro, setRuaBairro] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [interdicaoInicio, setInterdicaoInicio] = useState('');
+  const [interdicaoFim, setInterdicaoFim] = useState('');
   const [alertas, setAlertas] = useState([]);
   const [mensagem, setMensagem] = useState('');
   const [buscaResolvidos, setBuscaResolvidos] = useState('');
@@ -41,13 +43,18 @@ function AdminAlertas() {
   const handleCriarAlerta = async (e) => {
     e.preventDefault();
     setMensagem('');
+    if (interdicaoFim <= interdicaoInicio) {
+      alert('O fim da interdição deve ser posterior ao início.');
+      return;
+    }
     try {
-      await api.post('/admin/alertas', { rua_bairro: ruaBairro, descricao });
+      await api.post('/admin/alertas', { rua_bairro: ruaBairro, descricao, interdicao_inicio: interdicaoInicio, interdicao_fim: interdicaoFim });
       setMensagem('Alerta publicado no portal público com sucesso!');
       setRuaBairro(''); setDescricao('');
+      setInterdicaoInicio(''); setInterdicaoFim('');
       carregarAlertas();
-    } catch {
-      alert('Erro ao criar alerta.');
+    } catch (error) {
+      alert(error.response?.data?.erro || 'Erro ao criar alerta.');
     }
   };
 
@@ -229,6 +236,18 @@ function AdminAlertas() {
                 </div>
               </div>
 
+              <fieldset className="space-y-3">
+                <legend className="text-xs font-bold text-gray-700">Período da interdição — horário de Brasília (UTC−3)</legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="block text-xs font-semibold text-gray-700">Início *
+                    <input type="datetime-local" value={interdicaoInicio} onChange={(e) => setInterdicaoInicio(e.target.value)} required className="mt-2 w-full p-3 border border-gray-200 rounded-xl" />
+                  </label>
+                  <label className="block text-xs font-semibold text-gray-700">Fim *
+                    <input type="datetime-local" value={interdicaoFim} min={interdicaoInicio || undefined} onChange={(e) => setInterdicaoFim(e.target.value)} required className="mt-2 w-full p-3 border border-gray-200 rounded-xl" />
+                  </label>
+                </div>
+              </fieldset>
+
               <button type="submit" className="w-full bg-secondary-500 hover:bg-secondary-600 text-primary-950 font-bold py-3.5 rounded-xl shadow-md transition-all mt-4">
                 Publicar Alerta
               </button>
@@ -255,6 +274,7 @@ function AdminAlertas() {
                       <div>
                         <h4 className="font-bold text-red-800 text-sm mb-1">{alerta.rua_bairro}</h4>
                         <p className="text-xs text-red-700 leading-relaxed">{alerta.descricao}</p>
+                        {alerta.interdicao_inicio && alerta.interdicao_fim && <p className="text-xs mt-2">Interdição: {alerta.interdicao_inicio} até {alerta.interdicao_fim} (horário de Brasília)</p>}
                         <span className="text-[10px] uppercase font-bold text-red-400 mt-2 block">Status: {alerta.status}</span>
                       </div>
                       <button 
@@ -304,6 +324,7 @@ function AdminAlertas() {
                       <div>
                         <h4 className="font-semibold text-gray-700 text-sm mb-1">{alerta.rua_bairro}</h4>
                         <p className="text-xs text-gray-550 leading-relaxed">{alerta.descricao}</p>
+                        {alerta.interdicao_inicio && alerta.interdicao_fim && <p className="text-xs mt-2">Interdição: {alerta.interdicao_inicio} até {alerta.interdicao_fim} (horário de Brasília)</p>}
                         <span className="text-[10px] uppercase font-bold text-gray-400 mt-2 block">Status: {alerta.status}</span>
                       </div>
                       <button 

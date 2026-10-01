@@ -150,6 +150,7 @@ function AdminOuvidoriaSection() {
                     <label className="block text-sm font-semibold text-gray-700">Resposta ao cidadão
                       <textarea value={resposta} onChange={(event) => setResposta(event.target.value)} maxLength={4000} rows={6} placeholder="Registre aqui o retorno da SMTT..." className="mt-1.5 w-full resize-y rounded-lg border border-gray-200 bg-white p-3 font-normal focus:border-primary-500 focus:outline-none" />
                     </label>
+                    <p className="text-xs text-gray-600">Ao salvar com status Respondida, a resposta será enviada para {item.email}.</p>
                     <div className="flex items-center justify-between gap-3"><span className="text-xs text-gray-400">{resposta.length}/4000</span><button type="button" onClick={() => salvar(item.id)} disabled={salvando} className="rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-primary-800 disabled:opacity-60">{salvando ? 'Salvando...' : 'Salvar atendimento'}</button></div>
                   </div>
                 </div>

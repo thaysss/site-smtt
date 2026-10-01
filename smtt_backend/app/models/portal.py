@@ -11,6 +11,8 @@ class AlertaTransito(db.Model):
     rua_bairro = db.Column(db.String(150), nullable=False)
     data_inicio = db.Column(db.DateTime, nullable=False)
     data_fim = db.Column(db.DateTime)
+    interdicao_inicio = db.Column(db.DateTime)
+    interdicao_fim = db.Column(db.DateTime)
     status = db.Column(db.String(20), default='Ativo')
 
     # Uma função para facilitar transformar o resultado em JSON depois
@@ -20,6 +22,9 @@ class AlertaTransito(db.Model):
             "descricao": self.descricao,
             "rua_bairro": self.rua_bairro,
             "status": self.status,
+            "interdicao_inicio": self.interdicao_inicio.strftime("%d/%m/%Y %H:%M") if self.interdicao_inicio else None,
+            "interdicao_fim": self.interdicao_fim.strftime("%d/%m/%Y %H:%M") if self.interdicao_fim else None,
+            "fuso_horario": "America/Sao_Paulo",
             "data_inicio": self.data_inicio.strftime("%d/%m/%Y %H:%M") if self.data_inicio else None
         }
 

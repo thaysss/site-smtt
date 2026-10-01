@@ -618,6 +618,7 @@ function Home() {
                                 <div className="flex-grow">
                                   <h4 className="font-bold text-xs text-slate-900 leading-snug">{alerta.rua_bairro}</h4>
                                   <p className="text-[11px] text-slate-600 mt-1.5 leading-relaxed">{alerta.descricao}</p>
+                                  {alerta.interdicao_inicio && alerta.interdicao_fim && <p className="text-[11px] text-slate-700 mt-2 font-semibold">Interdição: {alerta.interdicao_inicio} até {alerta.interdicao_fim} (horário de Brasília)</p>}
                                   {alerta.data_inicio && (
                                     <span className="text-[9px] text-slate-500 font-bold block mt-2.5 uppercase tracking-wide">
                                       <i className="fa-regular fa-clock mr-1"></i> Publicado em: {alerta.data_inicio}h

@@ -51,3 +51,14 @@ def enviar_codigo_verificacao(destinatario, nome, codigo, finalidade):
 
 def enviar_protocolo(destinatario, nome, numero, tipo_servico):
     return enviar_email(destinatario, f'Protocolo {numero} criado - SMTT Propria', f'Ola, {nome}.\n\nSua solicitacao foi recebida com sucesso.\nProtocolo: {numero}\nServico: {tipo_servico}\nStatus inicial: Em Analise\n\nGuarde este numero para acompanhar o andamento no Portal SMTT Propria.')
+
+
+def enviar_resposta_ouvidoria(destinatario, nome, numero, resposta):
+    if current_app.config.get('MAIL_SUPPRESS_SEND'):
+        return False
+    return enviar_email(
+        destinatario,
+        f'Resposta da Ouvidoria - Protocolo {numero} - SMTT Propriá',
+        f'Olá, {nome}.\n\nSua manifestação recebeu uma resposta da Ouvidoria SMTT.\n'
+        f'Protocolo: {numero}\n\n{resposta}\n\nSMTT Propriá',
+    )
