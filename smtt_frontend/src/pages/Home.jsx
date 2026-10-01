@@ -1004,13 +1004,11 @@ function Home() {
                     <i className="fa-solid fa-phone" aria-hidden="true"></i>
                   </div>
 
-                  <a href="tel:+5579996654115">
-                    (79) 99665-4115 <br />
-                    153 <br /> 
-                    3322-1919
-                
-                    
-                  </a> 
+                  <div className="home-footer-phone-numbers">
+                    <a href="tel:+5579996654115">(79) 99665-4115</a>
+                    <a href="tel:153">153</a>
+                    <a href="tel:+557933221919">3322-1919</a>
+                  </div>
                 </div>
                 
 

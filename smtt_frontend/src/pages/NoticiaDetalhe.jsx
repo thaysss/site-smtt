@@ -299,19 +299,7 @@ function NoticiaDetalhe() {
               )}
             </div>
 
-            {/* Card de Informação Rápida */}
-            <div className="bg-primary-900 text-white rounded-2xl p-6 shadow-sm border border-primary-950/20 text-center relative overflow-hidden">
-              <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-white/5 rounded-full"></div>
-              <img src="/logo.png" alt="SMTT" className="w-12 h-12 mx-auto mb-4 object-contain" />
-              <h4 className="font-bold text-base mb-2">Canais de Atendimento</h4>
-              <p className="text-xs text-gray-300 mb-4 leading-relaxed">Dúvidas sobre trânsito, multas ou interdições? Acesse nosso portal público ou fale com a ouvidoria.</p>
-              <button 
-                onClick={() => navigate('/')}
-                className="w-full py-2.5 bg-secondary-500 hover:bg-secondary-600 text-primary-950 font-bold rounded-xl text-xs transition-colors shadow"
-              >
-                Página Inicial
-              </button>
-            </div>
+            
           </aside>
 
         </div>
