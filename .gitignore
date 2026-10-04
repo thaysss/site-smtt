@@ -25,3 +25,9 @@ smtt_frontend/dist/
 .DS_Store
 Thumbs.db
 .vercel
+
+# Configuracoes locais de implantacao AWS
+aws/generated/
+aws/settings.local.json
+aws/lightsail/generated/
+aws/lightsail/production.env

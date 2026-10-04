@@ -1,0 +1,16 @@
+{
+  "region": "sa-east-1",
+  "serviceName": "smtt-backend",
+  "repositoryName": "smtt-backend",
+  "bucketName": "PREENCHER_BUCKET_EXISTENTE",
+  "secretArn": "PREENCHER_ARN_SECRET_MANAGER",
+  "executionRoleArn": "PREENCHER_ARN_ROLE_EXECUCAO",
+  "infrastructureRoleArn": "PREENCHER_ARN_ROLE_INFRAESTRUTURA",
+  "taskRoleArn": "PREENCHER_ARN_ROLE_S3",
+  "serviceArn": "",
+  "cpu": "256",
+  "memory": "1024",
+  "minTasks": 1,
+  "maxTasks": 1,
+  "corsAllowedOrigins": "https://smttpropria.com.br,https://www.smttpropria.com.br"
+}

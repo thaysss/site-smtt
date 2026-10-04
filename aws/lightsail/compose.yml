@@ -1,0 +1,49 @@
+services:
+  backend:
+    image: smtt-backend:aws
+    env_file:
+      - path: production.env
+        format: raw
+    environment:
+      FLASK_ENV: production
+      PORT: '5000'
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '3'
+      DB_MAX_OVERFLOW: '0'
+      MAIL_SUPPRESS_SEND: 'false'
+    expose:
+      - '5000'
+    restart: unless-stopped
+    mem_limit: 650m
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Configure API_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+volumes:
+  caddy_data:
+  caddy_config:

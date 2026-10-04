@@ -236,6 +236,31 @@ def atualizar_servidor_admin(servidor_id):
         "servidor": _servidor_para_json(servidor),
     }), 200
 
+@auth_bp.route('/admin/servidores/<int:servidor_id>/senha', methods=['POST'])
+@jwt_required()
+def redefinir_senha_servidor_admin(servidor_id):
+    if cargo_das_claims(get_jwt()) != 'administrador':
+        return jsonify({"erro": "Acesso negado. Requer privilégios de administrador."}), 403
+    servidor = db.session.get(Servidor, servidor_id)
+    if not servidor:
+        return jsonify({"erro": "Servidor não encontrado."}), 404
+    dados = request.get_json(silent=True)
+    if not isinstance(dados, dict):
+        return jsonify({"erro": "Informe a nova senha e sua confirmação."}), 400
+    senha = dados.get('nova_senha')
+    if not isinstance(senha, str) or not 8 <= len(senha) <= 128:
+        return jsonify({"erro": "A nova senha deve ter entre 8 e 128 caracteres."}), 400
+    if senha != dados.get('confirmar_senha'):
+        return jsonify({"erro": "As senhas informadas não coincidem."}), 400
+    servidor.set_senha(senha)
+    servidor.senha_temporaria = True
+    db.session.commit()
+    return jsonify({
+        "mensagem": "Senha redefinida. O servidor deverá trocá-la no próximo login.",
+        "servidor": _servidor_para_json(servidor),
+    }), 200
+
+
 @auth_bp.route('/admin/login', methods=['POST'])
 def login_admin():
     dados = request.get_json(silent=True) or {}

@@ -87,6 +87,51 @@ class TestAdminAuthentication(unittest.TestCase):
         self.assertTrue(servidor.verificar_senha('senha-segura'))
         self.assertTrue(servidor.senha_temporaria)
 
+    def test_admin_password_reset_requires_change_on_next_login(self):
+        for cargo in ['Analista', 'Administrador']:
+            with self.subTest(cargo=cargo):
+                servidor = Servidor(nome='Reset', matricula=cargo, cargo=cargo, senha_temporaria=False)
+                servidor.set_senha('senha-anterior')
+                db.session.add(servidor)
+                db.session.commit()
+                token = create_access_token(identity='admin-123', additional_claims={'role': 'admin'})
+                response = self.client.post(f'/api/auth/admin/servidores/{servidor.id}/senha',
+                    headers={'Authorization': f'Bearer {token}'},
+                    json={'nova_senha': 'nova-temporaria', 'confirmar_senha': 'nova-temporaria'})
+                self.assertEqual(response.status_code, 200)
+                self.assertNotIn('senha_hash', response.get_json()['servidor'])
+                self.assertTrue(servidor.senha_temporaria)
+                self.assertFalse(servidor.verificar_senha('senha-anterior'))
+                old = self.client.post('/api/auth/admin/login', json={'usuario': cargo, 'senha': 'senha-anterior'})
+                self.assertEqual(old.status_code, 401)
+                login = self.client.post('/api/auth/admin/login', json={'usuario': cargo, 'senha': 'nova-temporaria'})
+                self.assertTrue(login.get_json()['troca_senha_obrigatoria'])
+                changed = self.client.post('/api/auth/admin/primeiro-acesso/senha',
+                    headers={'Authorization': "Bearer " + login.get_json()['token_troca_senha']},
+                    json={'nova_senha': 'senha-definitiva', 'confirmar_senha': 'senha-definitiva'})
+                self.assertEqual(changed.status_code, 200)
+                self.assertFalse(servidor.senha_temporaria)
+
+    def test_password_reset_rejects_unauthorized_and_invalid_requests(self):
+        servidor = Servidor(nome='Reset', matricula='reset', cargo='Analista', senha_temporaria=False)
+        servidor.set_senha('senha-anterior')
+        db.session.add(servidor)
+        db.session.commit()
+        url = f'/api/auth/admin/servidores/{servidor.id}/senha'
+        body = {'nova_senha': 'nova-temporaria', 'confirmar_senha': 'nova-temporaria'}
+        self.assertEqual(self.client.post(url, json=body).status_code, 401)
+        for claims in [{}, {'role': 'analista'}, {'role': 'supervisor'}, {'role': 'agente_transito'}, {'tipo': 'troca_senha_admin'}]:
+            token = create_access_token(identity='1', additional_claims=claims)
+            self.assertEqual(self.client.post(url, headers={'Authorization': f'Bearer {token}'}, json=body).status_code, 403)
+        token = create_access_token(identity='admin-123', additional_claims={'role': 'admin'})
+        headers = {'Authorization': f'Bearer {token}'}
+        for invalid in [{}, [], ['senha'], {'nova_senha': 12345678}, {'nova_senha': 'curta'},
+                        {'nova_senha': 'x' * 129}, {'nova_senha': 'nova-temporaria', 'confirmar_senha': 'diferente'}]:
+            self.assertEqual(self.client.post(url, headers=headers, json=invalid).status_code, 400)
+            self.assertTrue(servidor.verificar_senha('senha-anterior'))
+            self.assertFalse(servidor.senha_temporaria)
+        self.assertEqual(self.client.post('/api/auth/admin/servidores/999/senha', headers=headers, json=body).status_code, 404)
+
     def test_login_includes_server_profile(self):
         servidor = Servidor(nome='Agente Um', matricula='456', cargo='Agente de Trânsito', senha_temporaria=False)
         servidor.set_senha('senha-segura')

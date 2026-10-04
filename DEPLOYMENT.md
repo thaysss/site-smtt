@@ -56,3 +56,10 @@ Depois publique o backend e o frontend, nesta ordem. A capa permanece em
 capa e até nove fotos extras (PNG/JPEG), com seleção múltipla e remoção da galeria.
 O rollback em `smtt_backend/sql/20261001_noticias_multiplas_fotos_rollback.sql`
 recusa remover a coluna se houver fotos extras, evitando perda de dados.
+
+## Migração do backend para AWS
+
+A implantação escolhida usa Lightsail. O estado e os scripts estão em
+`aws/lightsail/README.md`; ECS/Fargate permanece apenas como alternativa.
+Nesta migração o frontend permanece na Vercel e o banco no Supabase; não
+execute migrações de banco ou reset apenas por mudar a hospedagem.

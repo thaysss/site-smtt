@@ -106,6 +106,11 @@ def create_app(test_config=None):
         from .utils.uploads import presigned_download_url
         return redirect(presigned_download_url(relative_path), code=302)
 
+    @app.route('/static/uploads/<path:relative_path>')
+    def download_legacy_upload(relative_path):
+        # Preserve URLs stored in Supabase after copying the files to S3.
+        return download_upload(relative_path)
+
     # 2. Before/After Request Hooks for tracing and metrics
     @app.before_request
     def before_request():

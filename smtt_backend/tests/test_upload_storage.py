@@ -53,3 +53,24 @@ def test_s3_storage_uploads_private_object_and_returns_application_url(tmp_path)
         assert client.generate_presigned_url.call_args.kwargs["ExpiresIn"] == 900
         delete_upload(url)
         client.delete_object.assert_called_once_with(Bucket="private-bucket", Key="uploads/eventos/documento.pdf")
+
+def test_migrated_legacy_upload_is_deleted_from_s3(tmp_path):
+    app = make_app(tmp_path, "s3")
+    client = Mock()
+    with app.app_context(), patch("app.utils.uploads._s3_client", return_value=client):
+        delete_upload("/static/uploads/eventos/documento.pdf")
+    client.delete_object.assert_called_once_with(Bucket="private-bucket", Key="uploads/eventos/documento.pdf")
+
+
+def test_legacy_upload_url_redirects_to_s3_after_migration():
+    from app import create_app
+    app = create_app({
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+        "STORAGE_BACKEND": "s3",
+    })
+    with patch("app.utils.uploads.presigned_download_url", return_value="https://signed.example/documento") as sign:
+        response = app.test_client().get("/static/uploads/eventos/documento.pdf")
+    assert response.status_code == 302
+    assert response.headers["Location"] == "https://signed.example/documento"
+    sign.assert_called_once_with("eventos/documento.pdf")

@@ -706,6 +706,7 @@ body.alto-contraste .text-gray-900 {
 .admin-users-status.active { color: #166534; background: #dcfce7; }
 .admin-users-row-actions { display: flex; justify-content: flex-end; gap: 7px; }
 .admin-users-row-actions button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--admin-border); border-radius: 8px; color: var(--admin-action); background: #fff; cursor: pointer; }
+.admin-users-row-actions button.reset-password { width: auto; padding: 0 10px; white-space: nowrap; }
 .admin-users-row-actions button.save { color: #fff; border-color: var(--admin-action); background: var(--admin-action); }
 .admin-users-row-actions button:disabled { opacity: .55; cursor: wait; }
 .admin-users-empty { padding: 28px; margin: 0; color: var(--admin-muted); text-align: center; }

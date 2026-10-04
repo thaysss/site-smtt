@@ -100,6 +100,9 @@ def delete_upload(url):
     if url.startswith(s3_prefix):
         _s3_client().delete_object(Bucket=current_app.config["S3_BUCKET"], Key=_object_key(url[len(s3_prefix):]))
     elif url.startswith(local_prefix):
+        if current_app.config.get("STORAGE_BACKEND") == "s3":
+            _s3_client().delete_object(Bucket=current_app.config["S3_BUCKET"], Key=_object_key(url[len(local_prefix):]))
+            return
         path = Path(current_app.root_path) / "static" / "uploads" / url[len(local_prefix):]
         path.unlink(missing_ok=True)
 

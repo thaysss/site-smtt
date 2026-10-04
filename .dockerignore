@@ -8,4 +8,7 @@ smtt_backend/__pycache__
 smtt_backend/**/__pycache__
 smtt_backend/.pytest_cache
 smtt_backend/instance
+smtt_backend/app/static/uploads/**
+!smtt_backend/app/static/uploads/.gitkeep
+aws
 *.py[cod]

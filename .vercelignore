@@ -1,0 +1,9 @@
+aws/
+smtt_backend/
+.git/
+**/.env
+**/.env.*
+**/*.env
+**/__pycache__/
+**/node_modules/
+**/.pytest_cache/

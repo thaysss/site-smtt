@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY smtt_backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# O frontend permanece no Vercel; somente o backend entra na imagem do Railway.
+# O frontend permanece no Vercel; somente o backend entra nesta imagem.
 COPY smtt_backend/ .
 
 RUN useradd --create-home --uid 10001 app && chown -R app:app /app

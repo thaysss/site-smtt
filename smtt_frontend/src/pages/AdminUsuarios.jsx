@@ -17,6 +17,42 @@ function AdminUsuarios() {
   const [editandoId, setEditandoId] = useState(null);
   const [edicao, setEdicao] = useState({ nome: '', matricula: '', cargo: '' });
 
+  const [resetando, setResetando] = useState(null);
+  const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [erroSenha, setErroSenha] = useState('');
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
+
+  const fecharReset = () => {
+    setResetando(null);
+    setNovaSenha('');
+    setConfirmarSenha('');
+    setErroSenha('');
+  };
+
+  const redefinirSenha = async (event) => {
+    event.preventDefault();
+    setErroSenha('');
+    if (novaSenha !== confirmarSenha) {
+      setErroSenha('As senhas informadas não coincidem.');
+      return;
+    }
+    setSalvandoSenha(true);
+    try {
+      const { data } = await api.post(`/auth/admin/servidores/${resetando.id}/senha`, {
+        nova_senha: novaSenha, confirmar_senha: confirmarSenha,
+      });
+      setServidores((atuais) => atuais.map((servidor) => servidor.id === data.servidor.id ? data.servidor : servidor));
+      setMensagem(data.mensagem);
+      setErro('');
+      fecharReset();
+    } catch (requestError) {
+      setErroSenha(requestError.response?.data?.erro || 'Não foi possível redefinir a senha.');
+    } finally {
+      setSalvandoSenha(false);
+    }
+  };
+
   const carregarServidores = useCallback(async () => {
     setCarregandoServidores(true);
     try {
@@ -173,7 +209,7 @@ function AdminUsuarios() {
           <div className="admin-users-list-heading">
             <div>
               <span><Users size={18} /> Servidores cadastrados</span>
-              <p>Edite o nome, a matrícula ou o cargo de um servidor.</p>
+              <p>Edite os dados ou redefina a senha de qualquer servidor.</p>
             </div>
             <strong>{servidores.length}</strong>
           </div>
@@ -195,7 +231,9 @@ function AdminUsuarios() {
                       <td className="admin-users-row-actions">{editando ? <>
                         <button type="button" className="save" onClick={() => salvarEdicao(servidor.id)} disabled={enviando} aria-label="Salvar alterações"><Save size={17} /></button>
                         <button type="button" onClick={() => setEditandoId(null)} disabled={enviando} aria-label="Cancelar edição"><X size={17} /></button>
-                      </> : <button type="button" onClick={() => iniciarEdicao(servidor)} aria-label={`Editar ${servidor.nome}`}><Pencil size={17} /></button>}</td>
+                      </> : <button type="button" onClick={() => iniciarEdicao(servidor)} aria-label={`Editar ${servidor.nome}`}><Pencil size={17} /></button>}
+                        <button type="button" className="reset-password" disabled={salvandoSenha} onClick={() => { fecharReset(); setResetando(servidor); setMensagem(''); }} aria-label={`Redefinir senha de ${servidor.nome}`}>Redefinir senha</button>
+                      </td>
                     </tr>;
                   })}
                 </tbody>
@@ -203,6 +241,25 @@ function AdminUsuarios() {
             </div>
           )}
         </section>
+        {resetando && (
+          <form className="admin-users-form" onSubmit={redefinirSenha} aria-label="Redefinir senha">
+            <h2>Redefinir senha de {resetando.nome}</h2>
+            <p>Matrícula: {resetando.matricula}. A senha será temporária e deverá ser trocada no próximo login. Informe a nova senha ao servidor.</p>
+            {erroSenha && <div className="admin-users-message error" role="alert">{erroSenha}</div>}
+            <div className="admin-users-fields">
+              <label>Nova senha temporária *
+                <input type="password" value={novaSenha} onChange={(event) => setNovaSenha(event.target.value)} minLength={8} maxLength={128} autoComplete="new-password" required disabled={salvandoSenha} autoFocus />
+              </label>
+              <label>Confirmar senha temporária *
+                <input type="password" value={confirmarSenha} onChange={(event) => setConfirmarSenha(event.target.value)} minLength={8} maxLength={128} autoComplete="new-password" required disabled={salvandoSenha} />
+              </label>
+            </div>
+            <div className="admin-users-actions">
+              <button type="submit" disabled={salvandoSenha}>{salvandoSenha ? 'Redefinindo...' : 'Confirmar redefinição'}</button>
+              <button type="button" onClick={fecharReset} disabled={salvandoSenha}>Cancelar</button>
+            </div>
+          </form>
+        )}
       </main>
     </div>
   );
