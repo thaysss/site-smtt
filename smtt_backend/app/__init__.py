@@ -94,6 +94,10 @@ def create_app(test_config=None):
     app.register_blueprint(servicos_bp) # Registra o módulo de serviços
     app.register_blueprint(admin_bp) 
     app.register_blueprint(health_bp)
+    from .routes.atividades import atividades_bp
+    from .utils.atividades import registrar_atividade
+    app.register_blueprint(atividades_bp)
+    app.after_request(registrar_atividade)
 
     @app.route('/')
     def frontend():

@@ -1,5 +1,5 @@
 # app/routes/auth.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 import re
 import secrets
 from datetime import datetime, timedelta
@@ -125,6 +125,7 @@ def login():
         return jsonify({"erro": "CPF ou senha inválidos"}), 401
     usuario = Cidadao.query.filter_by(cpf=cpf).first()
     if usuario and usuario.verificar_senha(senha):
+        g.atividade_identidade = (str(usuario.id), usuario.nome_completo, 'cidadao')
         token = create_access_token(identity=str(usuario.id))
         return jsonify({"token": token, "nome": usuario.nome_completo}), 200
     return jsonify({"erro": "CPF ou senha inválidos"}), 401
@@ -277,6 +278,7 @@ def login_admin():
         if not cargo_chave:
             return jsonify({"erro": "O cargo deste servidor precisa ser atualizado por um administrador."}), 403
 
+        g.atividade_identidade = (str(servidor.id), servidor.nome, cargo_chave)
         if servidor.senha_temporaria:
             token = create_access_token(
                 identity=str(servidor.id),

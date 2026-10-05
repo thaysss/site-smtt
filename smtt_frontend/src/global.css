@@ -657,6 +657,8 @@ body.alto-contraste .text-gray-900 {
 .admin-shell > main.admin-users-main {
   flex: 1 1 0;
   width: auto;
+  height: 100%;
+  overflow-y: auto;
   padding: 42px;
 }
 .admin-users-header { display: flex; gap: 16px; align-items: flex-start; max-width: 1040px; margin: 0 auto 28px; }
@@ -713,7 +715,7 @@ body.alto-contraste .text-gray-900 {
 
 @media (max-width: 900px) {
   .admin-users-shell { display: block; padding-top: 64px; }
-  .admin-users-main { padding: 24px 18px; }
+  .admin-shell > main.admin-users-main { padding: 24px 18px; }
   .admin-users-grid { grid-template-columns: 1fr; }
 }
 
@@ -6775,3 +6777,9 @@ body.alto-contraste .text-gray-900 {
   .citizen-auth-create strong { font-size: .74rem; }
   .citizen-auth-footer { margin-top: 18px; padding-top: 13px; font-size: .55rem; line-height: 1.45; }
 }
+
+.admin-users-reset { max-width: 1040px; margin: 24px auto; scroll-margin: 24px; }
+.admin-users-actions { gap: 12px; flex-wrap: wrap; }
+.admin-activity-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; }
+.admin-activity-controls select, .admin-activity-controls button, .admin-users-list-heading button { padding: 10px; border: 1px solid var(--admin-border); border-radius: 8px; background: #fff; color: var(--admin-action); }
+.admin-activity-controls button:disabled { opacity: .5; }

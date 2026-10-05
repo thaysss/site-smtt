@@ -20,6 +20,7 @@ const menuItems = [
   
   { id: 'alertas', label: 'Avisos de interdição', icon: BellRing, isTab: false },
   { id: 'usuarios', label: 'Servidores', icon: UserPlus, isTab: false },
+  { id: 'logs', label: 'Logs de atividades', icon: ListChecks, isTab: false },
   { id: 'registros', label: 'Editar e excluir', icon: FilePenLine, isTab: true },
 ];
 
@@ -61,6 +62,8 @@ function AdminSidebar({ activeItem, onTabChange }) {
       navigate('/admin/alertas');
     } else if (item.id === 'usuarios') {
       navigate('/admin/usuarios');
+    } else if (item.id === 'logs') {
+      navigate('/admin/logs');
     }
     setIsMobileOpen(false);
   };

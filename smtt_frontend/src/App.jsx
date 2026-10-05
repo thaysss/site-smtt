@@ -11,6 +11,7 @@ const AdminAlertas = lazy(() => import('./pages/AdminAlertas'));
 const AdminInfracoes = lazy(() => import('./pages/AdminInfracoes'));
 const AdminVeiculos = lazy(() => import('./pages/AdminVeiculos'));
 const AdminUsuarios = lazy(() => import('./pages/AdminUsuarios'));
+const AdminLogs = lazy(() => import('./pages/AdminLogs'));
 const ConsultaProtocolo = lazy(() => import('./pages/ConsultaProtocolo'));
 const SolicitacaoEvento = lazy(() => import('./pages/SolicitacaoEvento'));
 const SolicitacaoAlvara = lazy(() => import('./pages/SolicitacaoAlvara'));
@@ -92,6 +93,7 @@ function App() {
         <Route path="/admin/infracoes" element={<AdminProtectedRoute feature="lancar-infracao"><AdminInfracoes /></AdminProtectedRoute>} />
         <Route path="/admin/veiculos" element={<AdminProtectedRoute feature="veiculos"><AdminVeiculos /></AdminProtectedRoute>} />
         <Route path="/admin/usuarios" element={<AdminProtectedRoute feature="usuarios"><AdminUsuarios /></AdminProtectedRoute>} />
+        <Route path="/admin/logs" element={<AdminProtectedRoute feature="logs"><AdminLogs /></AdminProtectedRoute>} />
         <Route path="/consultar" element={<ConsultaProtocolo />} />
         <Route path="/solicitacao-evento" element={<SolicitacaoEvento />} />
         <Route path="/solicitacao-alvara" element={<SolicitacaoAlvara />} />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckCircle, Eye, EyeOff, Pencil, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import api from '../services/api';
@@ -17,11 +17,16 @@ function AdminUsuarios() {
   const [editandoId, setEditandoId] = useState(null);
   const [edicao, setEdicao] = useState({ nome: '', matricula: '', cargo: '' });
 
+  const resetFormRef = useRef(null);
   const [resetando, setResetando] = useState(null);
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [erroSenha, setErroSenha] = useState('');
   const [salvandoSenha, setSalvandoSenha] = useState(false);
+
+  useEffect(() => {
+    if (resetando) resetFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [resetando]);
 
   const fecharReset = () => {
     setResetando(null);
@@ -107,7 +112,7 @@ function AdminUsuarios() {
       setForm(initialForm);
       await carregarServidores();
     } catch (requestError) {
-      setErro(requestError.response?.data?.erro || 'Não foi possível cadastrar o administrador.');
+      setErro(requestError.response?.data?.erro || 'Não foi possível cadastrar o servidor.');
     } finally {
       setEnviando(false);
     }
@@ -190,7 +195,7 @@ function AdminUsuarios() {
             </div>
 
             <div className="admin-users-actions">
-              <button type="submit" disabled={enviando}><UserPlus size={18} />{enviando ? 'Cadastrando...' : 'Cadastrar administrador'}</button>
+              <button type="submit" disabled={enviando}><UserPlus size={18} />{enviando ? 'Cadastrando...' : 'Cadastrar servidor'}</button>
             </div>
             <p>O servidor deverá criar uma nova senha ao entrar pela primeira vez.</p>
           </form>
@@ -242,7 +247,7 @@ function AdminUsuarios() {
           )}
         </section>
         {resetando && (
-          <form className="admin-users-form" onSubmit={redefinirSenha} aria-label="Redefinir senha">
+          <form ref={resetFormRef} className="admin-users-form admin-users-reset" onSubmit={redefinirSenha} aria-label="Redefinir senha">
             <h2>Redefinir senha de {resetando.nome}</h2>
             <p>Matrícula: {resetando.matricula}. A senha será temporária e deverá ser trocada no próximo login. Informe a nova senha ao servidor.</p>
             {erroSenha && <div className="admin-users-message error" role="alert">{erroSenha}</div>}
