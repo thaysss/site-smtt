@@ -192,7 +192,7 @@ function SiteHeader() {
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" onClick={() => setIsMobileMenuOpen(false)}></div>
           {/* Drawer Content */}
-          <div className={`absolute top-0 right-0 w-80 max-w-sm h-full bg-white shadow-2xl flex flex-col p-6 transition-transform duration-300 transform ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className={`absolute top-0 right-0 w-80 max-w-[90vw] h-full overflow-y-auto bg-white shadow-2xl flex flex-col p-6 transition-transform duration-300 transform ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="flex justify-between items-center pb-6 border-b border-gray-100">
               <img src="/vc.png" alt="Logo SMTT" className="h-10 w-auto object-contain" />
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-primary-600 p-2 bg-gray-100 hover:bg-primary-50 rounded-full transition-all">

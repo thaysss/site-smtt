@@ -6783,3 +6783,125 @@ body.alto-contraste .text-gray-900 {
 .admin-activity-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; }
 .admin-activity-controls select, .admin-activity-controls button, .admin-users-list-heading button { padding: 10px; border: 1px solid var(--admin-border); border-radius: 8px; background: #fff; color: var(--admin-action); }
 .admin-activity-controls button:disabled { opacity: .5; }
+
+
+/* Telas pequenas: campos legíveis, menus e modais dentro da área visível. */
+@media (max-width: 900px) {
+  .admin-shell > main,
+  .citizen-portal-main,
+  .citizen-auth-form-panel {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-sidebar,
+  .citizen-sidebar {
+    height: 100dvh;
+    max-width: 90vw;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .admin-shell input:not([type="checkbox"]):not([type="radio"]),
+  .admin-shell select,
+  .admin-shell textarea,
+  .admin-login-field input,
+  .citizen-auth-form input,
+  .citizen-portal-main input,
+  .citizen-portal-main select,
+  .citizen-portal-main textarea {
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .admin-mobile-bar > button,
+  .admin-sidebar-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-shell > main > header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .admin-login-panel {
+    min-height: 100svh;
+    padding: 24px 16px;
+  }
+
+  .admin-login-form-wrap {
+    width: 100%;
+    min-width: 0;
+    padding: 28px 20px;
+    box-sizing: border-box;
+  }
+
+  .admin-login-options {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .ait-workspace {
+    padding: 16px !important;
+  }
+
+  .evento-modal-backdrop {
+    padding: 16px;
+  }
+
+  .evento-modal {
+    max-height: calc(100dvh - 32px);
+  }
+
+  .evento-modal,
+  .recurso-modal {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .recurso-modal {
+    max-height: 100dvh;
+  }
+
+  .evento-modal-header,
+  .recurso-modal-header {
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .evento-modal-body,
+  .recurso-modal-body {
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .evento-modal-footer {
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .evento-modal-footer button {
+    flex: 1 1 140px;
+    min-height: 44px;
+  }
+
+  .citizen-protocol-card li {
+    grid-template-columns: 10px minmax(0, 1fr);
+  }
+
+  .citizen-protocol-card li > :last-child {
+    grid-column: 2;
+  }
+
+  .citizen-welcome-banner h1,
+  .evento-modal-header h2,
+  .recurso-modal-header h2 {
+    overflow-wrap: anywhere;
+  }
+}

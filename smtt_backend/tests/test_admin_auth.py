@@ -2,7 +2,8 @@
 import json
 import unittest
 from unittest.mock import patch
-from flask_jwt_extended import create_access_token
+from datetime import timedelta
+from flask_jwt_extended import create_access_token, decode_token
 from app import create_app
 from app.extensions import db
 from app.models.servidor import Servidor
@@ -142,6 +143,19 @@ class TestAdminAuthentication(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()['perfil'], 'agente_transito')
+        claims = decode_token(response.get_json()['token'])
+        self.assertEqual(claims['exp'] - claims['iat'], 8 * 60 * 60)
+
+    def test_expired_admin_session_is_rejected(self):
+        token = create_access_token(
+            identity='admin-expired',
+            additional_claims={'role': 'administrador'},
+            expires_delta=timedelta(seconds=-1),
+        )
+        response = self.client.get('/api/admin/alertas', headers={
+            'Authorization': f'Bearer {token}',
+        })
+        self.assertEqual(response.status_code, 401)
 
     def test_first_admin_login_requires_password_change(self):
         servidor = Servidor(nome='Primeiro Acesso', matricula='789', cargo='Analista', senha_temporaria=True)
@@ -157,6 +171,8 @@ class TestAdminAuthentication(unittest.TestCase):
         data = response.get_json()
         self.assertTrue(data['troca_senha_obrigatoria'])
         self.assertIn('token_troca_senha', data)
+        claims = decode_token(data['token_troca_senha'])
+        self.assertEqual(claims['exp'] - claims['iat'], 15 * 60)
         self.assertNotIn('token', data)
 
         blocked = self.client.get('/api/admin/alertas', headers={

@@ -1088,7 +1088,7 @@ function Painel() {
       {/* JANELA MODAL DE RECURSO */}
       {modalAberto && (
         <div className="fixed inset-0 bg-primary-950/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-lg shadow-2xl relative overflow-hidden">
+          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-lg shadow-2xl relative max-h-[calc(100dvh-2rem)] overflow-y-auto">
 
             <button onClick={() => setModalAberto(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors">
               <X className="w-5 h-5" />

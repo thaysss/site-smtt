@@ -11,7 +11,9 @@ class Config:
     """Configurações base comuns a todos os ambientes."""
     SECRET_KEY = os.getenv('SECRET_KEY') or secrets.token_hex(32)
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY') or SECRET_KEY
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(
+        hours=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES_HOURS', '8'))
+    )
     CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '*')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 70 * 1024 * 1024))

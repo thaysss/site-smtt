@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BellRing, CalendarDays, ChevronLeft, ChevronRight,
@@ -33,6 +33,20 @@ function AdminSidebar({ activeItem, onTabChange }) {
   );
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (!isMobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsMobileOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMobileOpen]);
 
   const toggleCollapse = () => {
     const nextValue = !isCollapsed;
@@ -83,7 +97,7 @@ function AdminSidebar({ activeItem, onTabChange }) {
             <span>Gestão administrativa</span>
           </div>
         </div>
-        <button type="button" onClick={() => setIsMobileOpen(true)} aria-label="Abrir menu administrativo">
+        <button type="button" onClick={() => setIsMobileOpen(true)} aria-label="Abrir menu administrativo" aria-expanded={isMobileOpen} aria-controls="admin-navigation">
           <Menu size={22} />
         </button>
       </header>
@@ -92,7 +106,7 @@ function AdminSidebar({ activeItem, onTabChange }) {
         <button type="button" className="admin-sidebar-backdrop" onClick={() => setIsMobileOpen(false)} aria-label="Fechar menu administrativo" />
       )}
 
-      <aside className={`admin-sidebar ${isCollapsed ? 'is-collapsed' : ''} ${isMobileOpen ? 'is-mobile-open' : ''}`}>
+      <aside id="admin-navigation" className={`admin-sidebar ${isCollapsed ? 'is-collapsed' : ''} ${isMobileOpen ? 'is-mobile-open' : ''}`}>
         <button type="button" className="admin-sidebar-close" onClick={() => setIsMobileOpen(false)} aria-label="Fechar menu">
           <X size={20} />
         </button>

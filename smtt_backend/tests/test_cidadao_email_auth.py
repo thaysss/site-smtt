@@ -1,3 +1,4 @@
+from flask_jwt_extended import decode_token
 from unittest.mock import patch
 
 from app import create_app
@@ -57,6 +58,9 @@ def test_recuperacao_redefine_senha_com_codigo():
     assert redefinida.status_code == 200
     login = client.post('/api/auth/login', json={'cpf': '10987654321', 'senha': 'senha-nova-segura'})
     assert login.status_code == 200
+    with app.app_context():
+        claims = decode_token(login.get_json()['token'])
+    assert claims['exp'] - claims['iat'] == 8 * 60 * 60
 
 
 def test_recuperacao_nao_revela_conta_inexistente():
