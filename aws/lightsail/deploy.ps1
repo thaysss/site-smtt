@@ -4,12 +4,19 @@ $ErrorActionPreference='Stop'
 if ($ApiDomain -notmatch '^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$') { throw 'Dominio invalido.' }
 $generated=Join-Path $PSScriptRoot 'generated'
 $connection=Get-Content "$generated/connection.json" -Raw | ConvertFrom-Json
-& "$PSScriptRoot/ssh-access.ps1" -Region $connection.region -InstanceName $connection.instanceName
-$connection=Get-Content "$generated/connection.json" -Raw | ConvertFrom-Json
 $key=Join-Path $generated 'ssh-key'
+$cert=Join-Path $generated 'ssh-key-cert.pub'
 $known=Join-Path $generated 'known_hosts'
-$target="$($connection.username)@$($connection.ip)"
-$sshOptions=@('-i',$key,'-o',"UserKnownHostsFile=$known",'-o','StrictHostKeyChecking=yes','-o','BatchMode=yes','-o','ConnectTimeout=10')
+
+function Update-DeploySshAccess {
+    # Lightsail certificates are temporary; refresh before opening a new connection.
+    & "$PSScriptRoot/ssh-access.ps1" -Region $script:connection.region -InstanceName $script:connection.instanceName
+    $script:connection=Get-Content "$generated/connection.json" -Raw | ConvertFrom-Json
+    $script:target="$($script:connection.username)@$($script:connection.ip)"
+    $script:sshOptions=@('-i',$key,'-o',"CertificateFile=$cert",'-o','IdentitiesOnly=yes','-o',"UserKnownHostsFile=$known",'-o','StrictHostKeyChecking=yes','-o','BatchMode=yes','-o','ConnectTimeout=10')
+}
+
+Update-DeploySshAccess
 $envPath=Join-Path $generated 'runtime.env'
 if (-not (Test-Path $envPath)) { throw 'Execute prepare-env.py antes de transferir.' }
 & ssh @sshOptions $target 'test -f /opt/smtt/bootstrap-ready && umask 077 && touch /opt/smtt/production.env && chmod 600 /opt/smtt/production.env'
@@ -27,6 +34,7 @@ $files=@{
 foreach ($entry in $files.GetEnumerator()) {
     $source=Join-Path $generated $entry.Key
     if (-not (Test-Path $source)) { throw "Arquivo ausente: $($entry.Key)" }
+    Update-DeploySshAccess
     if ($entry.Key -eq 'backend-image.tar.gz') {
         $localHash=(Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLowerInvariant()
         $remoteHash=& ssh @sshOptions $target 'sha256sum /opt/smtt/backend-image.tar.gz 2>/dev/null'
@@ -39,6 +47,7 @@ foreach ($entry in $files.GetEnumerator()) {
     if ($LASTEXITCODE -ne 0) { throw "Transferencia falhou: $($entry.Key)" }
 }
 if ($Start) {
+    Update-DeploySshAccess
     & ssh @sshOptions $target 'sh /opt/smtt/start.sh'
     if ($LASTEXITCODE -ne 0) { throw 'Implantacao nao ficou saudavel; manter Railway.' }
 } else { Write-Host 'Arquivos transferidos. Use -Start para iniciar apos validar DNS e uploads.' }
