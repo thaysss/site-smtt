@@ -7,7 +7,7 @@ import {
   CheckCircle, XCircle, FileText, Paperclip, Upload,
   Calendar, Search, Clock3, SlidersHorizontal,
   Home, ChevronRight, Filter, MapPin, RefreshCw, Download,
-  ArrowUpDown, ChevronDown, ChevronUp, ShieldAlert
+  ArrowUpDown, ChevronDown, ChevronUp, ShieldAlert, Printer
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminRegistrosSection from '../components/AdminRegistrosSection';
@@ -16,6 +16,7 @@ import AdminDateFilter from '../components/AdminDateFilter';
 import AdminAlvarasSection from '../components/AdminAlvarasSection';
 import AdminOuvidoriaSection from '../components/AdminOuvidoriaSection';
 import { matchesDateFilter } from '../utils/dateFilters';
+import { printAutoInfracao } from '../utils/printAutoInfracao';
 import { canAccessAdmin, firstAllowedPanelTab } from '../utils/adminPermissions';
 
 const CAMPOS_EDICAO_INFRACAO = [
@@ -1470,6 +1471,14 @@ function AdminPainel({ defaultTab }) {
                         </button>
 
                         <div className="px-5 pb-3 flex flex-wrap justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => printAutoInfracao(inf)}
+                            aria-label={`Imprimir auto de infração ${inf.numero_ait || ''}`}
+                            className="rounded-lg border border-blue-200 px-3 py-2 text-xs font-bold text-blue-700 transition-colors hover:bg-blue-50 flex items-center gap-2"
+                          >
+                            <Printer size={15} /> Imprimir auto
+                          </button>
                           {PROXIMA_FASE_INFRACAO[inf.fase_atual || 'Autuação'] && !cancelada && (
                             <button
                               type="button"
