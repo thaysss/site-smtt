@@ -11,16 +11,23 @@ export function printAutoInfracao(infracao) {
   doc.title = `Auto de Infração - ${infracao.numero_ait || 'Sem número'}`;
   const style = doc.createElement('style');
   style.textContent = `
-    @page { size: A4; margin: 15mm; }
+    @page { size: A4; margin: 8mm; }
     * { box-sizing: border-box; }
-    body { margin: 24px auto; max-width: 780px; color: #111; font: 12px Arial, sans-serif; }
-    header { border-bottom: 2px solid #111; padding-bottom: 16px; }
-    h1 { font-size: 21px; margin: 12px 0; } h2 { font-size: 13px; margin: 0; padding: 8px; background: #eee; }
-    section { border: 1px solid #aaa; margin-top: 16px; break-inside: avoid; }
-    dl { display: grid; grid-template-columns: 1fr 1fr; margin: 0; }
-    dl div { padding: 9px; min-width: 0; } dt { font-size: 10px; color: #444; margin-bottom: 4px; }
+    body { margin: 24px auto; padding: 15px; max-width: 800px; border: 1px solid #ccc; background: white; color: #111; font: 11px Arial, sans-serif; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 50px; height: 50px; object-fit: contain; }
+    .brand strong { display: block; color: #003399; font-size: 11px; text-transform: uppercase; }
+    .brand small { display: block; margin-top: 3px; color: #555; font-size: 9px; font-weight: bold; }
+    .document-title { text-align: right; } h1 { font-size: 10px; text-transform: uppercase; margin: 0 0 5px; }
+    h2 { font-size: 9px; margin: 0; padding: 4px 8px; background: #333; color: white; text-transform: uppercase; letter-spacing: .5px; }
+    section { border: 1px solid #333; border-radius: 4px; overflow: hidden; margin-top: 12px; break-inside: avoid; }
+    dl { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; }
+    dl div { padding: 6px; min-width: 0; border-bottom: 1px solid #eee; }
+    dl div:nth-child(even) { background: #fafafa; }
+    dt { font-size: 8px; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; }
     dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .wide { grid-column: 1 / -1; } footer { margin-top: 20px; font-size: 10px; color: #444; }
+    .wide { grid-column: 1 / -1; } footer { margin-top: 15px; padding-top: 6px; border-top: 1px solid #ccc; font-size: 8px; color: #777; text-align: center; font-style: italic; }
     nav { display: flex; gap: 12px; margin-bottom: 24px; } button { padding: 10px 18px; cursor: pointer; }
     @media print { body { margin: 0; max-width: none; } nav { display: none; } }
   `;
@@ -35,9 +42,22 @@ export function printAutoInfracao(infracao) {
   element('button', 'Imprimir / Salvar PDF', nav).onclick = () => { popup.focus(); popup.print(); };
   element('button', 'Fechar', nav).onclick = () => popup.close();
   const header = element('header', undefined, doc.body);
-  element('strong', 'SMTT — Município de Propriá / SE', header);
-  element('h1', 'Auto de Infração de Trânsito', header);
-  element('div', `Número do AIT: ${infracao.numero_ait || 'Não informado'}`, header);
+  const brand = element('div', undefined, header);
+  brand.className = 'brand';
+  const logo = element('img', undefined, brand);
+  logo.alt = 'Logo SMTT';
+  const logoReady = new Promise((resolve) => {
+    logo.onload = resolve;
+    logo.onerror = resolve;
+  });
+  logo.src = new URL('/SMTT.png', window.location.origin).href;
+  const brandText = element('div', undefined, brand);
+  element('strong', 'Superintendência Municipal de Trânsito e Transporte', brandText);
+  element('small', 'SMTT PROPRIÁ — PROPRIÁ/SE', brandText);
+  const heading = element('div', undefined, header);
+  heading.className = 'document-title';
+  element('h1', 'Auto de Infração de Trânsito', heading);
+  element('div', `Número do AIT: ${infracao.numero_ait || 'Não informado'}`, heading);
   const section = (title, fields) => {
     const container = element('section', undefined, doc.body);
     element('h2', title, container);
@@ -51,12 +71,13 @@ export function printAutoInfracao(infracao) {
   };
   const vehicle = infracao.veiculo || {};
   const type = infracao.tipo_infracao || {};
-  section('Identificação do veículo', [
-    ['Placa', vehicle.placa], ['UF', vehicle.uf], ['Marca / Modelo', vehicle.marca_modelo],
+  section('Dados da infração — Identificação do veículo', [
+    ['Órgão autuador', 'SMTT PROPRIÁ'], ['Número do auto (AIT)', infracao.numero_ait],
+    ['Placa', vehicle.placa || infracao.placa_veiculo], ['UF', vehicle.uf], ['Marca / Modelo', vehicle.marca_modelo],
     ['Cor', vehicle.cor], ['Ano de fabricação', vehicle.ano_fabricacao], ['Renavam', vehicle.renavam],
   ]);
   section('Ocorrência', [
-    ['Data e hora', infracao.data_hora_infracao], ['Local do cometimento', infracao.local_cometimento],
+    ['Data e hora', infracao.data_hora_infracao], ['Local do cometimento', infracao.local_cometimento, true],
   ]);
   section('Enquadramento', [
     ['Código da infração', type.codigo_infracao], ['Desdobramento', infracao.desdobramento],
@@ -75,6 +96,11 @@ export function printAutoInfracao(infracao) {
     ['Número da NIP', infracao.numero_nip],
   ]);
   element('footer', `Cópia dos dados cadastrados no sistema SMTT. Emitida em ${new Date().toLocaleString('pt-BR')}.`, doc.body);
-  popup.focus();
-  popup.print();
+  // Wait for the logo before opening the print preview, including on a cold cache.
+  logoReady.then(() => {
+    if (!popup.closed) {
+      popup.focus();
+      popup.print();
+    }
+  });
 }
