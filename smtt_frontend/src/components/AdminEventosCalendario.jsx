@@ -55,7 +55,12 @@ export default function AdminEventosCalendario({ eventos, onAbrir }) {
           className={`event-calendar-day ${date.getMonth() !== mes.getMonth() ? 'outside' : ''} ${dia === key ? 'selected' : ''}`}
           onClick={() => { setDia(key); setMes(new Date(date.getFullYear(), date.getMonth(), 1)); }}>
           <span className="event-calendar-number">{date.getDate()}</span>
-          {items.slice(0, 2).map((evento) => <span key={evento.id} className={`event-calendar-chip ${tom(evento.status)}`} title={evento.local_evento || evento.numero_protocolo}>{evento.local_evento || evento.numero_protocolo}</span>)}
+          {items.slice(0, 2).map((evento) => <span key={evento.id} className="event-calendar-event">
+            <span className={`event-calendar-chip ${tom(evento.status)}`} title={evento.local_evento || evento.numero_protocolo}>{evento.local_evento || evento.numero_protocolo}</span>
+            <span className="event-calendar-chip event-calendar-responsible" title={`Responsável: ${evento.nome_solicitante || 'Não informado'}`}>
+              <span className="sr-only">Responsável: </span>{evento.nome_solicitante || 'Responsável não informado'}
+            </span>
+          </span>)}
           {items.length > 2 && <small>+{items.length - 2} eventos</small>}
           {items.length > 0 && <span className="event-calendar-mobile-count">{items.length}</span>}
         </button>;
