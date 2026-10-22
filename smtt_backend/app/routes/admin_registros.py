@@ -25,7 +25,7 @@ RECURSOS = {
     'protocolos': (Protocolo, 'Protocolos', 'numero_protocolo tipo_servico status'),
 }
 EDITAVEIS = {
-    'eventos': 'resposta_analise',
+    'eventos': 'nome_solicitante cpf_cnpj email telefone data_evento local_evento descricao resposta_analise',
     'alvaras': 'resposta_analise',
     'recursos': 'justificativa_julgamento',
 }
@@ -92,7 +92,7 @@ def campos(model, nomes):
         tipo = col.type.python_type
         result.append({
             'nome': nome, 'label': LABELS.get(nome, nome.replace('_', ' ').capitalize()),
-            'tipo': ('checkbox' if tipo is bool else 'datetime-local' if tipo is datetime else 'date' if tipo is date else 'number' if tipo in (int, Decimal) else 'textarea' if isinstance(col.type, db.Text) else 'email' if nome == 'email' else 'text'),
+            'tipo': ('checkbox' if tipo is bool else 'datetime-local' if tipo is datetime or nome == 'data_evento' else 'date' if tipo is date else 'number' if tipo in (int, Decimal) else 'textarea' if isinstance(col.type, db.Text) else 'email' if nome == 'email' else 'text'),
             'obrigatorio': not col.nullable, 'maxLength': getattr(col.type, 'length', None),
             'step': '1' if tipo is int else '0.01',
         })
@@ -201,6 +201,10 @@ def registrar_gestao(bp):
                 valores = {}
                 for nome, valor in dados.items():
                     try:
+                        if recurso == 'eventos' and nome == 'data_evento':
+                            parsed = datetime.fromisoformat(valor)
+                            if parsed.tzinfo is not None:
+                                raise ValueError('Informe a data e hora local.')
                         valores[nome] = converter(model.__table__.columns[nome], valor)
                     except (ValueError, TypeError, InvalidOperation, OverflowError):
                         return jsonify(erro=f'Valor inválido para {LABELS.get(nome, nome.replace("_", " "))}.'), 400

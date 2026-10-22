@@ -213,7 +213,7 @@ class SolicitacaoEvento(db.Model):
             "anexo_resposta": self.anexo_resposta,
             "numero_protocolo": self.protocolo.numero_protocolo if self.protocolo else None,
             "status": self.protocolo.status if self.protocolo else None,
-            "criado_em": self.protocolo.criado_em.strftime("%d/%m/%Y") if self.protocolo else None
+            "criado_em": self.protocolo.criado_em.strftime("%d/%m/%Y %H:%M") if self.protocolo and self.protocolo.criado_em else None
         }
 
 

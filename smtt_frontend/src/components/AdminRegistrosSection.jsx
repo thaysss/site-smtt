@@ -98,7 +98,7 @@ export default function AdminRegistrosSection({ target, onClose, onSaved }) {
   return <section className="space-y-6">
     {target && !editing && !deleting && <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"><div role="dialog" aria-modal="true" aria-label="Carregar registro" className="bg-white rounded-2xl p-6 max-w-lg"><p role={error ? 'alert' : 'status'}>{error || 'Carregando registro...'}</p><button type="button" className="mt-4 px-4 py-2 border rounded-xl" onClick={onClose}>Fechar</button></div></div>}
     {!target && <>
-    <div><h1 className="text-2xl font-bold text-gray-900">Editar e excluir registros</h1><p className="text-sm text-gray-600 mt-2">Gerencie solicitações, ações publicadas e registros administrativos. Nas solicitações, edite somente respostas, pareceres e anexos.</p></div>
+    <div><h1 className="text-2xl font-bold text-gray-900">Editar e excluir registros</h1><p className="text-sm text-gray-600 mt-2">Gerencie solicitações, ações publicadas e registros administrativos. Nos eventos, edite também os dados do responsável, data, horário, local e descrição.</p></div>
     {message && <p role="status" className="p-3 rounded-xl bg-green-50 text-green-800">{message}</p>}
     {error && !editing && !deleting && <div role="alert" className="p-3 rounded-xl bg-red-50 text-red-700">{error} <button type="button" className="underline" onClick={() => { setLoading(true); setError(''); setRevision((n) => n + 1); }}>Tentar novamente</button></div>}
     <div className="grid gap-4 sm:grid-cols-2">

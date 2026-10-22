@@ -68,7 +68,13 @@ class TestAdminRegistros(unittest.TestCase):
         db.session.refresh(item)
         self.assertEqual(item.nome_solicitante, 'Maria')
         self.assertEqual(item.resposta_analise, 'Parecer corrigido')
-        self.assertEqual(self.request('put', 'eventos', item.id, json={'nome_solicitante': 'Outro'}).status_code, 400)
+        self.assertEqual(self.request('put', 'eventos', item.id, json={'nome_solicitante': 'Outro', 'data_evento': '2026-11-07T12:30', 'local_evento': 'Centro', 'descricao': 'Caminhada'}).status_code, 200)
+        db.session.refresh(item)
+        self.assertEqual(item.nome_solicitante, 'Outro')
+        self.assertEqual(item.data_evento, '2026-11-07T12:30')
+        self.assertEqual(item.local_evento, 'Centro')
+        self.assertEqual(self.request('put', 'eventos', item.id, json={'data_evento': 'invalid'}).status_code, 400)
+        self.assertEqual(self.request('put', 'eventos', item.id, json={'criado_em': '2026-01-01'}).status_code, 400)
         self.assertEqual(item.protocolo_id, protocol.id)
         self.assertEqual(item.caminho_arquivo, '/static/uploads/test.pdf')
         self.assertEqual(self.request('put', 'eventos', item.id, json={'protocolo_id': 99}).status_code, 400)
@@ -148,9 +154,18 @@ class TestAdminRegistros(unittest.TestCase):
         self.assertEqual(self.request('get', 'unknown').status_code, 404)
 
     def test_only_responses_are_editable_for_requests(self):
-        for category, expected in [('eventos', 'resposta_analise'), ('alvaras', 'resposta_analise'), ('recursos', 'justificativa_julgamento')]:
+        for category, expected in [('alvaras', 'resposta_analise'), ('recursos', 'justificativa_julgamento')]:
             data = self.request('get', category).get_json()
             self.assertEqual([field['nome'] for field in data['campos']], [expected])
+
+    def test_event_fields_and_submission_time(self):
+        _, _, protocol, item = self.seed()
+        protocol.criado_em = datetime(2026, 10, 22, 16, 17)
+        db.session.commit()
+        self.assertEqual(item.to_dict()['criado_em'], '22/10/2026 16:17')
+        fields = self.request('get', 'eventos').get_json()['campos']
+        self.assertEqual(next(field['tipo'] for field in fields if field['nome'] == 'data_evento'), 'datetime-local')
+        self.assertNotIn('criado_em', [field['nome'] for field in fields])
 
     def test_replace_attachment_preserves_original_data(self):
         _, _, protocol, item = self.seed()

@@ -32,6 +32,11 @@ const CAMPOS_EDICAO_INFRACAO = [
   ['nosso_numero', 'Nosso número', 'text'], ['data_vencimento_boleto', 'Vencimento do boleto', 'date']
 ];
 const apiBaseUrl = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
+const formatarDataEvento = (value) => {
+  if (!value) return 'Não informada';
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}:\d{2}))?/);
+  return match ? `${match[3]}/${match[2]}/${match[1]}${match[4] ? ` às ${match[4]}` : ''}` : value;
+};
 const FASES_INFRACAO = [
   'Autuação',
   'Notificação de Autuação',
@@ -1216,6 +1221,7 @@ function AdminPainel({ defaultTab }) {
                           <th>Protocolo</th>
                           <th>Responsável</th>
                           <th>Data do evento</th>
+                          <th>Pedido enviado em</th>
                           <th>Local</th>
                           <th>Status</th>
                           <th>Ação</th>
@@ -1229,7 +1235,8 @@ function AdminPainel({ defaultTab }) {
                             <tr key={eve.id}>
                               <td className="eventos-protocolo">{eve.numero_protocolo}</td>
                               <td>{eve.nome_solicitante || 'Não informado'}</td>
-                              <td>{eve.data_evento || 'Não informada'}</td>
+                              <td>{formatarDataEvento(eve.data_evento)}</td>
+                              <td>{eve.criado_em || 'Não informado'}</td>
                               <td>{eve.local_evento || 'Não informado'}</td>
                               <td>
                                 <span className={'eventos-status ' + (eve.status === 'Aprovado' ? 'is-approved' : eve.status === 'Negado' ? 'is-denied' : aguardando ? 'is-waiting' : 'is-review')}>
@@ -1244,7 +1251,7 @@ function AdminPainel({ defaultTab }) {
                                 >
                                   {finalizado ? 'Visualizar' : aguardando ? 'Analisar' : 'Continuar análise'}
                                 </button>
-                                <AdminRegistroActions category="eventos" id={eve.id} onEdit={() => abrirEvento(eve, true)} onSaved={carregarEventos} />
+                                <AdminRegistroActions category="eventos" id={eve.id} onSaved={carregarEventos} />
                               </td>
                             </tr>
                           );
@@ -1290,7 +1297,8 @@ function AdminPainel({ defaultTab }) {
                       <section className="evento-modal-section">
                         <h3>Dados do evento e da interdição</h3>
                         <dl className="evento-modal-grid">
-                          <div><dt>Data e horário</dt><dd>{eventoSelecionado.data_evento || 'Não informado'}</dd></div>
+                          <div><dt>Data e horário do evento</dt><dd>{formatarDataEvento(eventoSelecionado.data_evento)}</dd></div>
+                          <div><dt>Pedido enviado em</dt><dd>{eventoSelecionado.criado_em || 'Não informado'}</dd></div>
                           <div><dt>Local e vias</dt><dd>{eventoSelecionado.local_evento || 'Não informado'}</dd></div>
                         </dl>
                         {eventoSelecionado.descricao && <div className="evento-modal-description"><span>Descrição</span><p>{eventoSelecionado.descricao}</p></div>}
