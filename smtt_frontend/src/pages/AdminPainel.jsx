@@ -1,4 +1,5 @@
 import AdminCountBadge from '../components/AdminCountBadge';
+import AdminEventosCalendario from '../components/AdminEventosCalendario';
 // src/pages/AdminPainel.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -1170,7 +1171,7 @@ function AdminPainel({ defaultTab }) {
                   </select>
                 </div>
                 <div className="eventos-field">
-                  <label htmlFor="evento-periodo">Período</label>
+                  <label htmlFor="evento-periodo">Período da solicitação</label>
                   <select id="evento-periodo" value={periodMode} onChange={(event) => handlePeriodModeChange(event.target.value)}>
                     <option value="all">Todos os períodos</option>
                     <option value="day">Dia específico</option>
@@ -1189,6 +1190,8 @@ function AdminPainel({ defaultTab }) {
                 </button>
               </div>
             </section>
+
+            <AdminEventosCalendario eventos={eventosFiltrados} onAbrir={abrirEvento} />
 
             <section className="eventos-results-card eventos-table-card">
               <header>
