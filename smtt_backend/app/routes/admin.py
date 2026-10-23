@@ -485,6 +485,49 @@ def listar_eventos_admin():
     return jsonify(resultado), 200
 
 
+@admin_bp.route('/eventos', methods=['POST'])
+def criar_evento_admin():
+    limites = {'nome_solicitante': 150, 'cpf_cnpj': 20, 'email': 100,
+               'telefone': 20, 'data_evento': 50, 'local_evento': 255, 'descricao': 2000}
+    dados = {campo: request.form.get(campo, '').strip() for campo in limites}
+    for campo, limite in limites.items():
+        if (campo != 'descricao' and not dados[campo]) or len(dados[campo]) > limite:
+            return jsonify(erro=f'Preencha corretamente o campo {campo.replace("_", " ") }.'), 400
+    documento = ''.join(c for c in dados['cpf_cnpj'] if c.isdigit())
+    if len(documento) not in (11, 14):
+        return jsonify(erro='Informe um CPF ou CNPJ com 11 ou 14 dígitos.'), 400
+    dados['cpf_cnpj'] = documento
+    if '@' not in dados['email'] or '.' not in dados['email'].rsplit('@', 1)[-1]:
+        return jsonify(erro='Informe um e-mail válido.'), 400
+    try:
+        data = datetime.fromisoformat(dados['data_evento'])
+        if data.tzinfo is not None or 'T' not in dados['data_evento']:
+            raise ValueError()
+        dados['data_evento'] = data.isoformat(timespec='minutes')
+    except ValueError:
+        return jsonify(erro='Informe uma data e horário válidos para o evento.'), 400
+    arquivo = request.files.get('arquivo')
+    if not validate_upload(arquivo):
+        return jsonify(erro='Anexe um requerimento PDF, PNG ou JPEG válido de até 10 MB.'), 400
+    caminho = None
+    try:
+        numero = f"EVE{get_brasilia_time().strftime('%Y%m%d')}{uuid.uuid4().hex[:9].upper()}"
+        protocolo = Protocolo(numero_protocolo=numero, tipo_servico='Solicitação de Evento', status='Em Análise')
+        db.session.add(protocolo)
+        db.session.flush()
+        extensao = os.path.splitext(secure_filename(arquivo.filename))[1].lower()
+        caminho = save_upload(arquivo, f'eventos/evento_{numero}_{uuid.uuid4().hex}{extensao}')
+        evento = SolicitacaoEvento(protocolo_id=protocolo.id, caminho_arquivo=caminho, **dados)
+        db.session.add(evento)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        if caminho:
+            delete_upload(caminho)
+        return jsonify(erro='Não foi possível cadastrar o evento. Tente novamente.'), 500
+    return jsonify(mensagem='Evento cadastrado com sucesso.', protocolo=numero, registro=evento.to_dict()), 201
+
+
 @admin_bp.route('/ouvidoria', methods=['GET'])
 def listar_ouvidoria_admin():
     mensagens = MensagemOuvidoria.query.order_by(MensagemOuvidoria.id.desc()).all()

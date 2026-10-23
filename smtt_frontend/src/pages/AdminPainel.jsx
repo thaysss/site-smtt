@@ -1,5 +1,6 @@
 import AdminCountBadge from '../components/AdminCountBadge';
 import AdminEventosCalendario from '../components/AdminEventosCalendario';
+import AdminNovoEvento from '../components/AdminNovoEvento';
 // src/pages/AdminPainel.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -1146,6 +1147,7 @@ function AdminPainel({ defaultTab }) {
                 <h1>Solicitações de Eventos</h1>
                 <p>Analise e acompanhe os pedidos de interdição de vias para eventos.</p>
               </div>
+              <AdminNovoEvento onSaved={(data) => { setMensagem(`Evento cadastrado com sucesso! Protocolo: ${data.protocolo}`); setEventoBusca(''); setEventoStatus('Todos'); clearPeriodFilter(); setEventoPage(1); carregarEventos(); }} />
             </header>
 
             <section className="admin-count-grid" aria-label="Resumo das solicitações">

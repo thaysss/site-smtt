@@ -4171,6 +4171,11 @@ body.alto-contraste .text-gray-900 {
   line-height: 1.55;
 }
 
+.novo-evento-campos { border: 0; padding: 0; margin: 18px 0 0; min-width: 0; display: grid; gap: 18px; }
+.novo-evento-campos input, .novo-evento-campos textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #cbdcf4; border-radius: 8px; font: inherit; }
+.novo-evento-erro { color: #b91c1c; }
+.eventos-page-header > .evento-modal-approve { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+
 .evento-modal-file {
   display: inline-flex;
   align-items: center;
