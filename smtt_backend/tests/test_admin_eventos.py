@@ -51,6 +51,27 @@ class TestAdminEventos(unittest.TestCase):
             self.assertEqual(db.session.get(Protocolo, protocolo.id).status, decisao)
             enviar.assert_called_with('maria@example.com', 'Maria', 'EVT-TESTE', decisao, 'Parecer técnico')
 
+        enviar.reset_mock()
+        for status in ('Em Análise', 'Aguardando Análise'):
+            resposta = self.client.put(
+                f'/api/admin/eventos/{evento.id}/julgar',
+                data={'decisao': status, 'justificativa_jari': ''},
+                headers=self.headers('supervisor'),
+            )
+            self.assertEqual(resposta.status_code, 200)
+            self.assertEqual(db.session.get(Protocolo, protocolo.id).status, status)
+        enviar.assert_not_called()
+
+        for status, parecer in [('Inválido', 'Parecer'), ('Aprovado', ' '), ('Negado', '')]:
+            resposta = self.client.put(
+                f'/api/admin/eventos/{evento.id}/julgar',
+                json={'decisao': status, 'justificativa_jari': parecer},
+                headers=self.headers('supervisor'),
+            )
+            self.assertEqual(resposta.status_code, 400)
+            self.assertEqual(db.session.get(Protocolo, protocolo.id).status, 'Aguardando Análise')
+        enviar.assert_not_called()
+
     @patch('app.services.email.enviar_email', return_value=True)
     def test_email_contem_protocolo_decisao_e_parecer(self, enviar):
         from app.services.email import enviar_resposta_evento

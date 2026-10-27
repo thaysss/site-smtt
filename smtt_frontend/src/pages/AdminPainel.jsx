@@ -110,6 +110,8 @@ function AdminPainel({ defaultTab }) {
   const [eventoModoEdicao, setEventoModoEdicao] = useState(false);
   const [arquivoRespostaEvento, setArquivoRespostaEvento] = useState(null);
   const [justificativaEvento, setJustificativaEvento] = useState('');
+  const [statusEvento, setStatusEvento] = useState('Em Análise');
+  const [eventoSalvando, setEventoSalvando] = useState(false);
   const [infracoes, setInfracoes] = useState([]);
   const [filtroInfracao, setFiltroInfracao] = useState('');
   const [infracaoAberta, setInfracaoAberta] = useState(null);
@@ -691,10 +693,10 @@ function AdminPainel({ defaultTab }) {
   };
 
   const abrirEvento = (evento, editar = false) => {
-    const finalizado = evento.status === 'Aprovado' || evento.status === 'Negado';
     setEventoFoco(evento.id);
     setEventoModoEdicao(editar);
-    setJustificativaEvento(finalizado ? (evento.resposta_analise || '') : '');
+    setStatusEvento(['Aprovado', 'Negado', 'Em Análise'].includes(evento.status) ? evento.status : 'Aguardando Análise');
+    setJustificativaEvento(evento.resposta_analise || '');
     setArquivoRespostaEvento(null);
   };
 
@@ -705,11 +707,13 @@ function AdminPainel({ defaultTab }) {
     setArquivoRespostaEvento(null);
   };
   const julgarEvento = async (id, decisao) => {
-    if (!justificativaEvento) {
+    if (eventoSalvando) return;
+    if (['Aprovado', 'Negado'].includes(decisao) && !justificativaEvento.trim()) {
       alert("Digite o parecer técnico antes de decidir.");
       return;
     }
     
+    setEventoSalvando(true);
     try {
       const formData = new FormData();
       formData.append('decisao', decisao);
@@ -723,9 +727,11 @@ function AdminPainel({ defaultTab }) {
       setArquivoRespostaEvento(null);
       setEventoFoco(null);
       setEventoModoEdicao(false);
-      carregarEventos();
-    } catch {
-      alert("Erro ao julgar solicitação de evento.");
+      await carregarEventos();
+    } catch (error) {
+      alert(error.response?.data?.erro || "Erro ao atualizar solicitação de evento.");
+    } finally {
+      setEventoSalvando(false);
     }
   };
 
@@ -1327,7 +1333,14 @@ function AdminPainel({ defaultTab }) {
                           </div>
                         ) : (
                           <>
-                            <label htmlFor="parecer-evento-modal">Parecer técnico *</label>
+                            <label htmlFor="status-evento-modal">Status da análise</label>
+                            <select id="status-evento-modal" value={statusEvento} onChange={(event) => setStatusEvento(event.target.value)} disabled={eventoSalvando} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 mb-4">
+                              <option value="Aguardando Análise">Aguardando análise</option>
+                              <option value="Em Análise">Em análise</option>
+                              <option value="Aprovado">Aprovado</option>
+                              <option value="Negado">Negado</option>
+                            </select>
+                            <label htmlFor="parecer-evento-modal">Parecer técnico {['Aprovado', 'Negado'].includes(statusEvento) ? '*' : '(opcional)'}</label>
                             <textarea
                               id="parecer-evento-modal"
                               rows="5"
@@ -1347,13 +1360,10 @@ function AdminPainel({ defaultTab }) {
 
                     <footer className="evento-modal-footer">
                       <button type="button" className="evento-modal-cancel" onClick={fecharEvento}>{finalizado && !eventoModoEdicao ? 'Fechar' : 'Cancelar'}</button>
-                      {eventoModoEdicao && finalizado ? (
-                        <button type="button" className="evento-modal-approve" disabled={!justificativaEvento.trim()} onClick={() => julgarEvento(eventoSelecionado.id, eventoSelecionado.status)}><CheckCircle size={18} /> Salvar alterações</button>
-                      ) : !finalizado && (
-                        <>
-                          <button type="button" className="evento-modal-deny" onClick={() => julgarEvento(eventoSelecionado.id, 'Negado')}><XCircle size={18} /> Negar solicitação</button>
-                          <button type="button" className="evento-modal-approve" onClick={() => julgarEvento(eventoSelecionado.id, 'Aprovado')}><CheckCircle size={18} /> Aprovar solicitação</button>
-                        </>
+                      {finalizado && !eventoModoEdicao ? (
+                        <button type="button" className="evento-modal-approve" onClick={() => abrirEvento(eventoSelecionado, true)}>Alterar status da análise</button>
+                      ) : (
+                        <button type="button" className="evento-modal-approve" disabled={eventoSalvando || (['Aprovado', 'Negado'].includes(statusEvento) && !justificativaEvento.trim())} onClick={() => julgarEvento(eventoSelecionado.id, statusEvento)}><CheckCircle size={18} /> {eventoSalvando ? 'Salvando...' : 'Salvar análise'}</button>
                       )}
                     </footer>
                   </section>

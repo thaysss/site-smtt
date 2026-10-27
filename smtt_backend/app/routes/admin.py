@@ -582,8 +582,14 @@ def julgar_evento(id):
         
     if not decisao:
         return jsonify({"erro": "A decisão é obrigatória."}), 400
-        
-    evento.resposta_analise = parecer or f"Solicitação avaliada pela equipe e classificada como: {decisao}."
+    if decisao not in {'Aguardando Análise', 'Em Análise', 'Aprovado', 'Negado'}:
+        return jsonify({"erro": "Status de análise inválido."}), 400
+    finalizado = decisao in {'Aprovado', 'Negado'}
+    parecer = (parecer or '').strip()
+    if finalizado and not parecer:
+        return jsonify({"erro": "Informe o parecer técnico para aprovar ou negar a solicitação."}), 400
+
+    evento.resposta_analise = parecer
     arquivo_resposta = request.files.get('arquivo_resposta')
     if arquivo_resposta and arquivo_resposta.filename:
         if not validate_upload(arquivo_resposta):
@@ -601,9 +607,11 @@ def julgar_evento(id):
         evento.anexo_resposta = save_upload(arquivo_resposta, f"eventos/respostas/{nome_seguro}")
     
     if evento.protocolo:
-        evento.protocolo.status = decisao # Ex: 'Aprovado' ou 'Negado'
+        evento.protocolo.status = decisao
         
     db.session.commit()
+    if not finalizado:
+        return jsonify({"mensagem": "Status da análise do evento atualizado com sucesso!"}), 200
     email_enviado = enviar_resposta_evento(
         evento.email, evento.nome_solicitante,
         evento.protocolo.numero_protocolo, decisao, evento.resposta_analise,
