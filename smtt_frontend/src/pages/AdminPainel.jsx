@@ -1,4 +1,5 @@
 import AdminCountBadge from '../components/AdminCountBadge';
+import AdminHistorico from '../components/AdminHistorico';
 import AdminEventosCalendario from '../components/AdminEventosCalendario';
 import AdminNovoEvento from '../components/AdminNovoEvento';
 // src/pages/AdminPainel.jsx
@@ -714,9 +715,10 @@ function AdminPainel({ defaultTab }) {
       formData.append('decisao', decisao);
       formData.append('justificativa_jari', justificativaEvento);
       if (arquivoRespostaEvento) formData.append('arquivo_resposta', arquivoRespostaEvento);
-      await api.put(`/admin/eventos/${id}/julgar`, formData);
+      const response = await api.put(`/admin/eventos/${id}/julgar`, formData);
       
-      setMensagem(`Solicitação de evento ${decisao === 'Aprovado' ? 'aprovada' : 'negada'} com sucesso!`);
+      setMensagem(response.data.mensagem);
+      if (response.data.email_enviado === false) alert(response.data.mensagem);
       setJustificativaEvento('');
       setArquivoRespostaEvento(null);
       setEventoFoco(null);
@@ -1064,6 +1066,7 @@ function AdminPainel({ defaultTab }) {
                     </header>
 
                     <div className="recurso-modal-body">
+                      <AdminHistorico key={recursoSelecionado.id} entidade="recursos" registroId={recursoSelecionado.id} />
                       <section className="recurso-overview">
                         <div><span>Tipo de recurso</span><strong>{recursoSelecionado.tipo_recurso || 'Defesa Prévia'}</strong></div>
                         <div><span>Número do AIT</span><strong>{recursoSelecionado.infracao?.numero_ait || 'N/A'}</strong></div>
@@ -1286,6 +1289,7 @@ function AdminPainel({ defaultTab }) {
                     </header>
 
                     <div className="evento-modal-body">
+                      <AdminHistorico key={eventoSelecionado.id} entidade="eventos" registroId={eventoSelecionado.id} />
                       <section className="evento-modal-section">
                         <h3>Dados do responsável</h3>
                         <dl className="evento-modal-grid">
@@ -1507,6 +1511,7 @@ function AdminPainel({ defaultTab }) {
 
                         {estaAberto && (
                           <div className="infracao-card-details">
+                            <AdminHistorico key={inf.id} entidade="infracoes" registroId={inf.id} />
                             <div className="infracao-details-grid">
                               <section>
                                 <h4>Veículo cadastrado</h4>

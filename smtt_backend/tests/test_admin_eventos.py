@@ -27,6 +27,40 @@ class TestAdminEventos(unittest.TestCase):
     def dados(self):
         return dict(nome_solicitante='Responsável', cpf_cnpj='123.456.789-01', email='gestor@example.com', telefone='79999999999', data_evento='2026-11-10T14:30', local_evento='Praça central', descricao='Evento cultural', arquivo=(BytesIO(b'%PDF-1.4\nexample'), 'requerimento.pdf'))
 
+    @patch('app.routes.admin.enviar_resposta_evento')
+    def test_julgamento_envia_email_e_preserva_decisao_se_envio_falhar(self, enviar):
+        protocolo = Protocolo(numero_protocolo='EVT-TESTE', tipo_servico='Solicitação de Evento')
+        db.session.add(protocolo)
+        db.session.flush()
+        evento = SolicitacaoEvento(
+            protocolo_id=protocolo.id, nome_solicitante='Maria', cpf_cnpj='123',
+            email='maria@example.com', telefone='123', data_evento='2026-11-10',
+            caminho_arquivo='/static/uploads/eventos/teste.pdf',
+        )
+        db.session.add(evento)
+        db.session.commit()
+        for decisao, sucesso in [('Aprovado', True), ('Negado', False), ('Negado', True)]:
+            enviar.return_value = sucesso
+            resposta = self.client.put(
+                f'/api/admin/eventos/{evento.id}/julgar',
+                json={'decisao': decisao, 'justificativa_jari': 'Parecer técnico'},
+                headers=self.headers('supervisor'),
+            )
+            self.assertEqual(resposta.status_code, 200)
+            self.assertEqual(resposta.get_json()['email_enviado'], sucesso)
+            self.assertEqual(db.session.get(Protocolo, protocolo.id).status, decisao)
+            enviar.assert_called_with('maria@example.com', 'Maria', 'EVT-TESTE', decisao, 'Parecer técnico')
+
+    @patch('app.services.email.enviar_email', return_value=True)
+    def test_email_contem_protocolo_decisao_e_parecer(self, enviar):
+        from app.services.email import enviar_resposta_evento
+        self.assertTrue(enviar_resposta_evento('maria@example.com', 'Maria', 'EVT-TESTE', 'Aprovado', 'Via liberada.'))
+        destinatario, assunto, corpo = enviar.call_args.args
+        self.assertEqual(destinatario, 'maria@example.com')
+        self.assertIn('EVT-TESTE', assunto)
+        for texto in ('Maria', 'EVT-TESTE', 'Aprovado', 'Via liberada.', 'anexos'):
+            self.assertIn(texto, corpo)
+
     @patch('app.routes.admin.save_upload', return_value='/static/uploads/eventos/teste.pdf')
     def test_criar_e_listar_com_cargos_autorizados(self, upload):
         for cargo in ('administrador', 'supervisor', 'analista'):

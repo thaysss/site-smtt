@@ -12,8 +12,11 @@ def registrar_atividade(response):
     # Persist only structured metadata, never bodies, passwords, tokens or query strings.
     if not request.path.startswith('/api/') or request.method == 'OPTIONS':
         return response
-    if request.endpoint == 'atividades.listar_atividades':
+    if request.endpoint in {'atividades.listar_atividades', 'atividades.historico_registro'}:
         return response
+    # Cada operação confirma sua própria transação. O log de acesso não pode
+    # confirmar alterações pendentes de uma requisição rejeitada na validação.
+    db.session.rollback()
     identidade = getattr(g, 'atividade_identidade', None)
     if identidade is None:
         try:

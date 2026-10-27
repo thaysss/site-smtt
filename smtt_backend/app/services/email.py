@@ -53,6 +53,17 @@ def enviar_protocolo(destinatario, nome, numero, tipo_servico):
     return enviar_email(destinatario, f'Protocolo {numero} criado - SMTT Propria', f'Ola, {nome}.\n\nSua solicitacao foi recebida com sucesso.\nProtocolo: {numero}\nServico: {tipo_servico}\nStatus inicial: Em Analise\n\nGuarde este numero para acompanhar o andamento no Portal SMTT Propria.')
 
 
+def enviar_resposta_evento(destinatario, nome, numero, decisao, parecer):
+    return enviar_email(
+        destinatario,
+        f'Resposta da solicitação de evento - Protocolo {numero} - SMTT Propriá',
+        f'Olá, {nome}.\n\nSua solicitação de evento foi analisada.\n'
+        f'Protocolo: {numero}\nDecisão: {decisao}\n\nParecer técnico:\n{parecer}\n\n'
+        'Consulte o protocolo no Portal SMTT Propriá para acessar eventuais anexos da resposta.\n\n'
+        'SMTT Propriá',
+    )
+
+
 def enviar_resposta_ouvidoria(destinatario, nome, numero, resposta):
     if current_app.config.get('MAIL_SUPPRESS_SEND'):
         return False

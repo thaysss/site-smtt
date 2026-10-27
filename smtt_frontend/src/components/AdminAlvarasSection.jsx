@@ -1,4 +1,5 @@
 import AdminCountBadge from './AdminCountBadge';
+import AdminHistorico from './AdminHistorico';
 import AdminRegistroActions from './AdminRegistroActions';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -396,6 +397,7 @@ function AdminAlvarasSection({
             </div>
 
             <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant mb-6 space-y-2">
+              <AdminHistorico key={alvaraSelecionado.id} entidade="alvaras" registroId={alvaraSelecionado.id} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                 <div><strong className="text-on-surface">Requerente:</strong> {alvaraSelecionado.nome_solicitante || 'Não informado'}</div>
                 <div><strong className="text-on-surface">CPF:</strong> {alvaraSelecionado.cpf || 'Não informado'}</div>

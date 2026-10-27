@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle, ChevronDown, ChevronUp, Inbox, Mail, MessageSquareText, RefreshCw, Search } from 'lucide-react';
 import api from '../services/api';
+import AdminHistorico from './AdminHistorico';
 
 const STATUS = ['Todos', 'Recebida', 'Em atendimento', 'Respondida', 'Arquivada'];
 
@@ -135,6 +136,7 @@ function AdminOuvidoriaSection() {
             </button>
             {aberta === item.id && (
               <div className="border-t border-gray-100 bg-gray-50 p-5">
+                <AdminHistorico key={item.id} entidade="ouvidoria" registroId={item.id} />
                 <div className="grid gap-5 lg:grid-cols-2">
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center gap-2 text-gray-600"><Mail size={16} /><a className="font-semibold text-primary-700 hover:underline" href={`mailto:${item.email}`}>{item.email}</a></div>

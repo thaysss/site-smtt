@@ -9,7 +9,7 @@ from app.models.servicos import Veiculo, AutoInfracao, RecursoMulta, Protocolo, 
 from app.models.portal import AlertaTransito, Noticia
 from datetime import datetime
 from app.utils.timezone import get_brasilia_time
-from app.services.email import enviar_resposta_ouvidoria
+from app.services.email import enviar_resposta_ouvidoria, enviar_resposta_evento
 from app.utils.uploads import delete_upload, save_upload, validate_upload
 import random
 
@@ -604,7 +604,17 @@ def julgar_evento(id):
         evento.protocolo.status = decisao # Ex: 'Aprovado' ou 'Negado'
         
     db.session.commit()
-    return jsonify({"mensagem": "Solicitação de evento julgada com sucesso!"}), 200
+    email_enviado = enviar_resposta_evento(
+        evento.email, evento.nome_solicitante,
+        evento.protocolo.numero_protocolo, decisao, evento.resposta_analise,
+    )
+    mensagem = (
+        "Solicitação de evento julgada com sucesso! Resposta enviada por e-mail ao solicitante."
+        if email_enviado else
+        "Solicitação de evento julgada e salva, mas não foi possível enviar o e-mail. "
+        "Tente salvar a decisão novamente para reenviar a resposta."
+    )
+    return jsonify({"mensagem": mensagem, "email_enviado": email_enviado}), 200
 
 
 @admin_bp.route('/alvaras', methods=['GET'])

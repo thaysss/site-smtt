@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ListChecks } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import api from '../services/api';
+import { LinhaDoTempo } from '../components/AdminHistorico';
 
 function AdminLogs() {
   const [servidores, setServidores] = useState([]);
@@ -37,20 +38,20 @@ function AtividadesUsuarios({ servidores }) {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [atualizacao, setAtualizacao] = useState(0);
+  const [somenteAcoes, setSomenteAcoes] = useState(true);
 
   useEffect(() => {
     const controller = new AbortController();
-    api.get('/auth/admin/atividades', { params: { pagina, usuario_id: usuarioId }, signal: controller.signal })
+    api.get('/auth/admin/atividades', { params: { pagina, usuario_id: usuarioId, somente_acoes: somenteAcoes ? '1' : '0' }, signal: controller.signal })
       .then(({ data }) => { if (!controller.signal.aborted) setDados(data); })
       .catch((error) => {
         if (!controller.signal.aborted) setErro(error.response?.data?.erro || 'Não foi possível carregar as atividades.');
       })
       .finally(() => { if (!controller.signal.aborted) setCarregando(false); });
     return () => controller.abort();
-  }, [pagina, usuarioId, atualizacao]);
+  }, [pagina, usuarioId, atualizacao, somenteAcoes]);
 
   const prepararConsulta = () => { setCarregando(true); setErro(''); };
-  const acoes = { GET: 'Consulta', POST: 'Envio / criação', PUT: 'Atualização', PATCH: 'Atualização', DELETE: 'Exclusão' };
   return <section className="admin-users-list-card" aria-label="Logs de atividades dos usuários">
     <div className="admin-users-list-heading">
       <div><span>Atividades dos usuários</span><p>Histórico de acessos e operações registrados a partir da implantação dos logs.</p></div>
@@ -62,16 +63,10 @@ function AtividadesUsuarios({ servidores }) {
         {servidores.map((servidor) => <option key={servidor.id} value={servidor.id}>{servidor.nome}</option>)}
       </select></label>
       <span>{dados.total} registros</span>
+      <label><input type="checkbox" checked={somenteAcoes} onChange={(event) => { prepararConsulta(); setSomenteAcoes(event.target.checked); setPagina(1); }} /> Somente ações nos registros</label>
     </div>
     {erro ? <p className="admin-users-message error" role="alert">{erro}</p> : carregando ? <p className="admin-users-empty" role="status">Carregando atividades...</p> : dados.itens.length === 0 ? <p className="admin-users-empty">Nenhuma atividade registrada.</p> :
-      <div className="admin-users-table-wrap"><table className="admin-users-table">
-        <thead><tr><th>Horário</th><th>Usuário</th><th>Perfil</th><th>Ação / recurso</th><th>Resultado</th></tr></thead>
-        <tbody>{dados.itens.map((item) => <tr key={item.id}>
-          <td>{new Date(item.criado_em).toLocaleString('pt-BR')}</td><td>{item.usuario_nome}</td><td>{item.perfil}</td>
-          <td>{acoes[item.metodo] || item.metodo}<br /><small>{item.recurso}</small></td>
-          <td>{item.status < 400 ? 'Sucesso' : 'Falha'} ({item.status})</td>
-        </tr>)}</tbody>
-      </table></div>}
+      <LinhaDoTempo itens={dados.itens} />}
     <div className="admin-activity-controls">
       <button type="button" disabled={carregando || pagina <= 1} onClick={() => { prepararConsulta(); setPagina((valor) => valor - 1); }}>Anterior</button>
       <span>Página {pagina} de {Math.max(1, dados.paginas)}</span>

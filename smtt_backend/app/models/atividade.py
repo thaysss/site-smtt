@@ -13,6 +13,10 @@ class AtividadeUsuario(db.Model):
     metodo = db.Column(db.String(10), nullable=False)
     recurso = db.Column(db.String(255), nullable=False)
     status = db.Column(db.Integer, nullable=False)
+    entidade = db.Column(db.String(50))
+    entidade_id = db.Column(db.Integer)
+    acao = db.Column(db.String(100))
+    detalhes = db.Column(db.Text)
 
     def to_dict(self):
         horario = self.criado_em
@@ -20,4 +24,6 @@ class AtividadeUsuario(db.Model):
             horario = horario.replace(tzinfo=timezone.utc)
         return {"id": self.id, "criado_em": horario.isoformat(), "usuario_id": self.usuario_id,
                 "usuario_nome": self.usuario_nome, "perfil": self.perfil,
-                "metodo": self.metodo, "recurso": self.recurso, "status": self.status}
+                "metodo": self.metodo, "recurso": self.recurso, "status": self.status,
+                "entidade": self.entidade, "entidade_id": self.entidade_id,
+                "acao": self.acao, "detalhes": self.detalhes}

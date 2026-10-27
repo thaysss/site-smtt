@@ -98,6 +98,8 @@ def create_app(test_config=None):
     from .utils.atividades import registrar_atividade
     app.register_blueprint(atividades_bp)
     app.after_request(registrar_atividade)
+    from .utils.historico import instalar_historico
+    instalar_historico()
 
     @app.route('/')
     def frontend():
