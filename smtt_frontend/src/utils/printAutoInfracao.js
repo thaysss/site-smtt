@@ -13,23 +13,24 @@ export function printAutoInfracao(infracao) {
   style.textContent = `
     @page { size: A4; margin: 8mm; }
     * { box-sizing: border-box; }
-    body { margin: 24px auto; padding: 15px; max-width: 800px; border: 1px solid #ccc; background: white; color: #111; font: 11px Arial, sans-serif; }
+    body { margin: 24px auto; padding: 15px; max-width: 800px; border: 1px solid #ccc; background: white; color: #111; font: 11pt/1.35 Arial, sans-serif; }
     header { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 12px; }
     .brand { display: flex; align-items: center; gap: 10px; }
     .brand img { width: 50px; height: 50px; object-fit: contain; }
-    .brand strong { display: block; color: #003399; font-size: 11px; text-transform: uppercase; }
-    .brand small { display: block; margin-top: 3px; color: #555; font-size: 9px; font-weight: bold; }
-    .document-title { text-align: right; } h1 { font-size: 10px; text-transform: uppercase; margin: 0 0 5px; }
-    h2 { font-size: 9px; margin: 0; padding: 4px 8px; background: #333; color: white; text-transform: uppercase; letter-spacing: .5px; }
+    .brand strong { display: block; color: #003399; font-size: 10pt; text-transform: uppercase; }
+    .brand small { display: block; margin-top: 3px; color: #444; font-size: 9pt; font-weight: bold; }
+    .document-title { text-align: right; flex: 0 0 32%; } h1 { font-size: 11pt; text-transform: uppercase; margin: 0 0 5px; }
+    h2 { font-size: 10pt; margin: 0; padding: 6px 8px; background: #eee; color: #111; text-transform: uppercase; letter-spacing: .5px; }
     section { border: 1px solid #333; border-radius: 4px; overflow: hidden; margin-top: 12px; break-inside: avoid; }
-    dl { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; }
-    dl div { padding: 6px; min-width: 0; border-bottom: 1px solid #eee; }
+    dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
+    dl div { padding: 8px; min-width: 0; border-bottom: 1px solid #eee; }
     dl div:nth-child(even) { background: #fafafa; }
-    dt { font-size: 8px; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; }
+    dt { font-size: 8.5pt; color: #444; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
     dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .wide { grid-column: 1 / -1; } footer { margin-top: 15px; padding-top: 6px; border-top: 1px solid #ccc; font-size: 8px; color: #777; text-align: center; font-style: italic; }
+    .observations dd { min-height: 18mm; line-height: 6mm; background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(6mm - 1px), #ccc calc(6mm - 1px), #ccc 6mm); }
+    .wide { grid-column: 1 / -1; } footer { margin-top: 15px; padding-top: 6px; border-top: 1px solid #ccc; font-size: 8pt; color: #444; text-align: center; font-style: italic; }
     nav { display: flex; gap: 12px; margin-bottom: 24px; } button { padding: 10px 18px; cursor: pointer; }
-    @media print { body { margin: 0; max-width: none; } nav { display: none; } }
+    @media print { body { margin: 0; padding: 0; max-width: none; border: 0; } nav { display: none; } }
   `;
   doc.head.append(style);
   const element = (tag, text, parent) => {
@@ -67,6 +68,10 @@ export function printAutoInfracao(infracao) {
       if (wide) row.className = 'wide';
       element('dt', label, row);
       element('dd', value === null || value === undefined || value === '' ? 'Não informado' : value, row);
+      if (label === 'Observações') {
+        row.classList.add('observations');
+        row.lastElementChild.textContent = value || '';
+      }
     });
   };
   const vehicle = infracao.veiculo || {};
@@ -83,12 +88,12 @@ export function printAutoInfracao(infracao) {
     ['Código da infração', type.codigo_infracao], ['Desdobramento', infracao.desdobramento],
     ['Descrição', type.descricao, true], ['Amparo legal', type.amparo_legal], ['Gravidade', type.gravidade],
     ['Pontuação', type.pontos],
-    ['Valor da multa', infracao.valor_final == null ? null : Number(infracao.valor_final).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })],
   ]);
   section('Dados operacionais', [
     ['Agente / Aparelho', infracao.agente_aparelho], ['Código Renainf', infracao.codigo_renainf],
     ['Medição regulamentada', infracao.medicao_regulamentada], ['Medição aferida', infracao.medicao_aferida],
     ['Medição considerada', infracao.medicao_considerada],
+    ['Observações', infracao.observacoes, true],
   ]);
   section('Controle do registro', [
     ['Fase atual', infracao.fase_atual], ['Data de expedição', infracao.data_expedicao],

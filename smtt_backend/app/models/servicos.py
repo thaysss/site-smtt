@@ -37,6 +37,7 @@ class AutoInfracao(db.Model):
     criado_em = db.Column(db.DateTime, default=get_brasilia_time)
     
     # Novos campos legais e fiscais da notificação
+    observacoes = db.Column(db.Text, nullable=True)
     agente_aparelho = db.Column(db.String(50), nullable=True)
     desdobramento = db.Column(db.String(10), default='1')
     medicao_aferida = db.Column(db.String(30), nullable=True)
@@ -62,6 +63,7 @@ class AutoInfracao(db.Model):
             "data_vencimento_defesa": self.data_vencimento_defesa.strftime("%d/%m/%Y") if self.data_vencimento_defesa else None,
             
             # Novos campos expostos
+            "observacoes": self.observacoes,
             "agente_aparelho": self.agente_aparelho,
             "desdobramento": self.desdobramento,
             "medicao_aferida": self.medicao_aferida,

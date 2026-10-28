@@ -1846,8 +1846,25 @@ body.alto-contraste .text-gray-900 {
 .admin-shell > main {
   width: 0;
   min-width: 0;
+  min-height: 0;
   max-width: 100%;
   overscroll-behavior: contain;
+}
+
+/* No desktop, somente o conteúdo do painel deve rolar. Evita que a
+   rolagem do documento desloque o shell e exponha o fundo branco. */
+@media (min-width: 901px) {
+  html:has(.admin-shell),
+  body:has(.admin-shell),
+  body:has(.admin-shell) #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .admin-shell > main {
+    height: 100%;
+    overflow-y: auto;
+  }
 }
 
 .admin-shell main .flex-1,

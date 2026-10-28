@@ -25,7 +25,7 @@ import { canAccessAdmin, firstAllowedPanelTab } from '../utils/adminPermissions'
 const CAMPOS_EDICAO_INFRACAO = [
   ['numero_ait', 'Número do AIT', 'text'], ['data_hora_infracao', 'Data e hora da infração', 'datetime-local'],
   ['local_cometimento', 'Local da infração', 'text'], ['fase_atual', 'Fase atual', 'fase'],
-  ['valor_final', 'Valor da multa (R$)', 'number'], ['data_vencimento_defesa', 'Prazo da defesa', 'date'],
+  ['observacoes', 'Observações', 'textarea'], ['data_vencimento_defesa', 'Prazo da defesa', 'date'],
   ['agente_aparelho', 'Agente / aparelho', 'text'], ['desdobramento', 'Desdobramento', 'text'],
   ['medicao_aferida', 'Medição aferida', 'text'], ['medicao_considerada', 'Medição considerada', 'text'],
   ['medicao_regulamentada', 'Medição regulamentada', 'text'], ['codigo_renainf', 'Código Renainf', 'text'],
@@ -348,7 +348,7 @@ function AdminPainel({ defaultTab }) {
   };
 
   const exportarInfracoes = () => {
-    const cabecalho = ['AIT', 'Placa', 'Data', 'Local', 'Fase', 'Gravidade', 'Pontos', 'Valor'];
+    const cabecalho = ['AIT', 'Placa', 'Data', 'Local', 'Fase', 'Gravidade', 'Pontos', 'Observações'];
     const linhas = infracoesFiltradas.map((item) => [
       item.numero_ait,
       item.veiculo?.placa || '',
@@ -357,7 +357,7 @@ function AdminPainel({ defaultTab }) {
       item.fase_atual || 'Autuação',
       item.tipo_infracao?.gravidade || '',
       item.tipo_infracao?.pontos || 0,
-      Number(item.valor_final || 0).toFixed(2),
+      item.observacoes || '',
     ]);
     const escapar = (valor) => '"' + String(valor ?? '').replace(/"/g, '""') + '"';
     const csv = [cabecalho, ...linhas].map((linha) => linha.map(escapar).join(';')).join('\n');
@@ -1452,7 +1452,6 @@ function AdminPainel({ defaultTab }) {
                 <div>
                   <button type="button" className={infracaoOrdenacao.campo === 'data_hora_infracao' ? 'is-active' : ''} onClick={() => ordenarInfracoes('data_hora_infracao')}>Data <ArrowUpDown size={12} /></button>
                   <button type="button" className={infracaoOrdenacao.campo === 'gravidade' ? 'is-active' : ''} onClick={() => ordenarInfracoes('gravidade')}>Gravidade <ArrowUpDown size={12} /></button>
-                  <button type="button" className={infracaoOrdenacao.campo === 'valor_final' ? 'is-active' : ''} onClick={() => ordenarInfracoes('valor_final')}>Valor <ArrowUpDown size={12} /></button>
                 </div>
               </header>
 
@@ -1491,8 +1490,6 @@ function AdminPainel({ defaultTab }) {
                             <p><MapPin size={14} /> {inf.local_cometimento || 'Local não informado'}</p>
                           </div>
                           <div className="infracao-summary-value">
-                            <small>Valor da multa</small>
-                            <strong className={cancelada ? 'is-cancelled' : ''}>{Number(inf.valor_final || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
                             <span>{estaAberto ? <ChevronUp size={16} /> : <ChevronDown size={16} />}{estaAberto ? 'Recolher' : 'Detalhes'}</span>
                           </div>
                         </button>
@@ -1553,6 +1550,7 @@ function AdminPainel({ defaultTab }) {
                                   <div><dt>Medição regulamentada</dt><dd>{inf.medicao_regulamentada || 'Não informada'}</dd></div>
                                   <div><dt>Medição aferida</dt><dd>{inf.medicao_aferida || 'Não informada'}</dd></div>
                                   <div><dt>Medição considerada</dt><dd>{inf.medicao_considerada || 'Não informada'}</dd></div>
+                                  <div className="col-span-full"><dt>Observações</dt><dd className="whitespace-pre-wrap break-words">{inf.observacoes || 'Não informadas'}</dd></div>
                                   <div><dt>Código Renainf</dt><dd>{inf.codigo_renainf || 'Não informado'}</dd></div>
                                 </dl>
                               </section>
@@ -1564,7 +1562,9 @@ function AdminPainel({ defaultTab }) {
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                   {CAMPOS_EDICAO_INFRACAO.map(([nome, label, tipo]) => (
                                     <label key={nome} className="text-sm font-semibold text-gray-700">{label}
-                                      {tipo === 'fase' ? (
+                                      {tipo === 'textarea' ? (
+                                        <textarea rows={4} value={infracaoValores[nome] ?? ''} onChange={(event) => setInfracaoValores((atual) => ({ ...atual, [nome]: event.target.value }))} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal" />
+                                      ) : tipo === 'fase' ? (
                                         <select value={infracaoValores[nome] ?? 'Autuação'} onChange={(event) => setInfracaoValores((atual) => ({ ...atual, [nome]: event.target.value }))} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal">
                                           {FASES_INFRACAO.map((fase) => <option key={fase} value={fase}>{fase}</option>)}
                                         </select>

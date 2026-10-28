@@ -132,7 +132,7 @@ function AitStepper({ etapas, etapaAtual, onNavigate }) {
   );
 }
 
-function AitContextPanel({ etapa, etapaAtual, placa, codigoInfracao, local, valor }) {
+function AitContextPanel({ etapa, etapaAtual, placa, codigoInfracao, local }) {
   return (
     <aside className="ait-new-context" aria-label="Resumo do lançamento">
       <div className="ait-new-context-heading"><span>Etapa {etapaAtual} de 4</span><strong>{etapa.label}</strong><small>{etapa.hint}</small></div>
@@ -140,7 +140,6 @@ function AitContextPanel({ etapa, etapaAtual, placa, codigoInfracao, local, valo
       <dl>
         <div><dt>Placa</dt><dd className="is-plate">{placa || 'Ainda não informada'}</dd></div>
         <div><dt>Código CTB</dt><dd>{codigoInfracao || 'Aguardando enquadramento'}</dd></div>
-        <div><dt>Valor estimado</dt><dd>{Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</dd></div>
         <div><dt>Local</dt><dd>{local || 'Ainda não informado'}</dd></div>
       </dl>
       <p><Info size={15} /><span>Os campos marcados com <strong>*</strong> são obrigatórios para avançar.</span></p>
@@ -176,6 +175,7 @@ function AdminInfracoes() {
   const [desdobramento, setDesdobramento] = useState('1');
   const [medicaoAferida, setMedicaoAferida] = useState('');
   const [medicaoConsiderada, setMedicaoConsiderada] = useState('');
+  const [observacoes, setObservacoes] = useState('');
   const [medicaoRegulamentada, setMedicaoRegulamentada] = useState('');
   const [codigoRenainf, setCodigoRenainf] = useState('');
   const [numeroNait, setNumeroNait] = useState('');
@@ -460,10 +460,6 @@ function AdminInfracoes() {
         setErro('A descrição do enquadramento é obrigatória.');
         return;
       }
-      if (!valor || parseFloat(valor) <= 0) {
-        setErro('O valor da infração deve ser maior que zero.');
-        return;
-      }
       if (!vencimentoDefesa) {
         setErro('A data de vencimento da defesa prévia é obrigatória.');
         return;
@@ -516,6 +512,7 @@ function AdminInfracoes() {
         desdobramento: desdobramento,
         medicao_aferida: medicaoAferida,
         medicao_considerada: medicaoConsiderada,
+        observacoes,
         medicao_regulamentada: medicaoRegulamentada,
         codigo_renainf: codigoRenainf,
         numero_nait: numeroNait,
@@ -535,7 +532,7 @@ function AdminInfracoes() {
       setAnoFabricacao(''); setMarcaModelo(''); setCor(''); setUf('SE');
       setNumeroAit('');
       setAgenteAparelho(''); setDesdobramento('1'); setMedicaoAferida('');
-      setMedicaoConsiderada(''); setMedicaoRegulamentada(''); setCodigoRenainf('');
+      setMedicaoConsiderada(''); setMedicaoRegulamentada(''); setCodigoRenainf(''); setObservacoes('');
       setNumeroNait(''); setNumeroNip(''); setDataExpedicao('');
       setLinhaDigitavel(''); setNossoNumero(''); setDataVencimentoBoleto('');
       setFaseAtual('Autuação');
@@ -595,7 +592,7 @@ function AdminInfracoes() {
           <AitStepper etapas={etapas} etapaAtual={step} onNavigate={setStep} />
 
           <div className="ait-layout">
-            <AitContextPanel etapa={etapaAtual} etapaAtual={step} placa={placa} codigoInfracao={codigoInfracao} local={local} valor={valor} />
+            <AitContextPanel etapa={etapaAtual} etapaAtual={step} placa={placa} codigoInfracao={codigoInfracao} local={local} />
 
           <form onSubmit={handleRegistrarMulta} className="ait-form space-y-6">
 
@@ -888,17 +885,6 @@ function AdminInfracoes() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Valor Base (R$) *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={valor}
-                      onChange={(e) => setValor(e.target.value)}
-                      required
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-red-600 transition-all text-sm"
-                    />
-                  </div>
-                  <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Limite Defesa *</label>
                     <input
                       type="date"
@@ -938,12 +924,6 @@ function AdminInfracoes() {
                         Gravidade {gravidade} • {pontos} Pontos na CNH
                       </h4>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block">Valor Base da Multa</span>
-                    <span className="text-lg font-bold text-red-600">
-                      R$ {parseFloat(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -1093,6 +1073,14 @@ function AdminInfracoes() {
               </div>
             )}
 
+            {step === 3 && (
+              <div className="my-5">
+                <label htmlFor="ait-observacoes" className="block text-sm font-bold text-gray-700 mb-2">Observações — Dados operacionais</label>
+                <textarea id="ait-observacoes" rows={4} value={observacoes} onChange={(event) => setObservacoes(event.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm" placeholder="Informações complementares sobre a ocorrência" />
+              </div>
+            )}
+            {step === 4 && <div className="my-5"><strong>Observações</strong><p className="whitespace-pre-wrap break-words">{observacoes || 'Não informadas'}</p></div>}
+
             {/* CONTROLE LEGAL INTEGRADO À ETAPA 3 */}
             {step === 3 && (
               <div className="space-y-6 animate-fadeIn">
@@ -1215,10 +1203,6 @@ function AdminInfracoes() {
                         <div>
                           <span className="text-[9px] uppercase font-bold text-gray-400 block">Pontuação CNH</span>
                           <span className="text-xs font-bold text-gray-800">{pontos} Pontos</span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] uppercase font-bold text-gray-400 block">Valor Estimado</span>
-                          <span className="text-xs font-bold text-red-600">R$ {parseFloat(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
                       </div>
                     </div>

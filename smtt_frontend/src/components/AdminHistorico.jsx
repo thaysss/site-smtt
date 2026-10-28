@@ -6,7 +6,7 @@ export function LinhaDoTempo({ itens }) {
     {itens.map((item) => <li key={item.id}>
       <time dateTime={item.criado_em}>{new Date(item.criado_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</time>
       <strong>{item.acao || ({ GET: 'Consulta', POST: 'Envio / criação', PUT: 'Atualização', DELETE: 'Exclusão' }[item.metodo] || item.metodo)}</strong>
-      <p>{item.usuario_nome} <span>({item.perfil})</span></p>
+      <p>{item.usuario_nome}</p>
       <p>{item.detalhes || item.recurso}</p>
       {!item.acao && <small>{item.status < 400 ? 'Sucesso' : 'Falha'} ({item.status})</small>}
     </li>)}

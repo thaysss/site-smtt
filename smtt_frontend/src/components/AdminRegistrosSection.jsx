@@ -42,7 +42,7 @@ export default function AdminRegistrosSection({ target, onClose, onSaved }) {
           if (!row) { setError('Registro não encontrado. Atualize a lista.'); return; }
           if (target.action === 'delete') setDeleting(row);
           else {
-            setValues(Object.fromEntries(result.campos.map((field) => [field.nome, row[field.nome] ?? (field.tipo === 'checkbox' ? false : '')])));
+            setValues(Object.fromEntries(result.campos.filter((field) => category !== 'infracoes' || field.nome !== 'valor_final').map((field) => [field.nome, row[field.nome] ?? (field.tipo === 'checkbox' ? false : '')])));
             setEditing(row);
           }
         }
@@ -112,7 +112,7 @@ export default function AdminRegistrosSection({ target, onClose, onSaved }) {
       <div className="space-y-3">{rows.slice((currentPage - 1) * 10, currentPage * 10).map((row) => <article key={row.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="min-w-0"><h2 className="font-bold text-gray-900 break-words">{identify(row)}</h2><p className="text-sm text-gray-500">#{row.id}{row.referencia ? ` · ${row.referencia}` : ''}{row.status ? ` · ${row.status}` : ''}</p></div>
         <div className="flex gap-3 shrink-0">
-          <button type="button" aria-label={`Editar ${identify(row)}`} className="flex gap-2 items-center text-blue-700 font-semibold" onClick={(event) => { trigger.current = event.currentTarget; setError(''); setValues(Object.fromEntries(data.campos.map((field) => [field.nome, row[field.nome] ?? (field.tipo === 'checkbox' ? false : '')]))); setEditing(row); }}><Pencil size={16} />Editar</button>
+          <button type="button" aria-label={`Editar ${identify(row)}`} className="flex gap-2 items-center text-blue-700 font-semibold" onClick={(event) => { trigger.current = event.currentTarget; setError(''); setValues(Object.fromEntries(data.campos.filter((field) => category !== 'infracoes' || field.nome !== 'valor_final').map((field) => [field.nome, row[field.nome] ?? (field.tipo === 'checkbox' ? false : '')]))); setEditing(row); }}><Pencil size={16} />Editar</button>
           <button type="button" aria-label={`Excluir ${identify(row)}`} className="flex gap-2 items-center text-red-700 font-semibold" onClick={(event) => { trigger.current = event.currentTarget; setError(''); setDeleting(row); }}><Trash2 size={16} />Excluir</button>
         </div>
       </article>)}</div>
@@ -125,7 +125,7 @@ export default function AdminRegistrosSection({ target, onClose, onSaved }) {
         <div className="flex justify-between gap-4 items-start"><h2 id="registro-dialog-title" className="text-xl font-bold">{deleting ? 'Excluir' : 'Editar'}: {identify(deleting || editing)}</h2><button type="button" disabled={busy} onClick={close} aria-label="Fechar"><X size={22} /></button></div>
         {error && <p role="alert" className="mt-4 text-red-700">{error}</p>}
         <form onSubmit={submit} className="mt-5 space-y-4">
-          {deleting ? <p>Confirma a exclusão permanente deste registro? Esta ação não pode ser desfeita.{['eventos', 'alvaras', 'recursos'].includes(category) ? ' O protocolo exclusivo desta solicitação e os registros de seus anexos também serão removidos.' : ''}</p> : <div className="grid sm:grid-cols-2 gap-4">{data.campos.map((field) => <label key={field.nome} className={`text-sm font-medium ${field.tipo === 'textarea' ? 'sm:col-span-2' : ''}`}>
+          {deleting ? <p>Confirma a exclusão permanente deste registro? Esta ação não pode ser desfeita.{['eventos', 'alvaras', 'recursos'].includes(category) ? ' O protocolo exclusivo desta solicitação e os registros de seus anexos também serão removidos.' : ''}</p> : <div className="grid sm:grid-cols-2 gap-4">{data.campos.filter((field) => category !== 'infracoes' || field.nome !== 'valor_final').map((field) => <label key={field.nome} className={`text-sm font-medium ${field.tipo === 'textarea' ? 'sm:col-span-2' : ''}`}>
             {field.label}{field.obrigatorio && field.tipo !== 'checkbox' ? ' *' : ''}
             {field.tipo === 'textarea' ? <textarea className={`${inputClass} mt-1`} rows={4} value={values[field.nome]} required={field.obrigatorio} maxLength={field.maxLength || undefined} onChange={(event) => setValues({ ...values, [field.nome]: event.target.value })} /> : <input className={field.tipo === 'checkbox' ? 'ml-3' : `${inputClass} mt-1`} type={field.tipo} value={field.tipo === 'checkbox' ? undefined : values[field.nome]} checked={field.tipo === 'checkbox' ? values[field.nome] : undefined} required={field.tipo !== 'checkbox' && field.obrigatorio} maxLength={field.maxLength || undefined} step={field.tipo === 'datetime-local' ? '1' : field.step} onChange={(event) => setValues({ ...values, [field.nome]: field.tipo === 'checkbox' ? event.target.checked : event.target.value })} />}
           </label>)}</div>}

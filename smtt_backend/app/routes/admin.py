@@ -139,6 +139,7 @@ def registrar_infracao():
         data_vencimento_defesa=data_vencimento,
         
         # Novos campos legais, fiscais e medições
+        observacoes=dados.get('observacoes'),
         agente_aparelho=dados.get('agente_aparelho'),
         desdobramento=dados.get('desdobramento', '1'),
         medicao_aferida=dados.get('medicao_aferida'),

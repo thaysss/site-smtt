@@ -52,6 +52,27 @@ class TestAdminRegistros(unittest.TestCase):
         db.session.commit()
         return vehicle, fine, protocol, request
 
+    def test_infraction_observations_create_edit_and_read(self):
+        text = 'Veículo parado.\nCondutor orientado.'
+        response = self.client.post('/api/admin/infracoes', headers=self.headers, json={
+            'numero_ait': 'OBS1', 'placa': 'ABC1234', 'codigo_infracao': 'OBS01',
+            'data_hora_infracao': '2026-10-28 10:00:00', 'local_cometimento': 'Centro',
+            'observacoes': text,
+        })
+        self.assertEqual(response.status_code, 201, response.get_json())
+        fine = AutoInfracao.query.filter_by(numero_ait='OBS1').one()
+        self.assertEqual(fine.to_dict()['observacoes'], text)
+        listing = self.request('get', 'infracoes').get_json()
+        self.assertIn('observacoes', [field['nome'] for field in listing['campos']])
+        self.assertEqual(self.request('put', 'infracoes', fine.id,
+                         json={'observacoes': 'Observação corrigida'}).status_code, 200)
+        db.session.refresh(fine)
+        self.assertEqual(fine.to_dict()['observacoes'], 'Observação corrigida')
+        self.assertEqual(self.request('put', 'infracoes', fine.id,
+                         json={'observacoes': ''}).status_code, 200)
+        db.session.refresh(fine)
+        self.assertFalse(fine.observacoes)
+
     def test_all_categories_require_admin(self):
         citizen = {'Authorization': 'Bearer ' + create_access_token(identity='2')}
         for category in RECURSOS:

@@ -18,7 +18,7 @@ RECURSOS = {
     'eventos': (SolicitacaoEvento, 'Solicitações de eventos', 'nome_solicitante cpf_cnpj email telefone data_evento local_evento descricao resposta_analise'),
     'alvaras': (SolicitacaoAlvara, 'Solicitações de alvarás', 'tipo_servico nome_solicitante cpf email telefone placa_veiculo fator_rh tem_auxiliar nome_auxiliar cpf_auxiliar resposta_analise'),
     'recursos': (RecursoMulta, 'Recursos de multas', 'tipo_recurso condutor_indicado_cpf condutor_indicado_cnh justificativa_julgamento'),
-    'infracoes': (AutoInfracao, 'Infrações', 'numero_ait data_hora_infracao local_cometimento fase_atual valor_final data_vencimento_defesa agente_aparelho desdobramento medicao_aferida medicao_considerada medicao_regulamentada codigo_renainf numero_nait numero_nip data_expedicao linha_digitavel nosso_numero data_vencimento_boleto'),
+    'infracoes': (AutoInfracao, 'Infrações', 'numero_ait data_hora_infracao local_cometimento fase_atual valor_final data_vencimento_defesa observacoes agente_aparelho desdobramento medicao_aferida medicao_considerada medicao_regulamentada codigo_renainf numero_nait numero_nip data_expedicao linha_digitavel nosso_numero data_vencimento_boleto'),
     'veiculos': (Veiculo, 'Veículos', 'placa renavam ano_fabricacao marca_modelo cor uf'),
     'alertas': (AlertaTransito, 'Avisos de interdição', 'descricao rua_bairro data_inicio data_fim status'),
     'noticias': (Noticia, 'Notícias e ações', 'titulo subtitulo conteudo categoria'),
