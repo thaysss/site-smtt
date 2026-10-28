@@ -275,8 +275,39 @@ def consulta_publica_placa():
 
 @public_bp.route('/noticias', methods=['GET'])
 def get_noticias():
-    noticias = Noticia.query.order_by(Noticia.criado_em.desc()).all()
-    return jsonify([n.to_dict() for n in noticias]), 200
+    from sqlalchemy import or_
+    from sqlalchemy.orm import load_only
+
+    # Preserve the full response for existing clients; new listings opt into paging.
+    if 'pagina' not in request.args and 'limite' not in request.args:
+        noticias = Noticia.query.order_by(Noticia.criado_em.desc(), Noticia.id.desc()).all()
+        return jsonify([n.to_dict() for n in noticias]), 200
+    try:
+        pagina = int(request.args.get('pagina', 1))
+        limite = int(request.args.get('limite', 6))
+        if pagina < 1 or not 1 <= limite <= 100:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify(erro='Invalid pagination parameters.'), 400
+
+    query = Noticia.query
+    busca = request.args.get('q', '').strip()[:255]
+    categoria = request.args.get('categoria', '').strip()[:100]
+    if busca:
+        termo = '%' + busca.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
+        query = query.filter(or_(Noticia.titulo.ilike(termo, escape='\\'), Noticia.subtitulo.ilike(termo, escape='\\')))
+    if categoria:
+        query = query.filter(Noticia.categoria == categoria)
+    total = query.count()
+    noticias = query.options(load_only(
+        Noticia.id, Noticia.titulo, Noticia.subtitulo, Noticia.categoria,
+        Noticia.imagem_url, Noticia.criado_em,
+    )).order_by(Noticia.criado_em.desc(), Noticia.id.desc()).offset((pagina - 1) * limite).limit(limite).all()
+    return jsonify(itens=[{
+        'id': n.id, 'titulo': n.titulo, 'subtitulo': n.subtitulo,
+        'categoria': n.categoria, 'imagem_url': n.imagem_url,
+        'criado_em': n.criado_em.strftime('%d/%m/%Y %H:%M') if n.criado_em else None,
+    } for n in noticias], total=total, pagina=pagina, limite=limite), 200
 
 
 @public_bp.route('/noticias/<int:id>', methods=['GET'])

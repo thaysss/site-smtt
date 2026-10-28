@@ -7,6 +7,7 @@ import uuid
 from pathlib import Path
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload, selectinload
 from app.extensions import db
 from app.models.portal import AlertaTransito, Noticia
 from app.models.servicos import AutoInfracao, Protocolo, RecursoMulta, SolicitacaoAlvara, SolicitacaoEvento, Veiculo, RecursoAnexo
@@ -161,7 +162,14 @@ def registrar_gestao(bp):
         if recurso not in RECURSOS:
             return jsonify(erro='Categoria não encontrada.'), 404
         model, label, nomes = RECURSOS[recurso]
-        return jsonify(label=label, campos=campos(model, EDITAVEIS.get(recurso, nomes)), registros=[dict(serializar(item, nomes), anexos=anexos_registro(item, recurso)) for item in model.query.order_by(model.id.desc()).all()])
+        query = model.query
+        if hasattr(model, 'protocolo'):
+            query = query.options(joinedload(model.protocolo))
+        if model is AutoInfracao:
+            query = query.options(joinedload(AutoInfracao.veiculo))
+        if model is RecursoMulta:
+            query = query.options(selectinload(RecursoMulta.anexos))
+        return jsonify(label=label, campos=campos(model, EDITAVEIS.get(recurso, nomes)), registros=[dict(serializar(item, nomes), anexos=anexos_registro(item, recurso)) for item in query.order_by(model.id.desc()).all()])
 
     @bp.route('/registros/<recurso>/<int:id>', methods=['PUT', 'DELETE'])
     def alterar_registro(recurso, id):

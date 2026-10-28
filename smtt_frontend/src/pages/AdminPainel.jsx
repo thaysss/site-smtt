@@ -475,11 +475,14 @@ function AdminPainel({ defaultTab }) {
       return;
     }
     api.defaults.headers.Authorization = `Bearer ${adminToken}`;
-    carregarRecursos();
-    carregarEventos();
-    carregarAlvaras();
-    carregarInfracoes();
-    carregarNoticias();
+    const carregarAba = {
+      recursos: carregarRecursos,
+      eventos: carregarEventos,
+      alvaras: carregarAlvaras,
+      infracoes: carregarInfracoes,
+      noticias: carregarNoticias,
+    }[menuAtivo];
+    if (carregarAba) void carregarAba();
   }, [navigate, menuAtivo]);
 
   async function carregarRecursos() {

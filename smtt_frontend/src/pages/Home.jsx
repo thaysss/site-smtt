@@ -26,7 +26,8 @@ function Home() {
   const [resultadoBusca, setResultadoBusca] = useState(null);
   const [buscando, setBuscando] = useState(false);
   const [noticias, setNoticias] = useState([]);
-  const [carregandoDados, setCarregandoDados] = useState(true);
+  const [carregandoAlertas, setCarregandoAlertas] = useState(true);
+  const [carregandoNoticias, setCarregandoNoticias] = useState(true);
   const [erroAlertas, setErroAlertas] = useState(false);
   const [erroNoticias, setErroNoticias] = useState(false);
   const [reduzirMovimento, setReduzirMovimento] = useState(false);
@@ -92,26 +93,20 @@ function Home() {
 
   // Carregar Alertas e Notícias da API
   const carregarDados = async () => {
-    setCarregandoDados(true);
+    setCarregandoAlertas(true);
+    setCarregandoNoticias(true);
     setErroAlertas(false);
     setErroNoticias(false);
-    const [resultadoAlertas, resultadoNoticias] = await Promise.allSettled([
-      api.get('/public/alertas'),
-      api.get('/public/noticias')
+    await Promise.allSettled([
+      api.get('/public/alertas')
+        .then(({ data }) => setAlertas(data))
+        .catch(() => setErroAlertas(true))
+        .finally(() => setCarregandoAlertas(false)),
+      api.get('/public/noticias', { params: { pagina: 1, limite: 3 } })
+        .then(({ data }) => setNoticias(data.itens))
+        .catch(() => setErroNoticias(true))
+        .finally(() => setCarregandoNoticias(false)),
     ]);
-    if (resultadoAlertas.status === 'fulfilled') {
-      setAlertas(resultadoAlertas.value.data);
-    } else {
-      console.error('Erro ao carregar alertas:', resultadoAlertas.reason);
-      setErroAlertas(true);
-    }
-    if (resultadoNoticias.status === 'fulfilled') {
-      setNoticias(resultadoNoticias.value.data.slice(0, 3));
-    } else {
-      console.error('Erro ao carregar notícias:', resultadoNoticias.reason);
-      setErroNoticias(true);
-    }
-    setCarregandoDados(false);
   };
 
   useEffect(() => {
@@ -577,7 +572,7 @@ function Home() {
                           <p className="font-bold text-sm">Não foi possível carregar os alertas.</p>
                           <button type="button" onClick={carregarDados} className="mt-3 text-xs font-bold text-primary-600 hover:underline">Tentar novamente</button>
                         </div>
-                      ) : carregandoDados ? (
+                      ) : carregandoAlertas ? (
                         <div className="text-center py-8 text-slate-500" role="status">Carregando alertas…</div>
                       ) : alertas.length === 0 ? (
                         <div className="text-center py-8 text-slate-500">
@@ -749,7 +744,7 @@ function Home() {
                 <p className="text-sm font-bold">Não foi possível carregar as notícias.</p>
                 <button type="button" onClick={carregarDados} className="mt-3 text-sm font-bold text-primary-600 hover:underline">Tentar novamente</button>
               </div>
-            ) : carregandoDados ? (
+            ) : carregandoNoticias ? (
               <div className="text-center py-16 text-slate-500 bg-slate-50 rounded-2xl border border-slate-200" role="status">
                 <i className="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i>
                 <p className="text-sm font-medium">Carregando notícias…</p>

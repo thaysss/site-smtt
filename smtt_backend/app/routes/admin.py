@@ -12,6 +12,7 @@ from app.utils.timezone import get_brasilia_time
 from app.services.email import enviar_resposta_ouvidoria, enviar_resposta_evento
 from app.utils.uploads import delete_upload, save_upload, validate_upload
 import random
+from sqlalchemy.orm import joinedload, selectinload
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
@@ -170,7 +171,7 @@ def registrar_infracao():
 
 @admin_bp.route('/infracoes', methods=['GET'])
 def listar_infracoes():
-    infracoes = AutoInfracao.query.order_by(AutoInfracao.criado_em.desc()).all()
+    infracoes = AutoInfracao.query.options(joinedload(AutoInfracao.veiculo), joinedload(AutoInfracao.tipo)).order_by(AutoInfracao.criado_em.desc()).all()
     return jsonify([i.to_dict() for i in infracoes]), 200
 
 
@@ -241,7 +242,11 @@ def listar_tipos_infracao():
 # ==========================================
 @admin_bp.route('/recursos', methods=['GET'])
 def listar_recursos():
-    recursos = RecursoMulta.query.all()
+    recursos = RecursoMulta.query.options(
+        joinedload(RecursoMulta.protocolo),
+        joinedload(RecursoMulta.infracao).joinedload(AutoInfracao.veiculo),
+        selectinload(RecursoMulta.anexos),
+    ).all()
     resultado = []
     
     for r in recursos:
@@ -481,7 +486,7 @@ def consultar_placa_externa(placa):
 
 @admin_bp.route('/eventos', methods=['GET'])
 def listar_eventos_admin():
-    eventos = SolicitacaoEvento.query.order_by(SolicitacaoEvento.id.desc()).all()
+    eventos = SolicitacaoEvento.query.options(joinedload(SolicitacaoEvento.protocolo)).order_by(SolicitacaoEvento.id.desc()).all()
     resultado = [e.to_dict() for e in eventos]
     return jsonify(resultado), 200
 
@@ -531,7 +536,7 @@ def criar_evento_admin():
 
 @admin_bp.route('/ouvidoria', methods=['GET'])
 def listar_ouvidoria_admin():
-    mensagens = MensagemOuvidoria.query.order_by(MensagemOuvidoria.id.desc()).all()
+    mensagens = MensagemOuvidoria.query.options(joinedload(MensagemOuvidoria.protocolo)).order_by(MensagemOuvidoria.id.desc()).all()
     return jsonify([mensagem.to_dict() for mensagem in mensagens]), 200
 
 
@@ -628,7 +633,7 @@ def julgar_evento(id):
 
 @admin_bp.route('/alvaras', methods=['GET'])
 def listar_alvaras_admin():
-    alvaras = SolicitacaoAlvara.query.order_by(SolicitacaoAlvara.id.desc()).all()
+    alvaras = SolicitacaoAlvara.query.options(joinedload(SolicitacaoAlvara.protocolo)).order_by(SolicitacaoAlvara.id.desc()).all()
     resultado = [a.to_dict() for a in alvaras]
     return jsonify(resultado), 200
 

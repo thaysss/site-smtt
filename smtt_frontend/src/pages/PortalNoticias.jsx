@@ -18,21 +18,37 @@ function PortalNoticias() {
   const [categoriaAtiva, setCategoriaAtiva] = useState(() => searchParams.get('categoria') || 'Todas');
   const [paginaAtual, setPaginaAtual] = useState(() => Math.max(1, Number(searchParams.get('pagina')) || 1));
   const [loading, setLoading] = useState(true);
+  const [totalNoticias, setTotalNoticias] = useState(0);
+  const [erro, setErro] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const carregarNoticias = async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      setErro(false);
       try {
-        const response = await api.get('/public/noticias');
-        setNoticias(response.data);
+        const { data } = await api.get('/public/noticias', {
+          signal: controller.signal,
+          params: { pagina: paginaAtual, limite: 6, q: busca.trim(),
+            categoria: categoriaAtiva === 'Todas' ? undefined : categoriaAtiva },
+        });
+        if (controller.signal.aborted) return;
+        setNoticias(data.itens);
+        setTotalNoticias(data.total);
+        const ultimaPagina = Math.max(1, Math.ceil(data.total / 6));
+        if (paginaAtual > ultimaPagina) setPaginaAtual(ultimaPagina);
       } catch (error) {
-        console.error("Erro ao carregar notícias:", error);
+        if (!controller.signal.aborted) {
+          console.error('Erro ao carregar noticias:', error);
+          setErro(true);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
-    };
-    carregarNoticias();
-  }, []);
+    }, 250);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [busca, categoriaAtiva, paginaAtual]);
 
   useEffect(() => {
     const params = {};
@@ -48,19 +64,9 @@ function PortalNoticias() {
   };
   const categorias = ['Todas', 'Educação', 'Mobilidade', 'Infraestrutura', 'Comunicados', 'Geral'];
 
-  const noticiasFiltradas = noticias.filter((noticia) => {
-    const correspondeBusca = noticia.titulo.toLowerCase().includes(busca.toLowerCase()) || 
-                             (noticia.subtitulo && noticia.subtitulo.toLowerCase().includes(busca.toLowerCase()));
-    
-    const correspondeCategoria = categoriaAtiva === 'Todas' || noticia.categoria === categoriaAtiva;
-    
-    return correspondeBusca && correspondeCategoria;
-  });
-
-  const itensPorPagina = 6;
-  const noticiasSecundarias = noticiasFiltradas;
-  const totalPaginas = Math.max(1, Math.ceil(noticiasSecundarias.length / itensPorPagina));
-  const noticiasPaginadas = noticiasSecundarias.slice((paginaAtual - 1) * itensPorPagina, paginaAtual * itensPorPagina);
+  const noticiasFiltradas = noticias;
+  const totalPaginas = Math.max(1, Math.ceil(totalNoticias / 6));
+  const noticiasPaginadas = noticias;
 
 
   const getPlaceholderIcon = (categoria) => {
@@ -150,7 +156,7 @@ function PortalNoticias() {
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary-600">Conteúdo atualizado</p>
               <h2 className="mt-1 text-2xl font-black text-slate-900">Últimas notícias</h2>
             </div>
-            <span className="text-sm text-slate-500">{noticiasFiltradas.length} {noticiasFiltradas.length === 1 ? 'matéria' : 'matérias'}</span>
+            <span className="text-sm text-slate-500">{totalNoticias} {totalNoticias === 1 ? 'matéria' : 'matérias'}</span>
           </div>
         )}
         {/* Listagem */}
@@ -158,6 +164,8 @@ function PortalNoticias() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6" aria-label="Carregando notícias">
             {[1, 2, 3].map((item) => <div key={item} className="overflow-hidden rounded-2xl border border-slate-200 bg-white animate-pulse"><div className="aspect-[16/10] bg-slate-200"></div><div className="p-6 space-y-3"><div className="h-3 w-24 rounded bg-slate-200"></div><div className="h-5 rounded bg-slate-200"></div><div className="h-4 w-2/3 rounded bg-slate-100"></div></div></div>)}
           </div>
+        ) : erro ? (
+          <p role="alert" className="text-center py-12">Falha ao carregar as notícias. Tente recarregar a página.</p>
         ) : noticiasFiltradas.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200 flex flex-col items-center justify-center">
             <i className="fa-solid fa-newspaper text-5xl text-gray-300 mb-4"></i>
