@@ -94,6 +94,9 @@ def create_app(test_config=None):
     app.register_blueprint(servicos_bp) # Registra o módulo de serviços
     app.register_blueprint(admin_bp) 
     app.register_blueprint(health_bp)
+    from .routes.eventos_sync import sync_bp
+    app.config['EVENTOS_SYNC_TOKEN'] = app.config.get('EVENTOS_SYNC_TOKEN', os.getenv('EVENTOS_SYNC_TOKEN', ''))
+    app.register_blueprint(sync_bp)
     from .routes.atividades import atividades_bp
     from .utils.atividades import registrar_atividade
     app.register_blueprint(atividades_bp)
