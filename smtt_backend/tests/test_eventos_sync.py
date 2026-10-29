@@ -12,6 +12,7 @@ def test_sync_auth_retry_conflict_and_private_fields():
     db.init_app(app)
     app.register_blueprint(sync_bp)
     with app.app_context():
+        db.session.execute(db.text('PRAGMA foreign_keys=ON'))
         db.create_all()
         client = app.test_client()
         url = '/api/integracoes/eventos/sincronizar'
@@ -35,5 +36,12 @@ def test_sync_auth_retry_conflict_and_private_fields():
         row['local_evento'] = 'Local do site'
         assert not client.post(url, json={'eventos': [row]}, headers=headers).get_json()['conflitos']
         assert client.post(url, json={'eventos': [row, row]}, headers=headers).status_code == 400
+        db.session.delete(event)
+        db.session.commit()
+        # Uma linha antiga ainda enviada não recria o evento excluído.
+        response = client.post(url, json={'eventos': [row]}, headers=headers).get_json()
+        assert response['excluidos'] == [row['chave']]
+        assert response['eventos'] == []
+        assert SolicitacaoEvento.query.count() == 0
         db.session.remove()
         db.drop_all()

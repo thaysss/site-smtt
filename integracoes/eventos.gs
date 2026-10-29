@@ -46,8 +46,17 @@ function sincronizarEventos() {
     const reply = UrlFetchApp.fetch(url, {method: 'post', contentType: 'application/json',
       headers: {Authorization: 'Bearer ' + token}, payload: JSON.stringify({eventos: rows}),
       followRedirects: false, muteHttpExceptions: true});
-    if (reply.getResponseCode() !== 200) throw new Error('Falha de sincronização HTTP ' + reply.getResponseCode());
+    if (reply.getResponseCode() !== 200) {
+      let motivo = 'O servidor não retornou uma mensagem JSON.';
+      try {
+        const erro = JSON.parse(reply.getContentText());
+        if (typeof erro.erro === 'string') motivo = erro.erro;
+      } catch (_) { /* Não registrar HTML, cabeçalhos ou credenciais. */ }
+      throw new Error('Falha de sincronização HTTP ' + reply.getResponseCode() + ': ' + motivo);
+    }
     const body = JSON.parse(reply.getContentText());
+    // Excluir em ordem decrescente depois de aplicar atualizações, sem deslocar linhas.
+    const deleted = new Set(body.excluidos || []);
     const conflicts = new Set(body.conflitos.map(c => c.chave));
     body.eventos.forEach(event => {
       if (conflicts.has(event.chave)) return;
@@ -62,6 +71,10 @@ function sincronizarEventos() {
       // RichText grava texto literal, inclusive conteúdo iniciado por '='.
       sheet.getRange(line, 1, 1, 6).setRichTextValues([values.map(v => SpreadsheetApp.newRichTextValue().setText(v).build())]);
     });
+    for (let line = sheet.getLastRow(); line >= 2; line--) {
+      const key = sheet.getRange(line, 1).getDisplayValue();
+      if (deleted.has(key)) sheet.deleteRow(line);
+    }
     if (conflicts.size) throw new Error('Conflito nos IDs: ' + [...conflicts].join(', ') + '. Confira os dados nos dois sistemas antes de corrigir.');
   } finally { lock.releaseLock(); }
 }

@@ -14,7 +14,7 @@ FIELDS = {'nome_solicitante': 150, 'telefone': 20, 'data_evento': 50,
 class EventoPlanilha(db.Model):
     __tablename__ = 'eventos_planilha'
     chave = db.Column(db.String(36), primary_key=True)
-    evento_id = db.Column(db.Integer, db.ForeignKey('solicitacoes_eventos.id'), unique=True, nullable=False)
+    evento_id = db.Column(db.Integer, db.ForeignKey('solicitacoes_eventos.id', ondelete='SET NULL'), unique=True, nullable=True)
     base = db.Column(db.JSON, nullable=False)
 
 
@@ -68,6 +68,8 @@ def sincronizar():
             link = EventoPlanilha(chave=row['chave'], evento_id=event.id, base=incoming)
             db.session.add(link)
         else:
+            if link.evento_id is None:
+                continue  # Tombstone: a planilha não deve recriar evento excluído.
             event = db.session.query(SolicitacaoEvento).filter_by(id=link.evento_id).with_for_update().one()
             current = shared(event)
             collisions = [f for f in FIELDS if incoming[f] != link.base.get(f, '')
@@ -89,6 +91,7 @@ def sincronizar():
             db.session.add(link)
         result.append({'chave': link.chave, **shared(event)})
     db.session.commit()
-    response = jsonify(eventos=result, conflitos=conflicts)
+    deleted = [link.chave for link in EventoPlanilha.query.filter_by(evento_id=None).all()]
+    response = jsonify(eventos=result, conflitos=conflicts, excluidos=deleted)
     response.headers['Cache-Control'] = 'no-store'
     return response
