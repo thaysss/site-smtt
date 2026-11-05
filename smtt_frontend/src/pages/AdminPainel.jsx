@@ -1,3 +1,4 @@
+import GuardaEventos from '../components/GuardaEventos';
 import AdminCountBadge from '../components/AdminCountBadge';
 import AdminHistorico from '../components/AdminHistorico';
 import AdminEventosCalendario from '../components/AdminEventosCalendario';
@@ -20,7 +21,7 @@ import AdminAlvarasSection from '../components/AdminAlvarasSection';
 import AdminOuvidoriaSection from '../components/AdminOuvidoriaSection';
 import { matchesDateFilter } from '../utils/dateFilters';
 import { printAutoInfracao } from '../utils/printAutoInfracao';
-import { canAccessAdmin, firstAllowedPanelTab } from '../utils/adminPermissions';
+import { canAccessAdmin, firstAllowedPanelTab, getAdminPerfil } from '../utils/adminPermissions';
 
 const CAMPOS_EDICAO_INFRACAO = [
   ['numero_ait', 'Número do AIT', 'text'], ['data_hora_infracao', 'Data e hora da infração', 'datetime-local'],
@@ -1148,6 +1149,8 @@ function AdminPainel({ defaultTab }) {
           </div>
         ) : menuAtivo === 'ouvidoria' ? (
           <AdminOuvidoriaSection />
+        ) : menuAtivo === 'eventos' && getAdminPerfil() === 'agente_transito' ? (
+          <GuardaEventos eventos={eventos} />
         ) : menuAtivo === 'eventos' ? (
           <div className="eventos-consulta eventos-consulta--table">
             <nav className="eventos-breadcrumb" aria-label="Navegação estrutural">

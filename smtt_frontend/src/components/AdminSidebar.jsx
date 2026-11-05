@@ -5,7 +5,7 @@ import {
   FilePenLine, FolderOpen, IdCard, ListChecks, LogOut, Menu, Newspaper,
   Search, X, LayoutDashboard, UserPlus, MessagesSquare,
 } from 'lucide-react';
-import { canAccessAdmin } from '../utils/adminPermissions';
+import { canAccessAdmin, getAdminPerfil } from '../utils/adminPermissions';
 
 const menuItems = [
   
@@ -82,7 +82,7 @@ function AdminSidebar({ activeItem, onTabChange }) {
     setIsMobileOpen(false);
   };
 
-  const filteredItems = menuItems.filter((item) =>
+  const filteredItems = menuItems.map((item) => item.id === 'eventos' && getAdminPerfil() === 'agente_transito' ? { ...item, label: 'Calendário de eventos' } : item).filter((item) =>
     canAccessAdmin(item.id)
     && item.label.toLocaleLowerCase('pt-BR').includes(searchQuery.toLocaleLowerCase('pt-BR')),
   );

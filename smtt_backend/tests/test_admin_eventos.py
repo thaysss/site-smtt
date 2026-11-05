@@ -101,6 +101,30 @@ class TestAdminEventos(unittest.TestCase):
         self.assertEqual(self.client.post('/api/admin/eventos', data=self.dados(), headers=self.headers('agente_transito')).status_code, 403)
         self.assertEqual(Protocolo.query.count(), 0)
 
+    @patch('app.routes.admin.save_upload', return_value='/static/uploads/eventos/teste.pdf')
+    def test_agente_consulta_apenas_dados_operacionais_sem_alterar(self, upload):
+        criado = self.client.post('/api/admin/eventos', data=self.dados(), headers=self.headers('supervisor'))
+        evento_id = criado.get_json()['registro']['id']
+        headers = self.headers('agente_transito')
+        resposta = self.client.get('/api/admin/eventos', headers=headers)
+        self.assertEqual(resposta.status_code, 200)
+        evento = resposta.get_json()[0]
+        self.assertEqual(set(evento), {'id', 'numero_protocolo', 'data_evento', 'local_evento', 'descricao', 'status'})
+        self.assertEqual(evento['local_evento'], 'Praça central')
+        self.assertEqual(evento['data_evento'], '2026-11-10T14:30')
+        self.assertEqual(self.client.get('/api/admin/eventos').status_code, 401)
+        for metodo, url in [
+            ('post', '/api/admin/eventos'),
+            ('put', f'/api/admin/eventos/{evento_id}/julgar'),
+            ('get', '/api/admin/registros/eventos'),
+            ('put', f'/api/admin/registros/eventos/{evento_id}'),
+            ('delete', f'/api/admin/registros/eventos/{evento_id}'),
+        ]:
+            self.assertEqual(getattr(self.client, metodo)(url, headers=headers).status_code, 403, url)
+        db.session.expire_all()
+        self.assertEqual(SolicitacaoEvento.query.count(), 1)
+        self.assertEqual(db.session.get(SolicitacaoEvento, evento_id).protocolo.status, 'Em Análise')
+
     @patch('app.routes.admin.save_upload')
     def test_rejeita_dados_e_anexos_invalidos(self, upload):
         for campo, valor in [('data_evento', 'inválida'), ('data_evento', '2026-11-10T14:30+00:00'), ('nome_solicitante', ' '), ('email', 'invalido'), ('cpf_cnpj', '123'), ('local_evento', 'x' * 256), ('arquivo', (BytesIO(b'invalido'), 'teste.pdf')), ('arquivo', None)]:

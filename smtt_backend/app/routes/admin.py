@@ -45,6 +45,8 @@ def verificar_se_eh_admin():
         cargo = cargo_das_claims(claims)
         recurso = _recurso_da_requisicao()
         permitido = pode_acessar(cargo, recurso)
+        if cargo == 'agente_transito' and recurso == 'eventos':
+            permitido = request.method == 'GET' and request.path.rstrip('/') == '/api/admin/eventos'
         if cargo != 'administrador' and request.path.startswith('/api/admin/registros/'):
             permitido = pode_acessar_registro(cargo, recurso)
         if not cargo or not permitido:
@@ -488,6 +490,9 @@ def consultar_placa_externa(placa):
 def listar_eventos_admin():
     eventos = SolicitacaoEvento.query.options(joinedload(SolicitacaoEvento.protocolo)).order_by(SolicitacaoEvento.id.desc()).all()
     resultado = [e.to_dict() for e in eventos]
+    if cargo_das_claims(get_jwt()) == 'agente_transito':
+        campos = {'id', 'numero_protocolo', 'data_evento', 'local_evento', 'descricao', 'status'}
+        resultado = [{campo: evento[campo] for campo in campos} for evento in resultado]
     return jsonify(resultado), 200
 
 

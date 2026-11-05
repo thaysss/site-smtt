@@ -9,7 +9,7 @@ const PERMISSOES = {
   administrador: ['*'],
   supervisor: ['dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'ouvidoria', 'infracoes', 'noticias', 'lancar-infracao', 'alertas', 'veiculos'],
   analista: ['dashboard', 'registros', 'recursos', 'eventos', 'alvaras', 'ouvidoria', 'noticias'],
-  agente_transito: ['dashboard', 'registros', 'infracoes', 'lancar-infracao', 'alertas', 'veiculos'],
+  agente_transito: ['eventos', 'dashboard', 'registros', 'infracoes', 'lancar-infracao', 'alertas', 'veiculos'],
 };
 
 export const getAdminPerfil = () => localStorage.getItem('adminPerfil')
