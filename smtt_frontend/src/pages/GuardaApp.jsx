@@ -49,7 +49,7 @@ export default function GuardaApp() {
   };
 
   return <main className="guarda-app">
-    <header className="guarda-app-bar"><img src="/SMTT.png" alt="SMTT Propriá" /><div><strong>Agenda do guarda</strong><small>{localStorage.getItem('adminNome')}</small></div><button type="button" onClick={sair}>Sair</button></header>
+    <header className="guarda-app-bar"><img src="/SMTT.png" alt="SMTT Propriá" /><div><strong>Agenda de Eventos</strong><small>{localStorage.getItem('adminNome')}</small></div><button type="button" onClick={sair}>Sair</button></header>
     <div className="guarda-app-content">
       {!instalado && <aside className="guarda-install">{instalacao ? <button type="button" onClick={instalar}>Instalar aplicativo</button> : <p>Para instalar, use “Instalar aplicativo” no menu do navegador. No iPhone/iPad, use Compartilhar → Adicionar à Tela de Início.</p>}</aside>}
       <button type="button" onClick={() => setAtualizacao((valor) => valor + 1)}>Atualizar eventos</button>
