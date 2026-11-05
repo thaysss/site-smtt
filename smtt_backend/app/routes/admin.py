@@ -491,8 +491,10 @@ def listar_eventos_admin():
     eventos = SolicitacaoEvento.query.options(joinedload(SolicitacaoEvento.protocolo)).order_by(SolicitacaoEvento.id.desc()).all()
     resultado = [e.to_dict() for e in eventos]
     if cargo_das_claims(get_jwt()) == 'agente_transito':
-        campos = {'id', 'numero_protocolo', 'data_evento', 'local_evento', 'descricao', 'status'}
-        resultado = [{campo: evento[campo] for campo in campos} for evento in resultado]
+        for evento in resultado:
+            documento = ''.join(c for c in (evento.get('cpf_cnpj') or '') if c.isdigit())
+            if evento.get('cpf_cnpj') and len(documento) != 14:
+                evento['cpf_cnpj'] = '***.***.***-**'
     return jsonify(resultado), 200
 
 

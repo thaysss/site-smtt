@@ -27,6 +27,33 @@ class TestAdminEventos(unittest.TestCase):
     def dados(self):
         return dict(nome_solicitante='Responsável', cpf_cnpj='123.456.789-01', email='gestor@example.com', telefone='79999999999', data_evento='2026-11-10T14:30', local_evento='Praça central', descricao='Evento cultural', arquivo=(BytesIO(b'%PDF-1.4\nexample'), 'requerimento.pdf'))
 
+    def test_guarda_recebe_detalhes_completos_com_cpf_mascarado(self):
+        protocolo = Protocolo(numero_protocolo='EVT-GUARDA', tipo_servico='Solicitação de Evento')
+        db.session.add(protocolo)
+        db.session.flush()
+        evento = SolicitacaoEvento(
+            protocolo_id=protocolo.id, nome_solicitante='Maria', cpf_cnpj='123.456.789-01',
+            email='maria@example.com', telefone='79999999999', data_evento='2026-11-10',
+            local_evento='Praça central', descricao='Evento cultural',
+            caminho_arquivo='/static/uploads/eventos/teste.pdf',
+            resposta_analise='Parecer técnico completo', anexo_resposta='/static/uploads/resposta.pdf',
+        )
+        db.session.add(evento)
+        db.session.commit()
+        esperado = evento.to_dict()
+        for documento in ('123.456.789-01', '12345678901', '123', ''):
+            evento.cpf_cnpj = documento
+            db.session.commit()
+            resposta = self.client.get('/api/admin/eventos', headers=self.headers('agente_transito'))
+            self.assertEqual(resposta.status_code, 200)
+            self.assertEqual(resposta.get_json()[0], {**esperado, 'cpf_cnpj': '***.***.***-**' if documento else ''})
+        evento.cpf_cnpj = '12.345.678/0001-99'
+        db.session.commit()
+        self.assertEqual(self.client.get('/api/admin/eventos', headers=self.headers('agente_transito')).get_json()[0]['cpf_cnpj'], evento.cpf_cnpj)
+        evento.cpf_cnpj = '12345678901'
+        db.session.commit()
+        self.assertEqual(self.client.get('/api/admin/eventos', headers=self.headers('administrador')).get_json()[0]['cpf_cnpj'], '12345678901')
+
     @patch('app.routes.admin.enviar_resposta_evento')
     def test_julgamento_envia_email_e_preserva_decisao_se_envio_falhar(self, enviar):
         protocolo = Protocolo(numero_protocolo='EVT-TESTE', tipo_servico='Solicitação de Evento')
@@ -102,14 +129,14 @@ class TestAdminEventos(unittest.TestCase):
         self.assertEqual(Protocolo.query.count(), 0)
 
     @patch('app.routes.admin.save_upload', return_value='/static/uploads/eventos/teste.pdf')
-    def test_agente_consulta_apenas_dados_operacionais_sem_alterar(self, upload):
+    def test_agente_consulta_detalhes_sem_alterar(self, upload):
         criado = self.client.post('/api/admin/eventos', data=self.dados(), headers=self.headers('supervisor'))
         evento_id = criado.get_json()['registro']['id']
         headers = self.headers('agente_transito')
         resposta = self.client.get('/api/admin/eventos', headers=headers)
         self.assertEqual(resposta.status_code, 200)
         evento = resposta.get_json()[0]
-        self.assertEqual(set(evento), {'id', 'numero_protocolo', 'data_evento', 'local_evento', 'descricao', 'status'})
+        self.assertEqual(evento, {**criado.get_json()['registro'], 'cpf_cnpj': '***.***.***-**'})
         self.assertEqual(evento['local_evento'], 'Praça central')
         self.assertEqual(evento['data_evento'], '2026-11-10T14:30')
         self.assertEqual(self.client.get('/api/admin/eventos').status_code, 401)
