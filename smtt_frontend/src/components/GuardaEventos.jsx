@@ -31,7 +31,7 @@ export default function GuardaEventos({ eventos }) {
         <button type="button" className="eventos-clear-button" onClick={() => { setBusca(''); setStatus('Todos'); }}>Limpar filtros</button>
       </div>
     </section>
-    <AdminEventosCalendario eventos={filtrados} onAbrir={setSelecionado} somenteConsulta />
+    <AdminEventosCalendario eventos={filtrados} onAbrir={setSelecionado} />
     <section className="eventos-results-card"><h2>Eventos ({filtrados.length})</h2>
       {filtrados.map((evento) => <p key={evento.id}><button type="button" className="evento-table-action" onClick={() => setSelecionado(evento)}>{evento.numero_protocolo} · {evento.local_evento || 'Local não informado'} · {evento.status}</button></p>)}
     </section>
