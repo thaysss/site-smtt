@@ -63,3 +63,14 @@ A implantação escolhida usa Lightsail. O estado e os scripts estão em
 `aws/lightsail/README.md`; ECS/Fargate permanece apenas como alternativa.
 Nesta migração o frontend permanece na Vercel e o banco no Supabase; não
 execute migrações de banco ou reset apenas por mudar a hospedagem.
+
+
+## Aplicativo de eventos do guarda (PWA)
+
+- Publicar frontend e backend juntos. A entrada do aplicativo é `/guarda`, em HTTPS.
+- O perfil Agente de Trânsito abre diretamente na consulta de eventos, sem menu administrativo.
+- O manifesto permite instalar no celular ou computador; no Safari do iOS, usar Compartilhar → Adicionar à Tela de Início.
+- Novos logins de agentes geram sessão sem expiração automática. Quem já estava conectado deve sair e entrar uma vez após a atualização. O botão Sair remove a sessão deste dispositivo; limpar os dados do navegador também remove o login.
+- Eventos exigem conexão. O service worker guarda apenas a página de aviso offline, sem cache de respostas da API.
+- Não há alteração de esquema ou dados no banco e não é necessária migração SQL.
+- Verificar em dispositivo: instalar, entrar como agente, fechar e reabrir, consultar evento e clicar em Sair.

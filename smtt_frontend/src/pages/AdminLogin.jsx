@@ -24,6 +24,10 @@ function AdminLogin() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (localStorage.getItem('adminToken')) {
+      navigate(localStorage.getItem('adminPerfil') === 'agente_transito' || new URLSearchParams(location.search).get('app') === 'guarda' ? '/guarda' : '/admin/dashboard', { replace: true });
+      return;
+    }
     const params = new URLSearchParams(location.search);
     if (params.get('message') === 'session_expired') {
       navigate(location.pathname, { replace: true });
@@ -60,7 +64,7 @@ function AdminLogin() {
     localStorage.setItem('adminNome', dados.nome);
     localStorage.setItem('adminCargo', dados.cargo);
     localStorage.setItem('adminPerfil', dados.perfil);
-    navigate('/admin/dashboard');
+    navigate(dados.perfil === 'agente_transito' || new URLSearchParams(location.search).get('app') === 'guarda' ? '/guarda' : '/admin/dashboard', { replace: true });
   };
 
   const handleTrocaSenha = async (e) => {

@@ -31,6 +31,16 @@ class TestAdminAuthentication(unittest.TestCase):
         db.drop_all()
         self.app_context.pop()
 
+    def test_guard_session_has_no_automatic_expiration(self):
+        from app.routes.auth import _criar_token_admin
+        servidor = Servidor(nome='Guarda', matricula='guarda', cargo='Agente de Trânsito')
+        db.session.add(servidor)
+        servidor.set_senha('SenhaTeste123!')
+        db.session.commit()
+        token, perfil, _ = _criar_token_admin(servidor)
+        self.assertEqual(perfil, 'agente_transito')
+        self.assertNotIn('exp', decode_token(token))
+
     def test_admin_endpoint_requires_auth(self):
         """Verify that accessing an admin endpoint without a token returns 401."""
         response = self.client.get('/api/admin/alertas')
@@ -144,7 +154,7 @@ class TestAdminAuthentication(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()['perfil'], 'agente_transito')
         claims = decode_token(response.get_json()['token'])
-        self.assertEqual(claims['exp'] - claims['iat'], 8 * 60 * 60)
+        self.assertNotIn('exp', claims)
 
     def test_expired_admin_session_is_rejected(self):
         token = create_access_token(

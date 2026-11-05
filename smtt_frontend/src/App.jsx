@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { canAccessAdmin } from './utils/adminPermissions';
+import { canAccessAdmin, getAdminPerfil } from './utils/adminPermissions';
+const GuardaApp = lazy(() => import('./pages/GuardaApp'));
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Painel = lazy(() => import('./pages/Painel'));
@@ -31,7 +32,8 @@ const ProtectedRoute = ({ children }) => {
 // Guarda de Rota para Administrador Autenticado
 const AdminProtectedRoute = ({ children, feature }) => {
   const token = localStorage.getItem('adminToken');
-  if (!token) return <Navigate to="/admin/login" replace />;
+  if (!token) return <Navigate to={window.location.pathname === '/guarda' ? '/admin/login?app=guarda' : '/admin/login'} replace />;
+  if (getAdminPerfil() === 'agente_transito' && window.location.pathname !== '/guarda') return <Navigate to="/guarda" replace />;
   return !feature || canAccessAdmin(feature) ? children : <Navigate to="/admin/dashboard" replace />;
 };
 
@@ -48,6 +50,7 @@ function App() {
         const adminToken = localStorage.getItem('adminToken');
 
         if (token || adminToken) {
+          if (adminToken && getAdminPerfil() === 'agente_transito') return;
           if (adminToken) {
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminNome');
@@ -85,6 +88,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/painel" element={<ProtectedRoute><Painel /></ProtectedRoute>} />
         
+        <Route path="/guarda" element={<AdminProtectedRoute feature="eventos"><GuardaApp /></AdminProtectedRoute>} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
         <Route path="/admin/painel" element={<AdminProtectedRoute><AdminPainel /></AdminProtectedRoute>} />

@@ -140,6 +140,7 @@ def _criar_token_admin(servidor):
     token = create_access_token(
         identity=str(servidor.id),
         additional_claims={"role": cargo_chave, "cargo": cargo_chave},
+        **({"expires_delta": False} if cargo_chave == "agente_transito" else {}),
     )
     return token, cargo_chave, cargo
 

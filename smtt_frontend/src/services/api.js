@@ -27,13 +27,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && error.response.status === 401 && !error.config?.url?.startsWith('/auth/')) {
       const isConfigAdminRoute = error.config && error.config.url && error.config.url.includes('/admin');
       
       if (isConfigAdminRoute) {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminNome');
-        window.location.href = '/admin/login?message=session_expired';
+        window.location.href = window.location.pathname === '/guarda' ? '/admin/login?app=guarda&message=session_expired' : '/admin/login?message=session_expired';
       } else {
         localStorage.removeItem('token');
         localStorage.removeItem('nomeUsuario');

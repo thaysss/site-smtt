@@ -1,0 +1,12 @@
+.guarda-app { min-height: 100dvh; background: #f4f7fb; color: #0b2548; }
+.guarda-app-bar { display: flex; align-items: center; gap: 14px; padding: max(16px, env(safe-area-inset-top)) 20px 16px; background: #0b1c3e; color: white; }
+.guarda-app-bar img { width: 52px; height: 52px; object-fit: contain; }
+.guarda-app-bar div { display: grid; gap: 4px; flex: 1; }
+.guarda-app-bar small { opacity: .85; }
+.guarda-app button { min-height: 44px; cursor: pointer; }
+.guarda-app-bar button, .guarda-install button { border: 1px solid currentColor; border-radius: 8px; padding: 8px 18px; }
+.guarda-app-content { max-width: 1200px; margin: auto; padding: 20px 16px max(24px, env(safe-area-inset-bottom)); }
+.guarda-app-content > button { margin-bottom: 16px; color: #1265e8; }
+.guarda-install { margin-bottom: 20px; padding: 14px; border-radius: 12px; background: #e5edff; font-size: 14px; }
+.guarda-app .eventos-results-card h2 { font-weight: 700; margin-bottom: 12px; }
+@media (max-width: 600px) { .guarda-app-content { padding-inline: 10px; } .guarda-app .eventos-filter-grid { grid-template-columns: 1fr; } }
