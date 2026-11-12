@@ -1,5 +1,5 @@
 // src/pages/AdminInfracoes.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
@@ -8,106 +8,7 @@ import {
   ChevronLeft, ChevronRight, Search, Sparkles, ClipboardCheck, ShieldCheck, Home
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
-
-const INFRACOES_COMUNS_CTB = [
-  {
-    codigo: '74550',
-    descricao: 'Transitar em velocidade superior à máxima permitida em até 20%',
-    amparo_legal: 'Art. 218, I',
-    gravidade: 'Média',
-    pontos: '4',
-    valor: '130.16'
-  },
-  {
-    codigo: '74630',
-    descricao: 'Transitar em velocidade superior à máxima permitida em mais de 20% até 50%',
-    amparo_legal: 'Art. 218, II',
-    gravidade: 'Grave',
-    pontos: '5',
-    valor: '195.23'
-  },
-  {
-    codigo: '74710',
-    descricao: 'Transitar em velocidade superior à máxima permitida em mais de 50%',
-    amparo_legal: 'Art. 218, III',
-    gravidade: 'Gravíssima',
-    pontos: '7',
-    valor: '880.41'
-  },
-  {
-    codigo: '5541',
-    descricao: 'Estacionar em desacordo com a regulamentação especificada pela sinalização (Zona Azul)',
-    amparo_legal: 'Art. 181, XVII',
-    gravidade: 'Média',
-    pontos: '4',
-    valor: '130.16'
-  },
-  {
-    codigo: '51851',
-    descricao: 'Deixar o condutor de usar o cinto de segurança',
-    amparo_legal: 'Art. 167',
-    gravidade: 'Grave',
-    pontos: '5',
-    valor: '195.23'
-  },
-  {
-    codigo: '51852',
-    descricao: 'Deixar o passageiro de usar o cinto de segurança',
-    amparo_legal: 'Art. 167',
-    gravidade: 'Grave',
-    pontos: '5',
-    valor: '195.23'
-  },
-  {
-    codigo: '60501',
-    descricao: 'Avançar o sinal vermelho do semáforo',
-    amparo_legal: 'Art. 208',
-    gravidade: 'Gravíssima',
-    pontos: '7',
-    valor: '293.47'
-  },
-  {
-    codigo: '60502',
-    descricao: 'Avançar o sinal de parada obrigatória',
-    amparo_legal: 'Art. 208',
-    gravidade: 'Gravíssima',
-    pontos: '7',
-    valor: '293.47'
-  },
-  {
-    codigo: '73662',
-    descricao: 'Dirigir veículo segurando ou manuseando telefone celular',
-    amparo_legal: 'Art. 252, PÚ',
-    gravidade: 'Gravíssima',
-    pontos: '7',
-    valor: '293.47'
-  },
-  {
-    codigo: '65992',
-    descricao: 'Conduzir o veículo registrado que não esteja devidamente licenciado',
-    amparo_legal: 'Art. 230, V',
-    gravidade: 'Gravíssima',
-    pontos: '7',
-    valor: '293.47'
-  },
-  {
-    codigo: '50100',
-    descricao: 'Dirigir veículo sem possuir Carteira Nacional de Habilitação (CNH)',
-    amparo_legal: 'Art. 162, I',
-    gravidade: 'Gravíssima',
-    pontos: '7',
-    valor: '880.41'
-  },
-  {
-    codigo: '51691',
-    descricao: 'Dirigir sob a influência de álcool (Lei Seca)',
-    amparo_legal: 'Art. 165',
-    gravidade: 'Gravíssima',
-    pontos: '7',
-    valor: '2934.70'
-  }
-];
-
+import { buscarInfracoes, encontrarInfracao } from '../utils/catalogoInfracoes';
 
 function AitStepper({ etapas, etapaAtual, onNavigate }) {
   return (
@@ -157,11 +58,13 @@ function AdminInfracoes() {
 
   const [codigoInfracao, setCodigoInfracao] = useState('');
   const [descricaoInfracao, setDescricaoInfracao] = useState('');
-  const [amparoLegal, setAmparoLegal] = useState('Art. 181, XVII');
-  const [gravidade, setGravidade] = useState('Média');
-  const [pontos, setPontos] = useState('0');
+  const [amparoLegal, setAmparoLegal] = useState('');
+  const [gravidade, setGravidade] = useState('');
+  const [pontos, setPontos] = useState('');
   const [vencimentoDefesa, setVencimentoDefesa] = useState('');
   const [sugestoesCTB, setSugestoesCTB] = useState([]);
+  const [infracaoSelecionada, setInfracaoSelecionada] = useState(null);
+  const consultaCTB = useRef(0);
 
   // Novos campos do veículo
   const [anoFabricacao, setAnoFabricacao] = useState('');
@@ -205,56 +108,55 @@ function AdminInfracoes() {
     }
   }, [erro]);
 
-  // Função para lidar com alteração no código CTB e preenchimento automático
-  const handleCodigoCTBChange = async (val) => {
-    setCodigoInfracao(val);
-
-    if (val.trim() === '') {
-      setSugestoesCTB([]);
-      return;
+  const selecionarInfracao = (item) => {
+    consultaCTB.current += 1;
+    setCodigoInfracao(item.codigo);
+    setDescricaoInfracao(item.descricao);
+    setAmparoLegal(item.amparo_legal || '');
+    setGravidade(item.gravidade || '');
+    setPontos(String(item.pontos ?? ''));
+    setValor(item.valor || '0.00');
+    setDesdobramento(item.desdobramento ?? item.codigo.slice(4));
+    setInfracaoSelecionada(item);
+    setSugestoesCTB([]);
+    if (isSpeedLimitInfraction(item.codigo) && medicaoAferida) {
+      recalculateSpeed(item.codigo, medicaoAferida);
     }
+  };
 
-    // Filtro local nas infrações comuns
-    const filtradas = INFRACOES_COMUNS_CTB.filter(item =>
-      item.codigo.includes(val) || item.descricao.toLowerCase().includes(val.toLowerCase())
-    );
+  // O catálogo preserva cada combinação de código e desdobramento da planilha.
+  const handleCodigoCTBChange = async (val) => {
+    const consulta = ++consultaCTB.current;
+    setCodigoInfracao(val);
+    setInfracaoSelecionada(null);
+    setDescricaoInfracao('');
+    setAmparoLegal('');
+    setGravidade('');
+    setPontos('');
+    setValor('0.00');
+    setDesdobramento('');
+    const filtradas = buscarInfracoes(val);
     setSugestoesCTB(filtradas);
 
-    // Se bater exatamente com um código local, preenche
-    const correspondenteLocal = INFRACOES_COMUNS_CTB.find(item => item.codigo === val.trim());
-    if (correspondenteLocal) {
-      setDescricaoInfracao(correspondenteLocal.descricao);
-      setAmparoLegal(correspondenteLocal.amparo_legal || 'Art. 181, XVII');
-      setGravidade(correspondenteLocal.gravidade);
-      setPontos(correspondenteLocal.pontos);
-      setValor(correspondenteLocal.valor);
-      setSugestoesCTB([]);
-
-      // Se tiver medição aferida, recalcula velocidade considerada
-      if (isSpeedLimitInfraction(val.trim()) && medicaoAferida) {
-        recalculateSpeed(val.trim(), medicaoAferida);
-      }
+    const correspondente = encontrarInfracao(val);
+    if (correspondente) {
+      selecionarInfracao(correspondente);
       return;
     }
 
-    // Se tiver 4 ou mais dígitos, busca também no banco de dados (tipos já usados)
-    if (val.trim().length >= 4) {
+    // Mantém a consulta aos tipos personalizados já utilizados, sem confundir famílias.
+    if (!filtradas.length && /^[a-z0-9]{4,20}$/i.test(val.trim())) {
       try {
-        const res = await api.get(`/admin/tipos-infracao?codigo=${val.trim()}`);
-        if (res.data) {
-          setDescricaoInfracao(res.data.descricao);
-          setAmparoLegal(res.data.amparo_legal || 'Art. 181, XVII');
-          setGravidade(res.data.gravidade);
-          setPontos(res.data.pontos.toString());
-          setValor(res.data.valor_base.toFixed(2));
-          setSugestoesCTB([]);
-
-          if (isSpeedLimitInfraction(val.trim()) && medicaoAferida) {
-            recalculateSpeed(val.trim(), medicaoAferida);
-          }
+        const res = await api.get('/admin/tipos-infracao', { params: { codigo: val.trim() } });
+        if (res.data && consulta === consultaCTB.current) {
+          selecionarInfracao({
+            ...res.data,
+            codigo: res.data.codigo_infracao,
+            valor: Number(res.data.valor_base || 0).toFixed(2),
+          });
         }
       } catch {
-        // Ignora se não localizado no banco
+        // Permite o preenchimento manual quando o tipo não está cadastrado.
       }
     }
   };
@@ -460,6 +362,10 @@ function AdminInfracoes() {
         setErro('A descrição do enquadramento é obrigatória.');
         return;
       }
+      if (!gravidade || pontos === '') {
+        setErro('Informe a gravidade e os pontos deste enquadramento.');
+        return;
+      }
       if (!vencimentoDefesa) {
         setErro('A data de vencimento da defesa prévia é obrigatória.');
         return;
@@ -528,7 +434,9 @@ function AdminInfracoes() {
 
       // Limpa os campos
       setPlaca(''); setDataHora(''); setLocal(''); setCodigoInfracao('');
-      setDescricaoInfracao(''); setAmparoLegal('Art. 181, XVII'); setVencimentoDefesa('');
+      setDescricaoInfracao(''); setAmparoLegal(''); setVencimentoDefesa('');
+      setInfracaoSelecionada(null); setSugestoesCTB([]); setGravidade(''); setPontos(''); setValor('0.00');
+      consultaCTB.current += 1;
       setAnoFabricacao(''); setMarcaModelo(''); setCor(''); setUf('SE');
       setNumeroAit('');
       setAgenteAparelho(''); setDesdobramento('1'); setMedicaoAferida('');
@@ -552,6 +460,7 @@ function AdminInfracoes() {
   ];
 
   const etapaAtual = etapas[step - 1];
+  const info = getExcessoSpeedInfo();
 
   return (
     <div className="admin-shell flex h-screen bg-gray-50 font-sans text-gray-800 selection:bg-primary-600 selection:text-white">
@@ -786,7 +695,9 @@ function AdminInfracoes() {
                       <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <input 
                         type="text" 
-                        placeholder="Ex: 5541" 
+                        placeholder="Código ou descrição"
+                        aria-label="Pesquisar código ou descrição da infração"
+                        autoComplete="off"
                         value={codigoInfracao} 
                         onChange={(e) => handleCodigoCTBChange(e.target.value)} 
                         required 
@@ -794,39 +705,29 @@ function AdminInfracoes() {
                       />
                       
                       {sugestoesCTB.length > 0 && (
-                        <div className="absolute z-20 w-full bg-white border border-gray-200 rounded-xl mt-1 shadow-lg max-h-60 overflow-y-auto divide-y divide-gray-100">
+                        <div className="absolute z-20 w-full sm:w-[32rem] max-w-[calc(100vw-4rem)] bg-white border border-gray-200 rounded-xl mt-1 shadow-lg max-h-60 overflow-y-auto divide-y divide-gray-100">
                           {sugestoesCTB.map((sug) => (
                             <button
                               key={sug.codigo}
                               type="button"
-                              onClick={() => {
-                                setCodigoInfracao(sug.codigo);
-                                setDescricaoInfracao(sug.descricao);
-                                setAmparoLegal(sug.amparo_legal || 'Art. 181, XVII');
-                                setGravidade(sug.gravidade);
-                                setPontos(sug.pontos);
-                                setValor(sug.valor);
-                                setSugestoesCTB([]);
-                                if (isSpeedLimitInfraction(sug.codigo) && medicaoAferida) {
-                                  recalculateSpeed(sug.codigo, medicaoAferida);
-                                }
-                              }}
+                              onClick={() => selecionarInfracao(sug)}
                               className="w-full text-left px-4 py-3 hover:bg-primary-50 flex items-start gap-3 transition-colors text-xs"
                             >
                               <FileDigit className="w-5 h-5 text-primary-500 shrink-0 mt-0.5" />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-bold text-sm text-primary-950">Código {sug.codigo}</span>
+                                  <span className="font-bold text-sm text-primary-950">Código {sug.codigo_base}-{sug.desdobramento}</span>
                                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                     sug.gravidade === 'Leve' ? 'bg-green-100 text-green-700' :
                                     sug.gravidade === 'Média' ? 'bg-amber-100 text-amber-700' :
                                     sug.gravidade === 'Grave' ? 'bg-orange-100 text-orange-700' :
                                     'bg-red-100 text-red-700'
                                   }`}>
-                                    {sug.gravidade}
+                                    {sug.gravidade || 'Não informada'}
                                   </span>
                                 </div>
-                                <p className="text-xs text-gray-500 line-clamp-2">{sug.descricao}</p>
+                                <p className="text-xs text-gray-500">{sug.descricao}</p>
+                                <p className="text-xs text-gray-400 mt-1">{sug.amparo_legal} • Desdobramento {sug.desdobramento}</p>
                               </div>
                             </button>
                           ))}
@@ -866,6 +767,7 @@ function AdminInfracoes() {
                       onChange={(e) => setGravidade(e.target.value)}
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all cursor-pointer text-sm"
                     >
+                      <option value="">Selecione</option>
                       <option value="Leve">Leve</option>
                       <option value="Média">Média</option>
                       <option value="Grave">Grave</option>
@@ -907,6 +809,18 @@ function AdminInfracoes() {
                     </select>
                   </div>
                 </div>
+
+                {infracaoSelecionada?.origem === 'renainf' && (
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm space-y-2">
+                    <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div><dt className="font-bold">Desdobramento</dt><dd>{infracaoSelecionada.desdobramento}</dd></div>
+                      <div><dt className="font-bold">Infrator</dt><dd>{infracaoSelecionada.infrator}</dd></div>
+                      <div><dt className="font-bold">Órgão competente</dt><dd>{infracaoSelecionada.competencia}</dd></div>
+                    </dl>
+                    <p>Gravidade na planilha: {infracaoSelecionada.gravidade_original}</p>
+                    <p className="text-xs text-gray-500">Fonte: tabela RENAINF fornecida. Confira as informações do enquadramento antes de registrar.</p>
+                  </div>
+                )}
 
                 {/* Resumo da Penalidade */}
                 <div className="bg-white border border-gray-150 rounded-2xl p-5 shadow-sm mt-4 flex items-center justify-between gap-4">
@@ -994,45 +908,33 @@ function AdminInfracoes() {
                 </div>
 
                 {/* Banner de Validação Automática de Velocidade */}
-                {isSpeedLimitInfraction(codigoInfracao) && medicaoConsiderada && medicaoRegulamentada && (
-                  (() => {
-                    const info = getExcessoSpeedInfo();
-                    if (!info) return null;
-                    return (
-                      <div className={`p-4 rounded-xl text-sm border flex items-start gap-3 ${info.isDivergent ? 'bg-red-50 border-red-200 text-red-700' : 'bg-blue-50 border-blue-200 text-blue-700'
-                        }`}>
-                        <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-500" />
-                        <div className="flex-1">
-                          <p className="font-bold text-xs uppercase tracking-wider mb-1">Análise de Excesso de Velocidade</p>
-                          <p className="text-xs leading-relaxed">
-                            O veículo transitou a <strong>{medicaoConsiderada} km/h</strong> (considerada) em uma via regulamentada para <strong>{medicaoRegulamentada} km/h</strong>.
-                            Isso representa um excesso de <strong>{info.pct}%</strong>, correspondente a: <strong>{info.enquadramentoSugerido}</strong>.
-                          </p>
-                          {info.isDivergent && (
-                            <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center gap-2 animate-fadeIn">
-                              <span className="text-xs font-bold text-red-800">⚠️ Enquadramento selecionado divergente do calculado.</span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const matched = INFRACOES_COMUNS_CTB.find(item => item.codigo === info.codigoSugerido);
-                                  if (matched) {
-                                    setCodigoInfracao(matched.codigo);
-                                    setDescricaoInfracao(matched.descricao);
-                                    setGravidade(matched.gravidade);
-                                    setPontos(matched.pontos);
-                                    setValor(matched.valor);
-                                  }
-                                }}
-                                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition-colors shadow-sm"
-                              >
-                                Ajustar para Código {info.codigoSugerido}
-                              </button>
-                            </div>
-                          )}
+                {isSpeedLimitInfraction(codigoInfracao) && medicaoConsiderada && medicaoRegulamentada && info && (
+                  <div className={`p-4 rounded-xl text-sm border flex items-start gap-3 ${info.isDivergent ? 'bg-red-50 border-red-200 text-red-700' : 'bg-blue-50 border-blue-200 text-blue-700'
+                    }`}>
+                    <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-500" />
+                    <div className="flex-1">
+                      <p className="font-bold text-xs uppercase tracking-wider mb-1">Análise de Excesso de Velocidade</p>
+                      <p className="text-xs leading-relaxed">
+                        O veículo transitou a <strong>{medicaoConsiderada} km/h</strong> (considerada) em uma via regulamentada para <strong>{medicaoRegulamentada} km/h</strong>.
+                        Isso representa um excesso de <strong>{info.pct}%</strong>, correspondente a: <strong>{info.enquadramentoSugerido}</strong>.
+                      </p>
+                      {info.isDivergent && (
+                        <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center gap-2 animate-fadeIn">
+                          <span className="text-xs font-bold text-red-800">⚠️ Enquadramento selecionado divergente do calculado.</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const matched = encontrarInfracao(info.codigoSugerido);
+                              if (matched) selecionarInfracao(matched);
+                            }}
+                            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition-colors shadow-sm"
+                          >
+                            Ajustar para Código {info.codigoSugerido}
+                          </button>
                         </div>
-                      </div>
-                    );
-                  })()
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 <div className="bg-gray-50 rounded-2xl p-5 border border-gray-150 space-y-4">

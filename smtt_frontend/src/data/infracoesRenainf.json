@@ -1,0 +1,2324 @@
+[
+  {
+    "codigo_base": "5002",
+    "desdobramento": "0",
+    "descricao": "Multa, por não identificação do condutor infrator, imposta à pessoa jurídica",
+    "amparo_legal": "257, § 8º",
+    "infrator": "Proprietário",
+    "gravidade_original": "---",
+    "competencia": "EST/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5010",
+    "desdobramento": "0",
+    "descricao": "Dirigir veículo sem possuir CNH ou Permissão para Dirigir",
+    "amparo_legal": "162, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss 3X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5029",
+    "desdobramento": "1",
+    "descricao": "Dirigir veículo com CNH ou PPD cassada",
+    "amparo_legal": "162, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5029",
+    "desdobramento": "2",
+    "descricao": "Dirigir veículo com CNH ou PPD com suspensão do direito de dirigir",
+    "amparo_legal": "162, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5037",
+    "desdobramento": "1",
+    "descricao": "Dirigir veículo com CNH de categoria diferente da do veículo e Dirigir veículo com CNH ou PPD com suspensão do direito de dirigir",
+    "amparo_legal": "162, III",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss 3X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5045",
+    "desdobramento": "0",
+    "descricao": "Dirigir veículo com validade de CNH/PPD vencida há mais de 30 dias",
+    "amparo_legal": "162, V",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5053",
+    "desdobramento": "1",
+    "descricao": "Dirigir veículo sem usar lentes corretoras de visão e Dirigir veículo sem usar aparelho auxiliar de audição e Dirigir veículo sem usar aparelho auxiliar de prótese física e Dirigir veículo s/ adaptações impostas na concessão/renovação licença conduzir",
+    "amparo_legal": "162, VI",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5061",
+    "desdobramento": "0",
+    "descricao": "Entregar veículo a pessoa sem CNH ou Permissão para Dirigir",
+    "amparo_legal": "163 c/c 162, I",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss 3X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5070",
+    "desdobramento": "1",
+    "descricao": "Entregar veículo a pessoa com CNH ou PPD cassada e Entregar veículo a pessoa com CNH ou PPD com suspensão do direito de dirigir",
+    "amparo_legal": "163 c/c 162, II",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5088",
+    "desdobramento": "1",
+    "descricao": "Entregar veículo a pessoa com CNH de categoria diferente da do veículo e Entregar veículo a pessoa com PPD de categoria diferente da do veículo",
+    "amparo_legal": "163 c/c 162, III",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss 3X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5096",
+    "desdobramento": "0",
+    "descricao": "Entregar veículo a pessoa com CNH/PPD vencida há mais de 30 dias",
+    "amparo_legal": "163 c/c 162, V",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5100",
+    "desdobramento": "1",
+    "descricao": "Entregar o veículo a pessoa sem usar lentes corretoras de visão e Entregar o veículo a pessoa sem usar aparelho auxiliar de audição e Entregar o veículo a pessoa sem aparelho de prótese física e Entregar veíc pessoa s/ adaptações impostas concessão/renovação licença conduzir",
+    "amparo_legal": "163 c/c 162, VI",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5118",
+    "desdobramento": "0",
+    "descricao": "Permitir posse/condução do veículo a pessoa sem CNH ou PPD",
+    "amparo_legal": "164 c/c 162, I",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss 3X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5126",
+    "desdobramento": "1",
+    "descricao": "Permitir posse/condução do veículo a pessoa com CNH ou PPD cassada e Permitir posse/condução veíc pessoa com CNH/PPD c/ suspensão direito de dirigir",
+    "amparo_legal": "164 c/c 162, II",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5134",
+    "desdobramento": "1",
+    "descricao": "Permitir posse/condução veíc a pessoa com CNH categoria diferente da do veículo e Permitir posse/condução veíc a pessoa com PPD categoria diferente da do veículo",
+    "amparo_legal": "164 c/c 162, III",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss 3X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5142",
+    "desdobramento": "0",
+    "descricao": "Permitir posse/condução do veíc a pessoa com CNH/PPD vencida há mais de 30 dias",
+    "amparo_legal": "164 c/c 162, V",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5150",
+    "desdobramento": "1",
+    "descricao": "Permitir posse/condução do veículo a pessoa sem usar lentes corretoras de visão e Permitir posse/condução do veículo a pessoa s/ usar aparelho auxiliar de audição e Permitir posse/condução do veículo a pessoa sem usar aparelho de prótese física e Permitir posse/cond veíc s/ adaptações impostas concessão/renovação licença cond",
+    "amparo_legal": "164 c/c 162, VI",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5169",
+    "desdobramento": "1",
+    "descricao": "Dirigir sob a influência de álcool e Dirigir sob a influência de qquer substância psicoativa que deter. Dependência",
+    "amparo_legal": "165",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 10X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5177",
+    "desdobramento": "0",
+    "descricao": "Confiar/entregar veíc pess c/ estado físico/psíquico s/ condições dirigir segur",
+    "amparo_legal": "166",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5185",
+    "desdobramento": "1",
+    "descricao": "Deixar o condutor de usar o cinto segurança e Deixar o passageiro de usar o cinto segurança",
+    "amparo_legal": "167",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5193",
+    "desdobramento": "0",
+    "descricao": "Transportar criança sem observância das normas de segurança estabelecidas p/ CTB",
+    "amparo_legal": "168",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5207",
+    "desdobramento": "0",
+    "descricao": "Dirigir sem atenção ou sem os cuidados indispensáveis à segurança",
+    "amparo_legal": "169",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5215",
+    "desdobramento": "1",
+    "descricao": "Dirigir ameaçando os pedestres que estejam atravessando a via pública e Dirigir ameaçando os demais veículos",
+    "amparo_legal": "170",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5223",
+    "desdobramento": "1",
+    "descricao": "Usar veículo para arremessar sobre os pedestres água ou detritos e Usar veículo para arremessar sobre os veículos água ou detritos",
+    "amparo_legal": "171",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5231",
+    "desdobramento": "1",
+    "descricao": "Atirar do veículo objetos ou substâncias e Abandonar na via objetos ou substâncias",
+    "amparo_legal": "172",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5240",
+    "desdobramento": "0",
+    "descricao": "Disputar corrida",
+    "amparo_legal": "173",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 10X",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5258",
+    "desdobramento": "1",
+    "descricao": "Promover na via competição sem permissão e Promover na via eventos organizados sem permissão e Promover na via exibição e demonstração de perícia em manobra de veículo s/perm",
+    "amparo_legal": "174",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss 10X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5266",
+    "desdobramento": "1",
+    "descricao": "Participar na via como condutor em competição sem permissão e Participar na via como condutor em eventos organizados sem permissão  e Participar como condutor exib/demonst perícia em manobra de veic s/ permissão",
+    "amparo_legal": "174",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 10X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5274",
+    "desdobramento": "1",
+    "descricao": "Utiliz veíc demonst/exibir manobra perigosa mediante arrancada brusca e Utiliz veíc dem/exibir manob perig med derrap/frenag c/desliz/arrast pneus",
+    "amparo_legal": "175",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 10X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5282",
+    "desdobramento": "0",
+    "descricao": "Deixar o cond envolvido em acidente, de prestar ou providenciar socorro a vítima",
+    "amparo_legal": "176, I",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5290",
+    "desdobramento": "0",
+    "descricao": "Deixar o cond envolvido em acid, de adotar provid p/ evitar perigo p/o trânsito",
+    "amparo_legal": "176, II",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5304",
+    "desdobramento": "0",
+    "descricao": "Deixar o cond envolvido em acidente, de preservar local p/ trab policia/pericia",
+    "amparo_legal": "176, III",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5312",
+    "desdobramento": "0",
+    "descricao": "Deixar o cond envolvido em acid, de remover o veíc local qdo determ polic/agente",
+    "amparo_legal": "176, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5320",
+    "desdobramento": "0",
+    "descricao": "Deixar o cond envolvido em acid, de identificar-se policial e prestar inf p/o BO",
+    "amparo_legal": "176, V",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 5X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5339",
+    "desdobramento": "0",
+    "descricao": "Deixar o cond de prestar socorro vítima acid de trânsito, qdo solicit p/ agente",
+    "amparo_legal": "177",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5347",
+    "desdobramento": "0",
+    "descricao": "Deixar o condutor envolvido em acidente s/ vítima, de remover o veículo do local",
+    "amparo_legal": "178",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "5355",
+    "desdobramento": "0",
+    "descricao": "Fazer ou deixar que se faça reparo em veíc, em rodovia e via de trânsito rápido",
+    "amparo_legal": "179, I",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5363",
+    "desdobramento": "0",
+    "descricao": "Fazer/deixar que se faça reparo em veíc nas vias (q não rodovia/transito rapido)",
+    "amparo_legal": "179, II",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5371",
+    "desdobramento": "0",
+    "descricao": "Ter seu veículo imobilizado na via por falta de combustível",
+    "amparo_legal": "180",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5380",
+    "desdobramento": "0",
+    "descricao": "Estacionar nas esquinas e a menos de 5m do alinhamento da via transversal",
+    "amparo_legal": "181, I",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5398",
+    "desdobramento": "0",
+    "descricao": "Estacionar afastado da guia da calçada (meio-fio) de 50cm a 1m",
+    "amparo_legal": "181, II",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5401",
+    "desdobramento": "0",
+    "descricao": "Estacionar afastado da guia da calçada (meio-fio) a mais de 1m",
+    "amparo_legal": "181, III",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5410",
+    "desdobramento": "0",
+    "descricao": "Estacionar em desacordo com as posições estabelecidas no CTB",
+    "amparo_legal": "181, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5428",
+    "desdobramento": "1",
+    "descricao": "Estacionar na pista de rolamento das estradas e Estacionar na pista de rolamento das rodovias e Estacionar na pista de rolamento das vias de trânsito rápido e Estacionar na pista de rolamento das vias dotadas de acostamento",
+    "amparo_legal": "181, V",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5436",
+    "desdobramento": "0",
+    "descricao": "Estacionar junto/sobre hidr de incêndio, reg de água/tampa de poço visit gal sub",
+    "amparo_legal": "181, VI",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5444",
+    "desdobramento": "0",
+    "descricao": "Estacionar nos acostamentos",
+    "amparo_legal": "181, VII",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5452",
+    "desdobramento": "1",
+    "descricao": "Estacionar no passeio, Estacionar sobre faixa destinada a pedestre, Estacionar sobre ciclovia ou ciclofaixa, Estacionar nas ilhas ou refúgios, Estacionar ao lado ou sobre canteiro central/divisores de pista de rolamento, Estacionar ao lado ou sobre marcas de canalização, Estacionar ao lado ou sobre gramado ou jardim público",
+    "amparo_legal": "181, VIII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5460",
+    "desdobramento": "0",
+    "descricao": "Estacionar em guia de calçada rebaixada destinada à entrada/saída de veículos",
+    "amparo_legal": "181, IX",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5479",
+    "desdobramento": "0",
+    "descricao": "Estacionar impedindo a movimentação de outro veículo",
+    "amparo_legal": "181, X",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5487",
+    "desdobramento": "0",
+    "descricao": "Estacionar ao lado de outro veículo em fila dupla",
+    "amparo_legal": "181, XI",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5495",
+    "desdobramento": "0",
+    "descricao": "Estacionar na área de cruzamento de vias",
+    "amparo_legal": "181, XII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5509",
+    "desdobramento": "0",
+    "descricao": "Estacionar no ponto de embarque/desembarque de passageiros transporte coletivo",
+    "amparo_legal": "181, XIII",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5517",
+    "desdobramento": "1",
+    "descricao": "Estacionar nos viadutos, Estacionar nas pontes, Estacionar nos túneis",
+    "amparo_legal": "181, XIV",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5525",
+    "desdobramento": "0",
+    "descricao": "Estacionar na contramão de direção",
+    "amparo_legal": "181, XV",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5533",
+    "desdobramento": "0",
+    "descricao": "Estacionar aclive/declive ñ freado e sem calço segurança, PBT superior a 3500kg",
+    "amparo_legal": "181, XVI",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5541",
+    "desdobramento": "1",
+    "descricao": "Estacionar em desacordo com a regulamentação especificada pela sinalização, estacionamento rotativo, ponto ou vaga de táxi, vaga de carga/descarga, vaga portador necessid especiais, vaga idoso, vaga de curta duração",
+    "amparo_legal": "181, XVII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5550",
+    "desdobramento": "0",
+    "descricao": "Estacionar em local/horário proibido especificamente pela sinalização",
+    "amparo_legal": "181, XVIII",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5568",
+    "desdobramento": "0",
+    "descricao": "Estacionar local/horário de estacionamento e parada proibidos pela sinalização",
+    "amparo_legal": "181, XIX",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5576",
+    "desdobramento": "0",
+    "descricao": "Parar nas esquinas e a menos 5m do bordo do alinhamento da via transversal",
+    "amparo_legal": "182, I",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5584",
+    "desdobramento": "0",
+    "descricao": "Parar afastado da guia da calçada (meio-fio) de 50cm a 1m",
+    "amparo_legal": "182, II",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5592",
+    "desdobramento": "0",
+    "descricao": "Parar afastado da guia da calçada (meio-fio) a mais de 1m",
+    "amparo_legal": "182, III",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5606",
+    "desdobramento": "0",
+    "descricao": "Parar em desacordo com as posições estabelecidas no CTB",
+    "amparo_legal": "182, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5614",
+    "desdobramento": "1",
+    "descricao": "Parar na pista de rolamento das estradas, Parar na pista de rolamento das rodovias, Parar na pista de rolamento das vias de trânsito rápido, Parar na pista de rolamento das demais vias dotadas de acostamento",
+    "amparo_legal": "182, V",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5622",
+    "desdobramento": "1",
+    "descricao": "Parar no passeio, Parar sobre faixa destinada a pedestres, Parar nas ilhas ou refúgios, Parar nos canteiros centrais/divisores de pista de rolamento, Parar nas marcas de canalização",
+    "amparo_legal": "182, VI",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5630",
+    "desdobramento": "0",
+    "descricao": "Parar na área de cruzamento de vias",
+    "amparo_legal": "182, VII",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5649",
+    "desdobramento": "1",
+    "descricao": "Parar nos viadutos, Parar nas pontes, Parar nos túneis",
+    "amparo_legal": "182, VIII",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5657",
+    "desdobramento": "0",
+    "descricao": "Parar na contramão de direção",
+    "amparo_legal": "182, IX",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5665",
+    "desdobramento": "0",
+    "descricao": "Parar em local/horário proibidos especificamente pela sinalização",
+    "amparo_legal": "182, X",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5673",
+    "desdobramento": "1",
+    "descricao": "Parar sobre faixa de pedestres na mudança de sinal luminoso, e (fisc eletrônica)",
+    "amparo_legal": "183",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5681",
+    "desdobramento": "0",
+    "descricao": "Transitar na faixa/pista da direita regul circulação exclusiva determ veículo",
+    "amparo_legal": "184, I",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5690",
+    "desdobramento": "0",
+    "descricao": "Transitar na faixa/pista da esquerda regul circulação exclusiva determ veículo",
+    "amparo_legal": "184, II",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5703",
+    "desdobramento": "0",
+    "descricao": "Deixar de conservar o veículo na faixa a ele destinada pela sinalização de regul",
+    "amparo_legal": "185, I",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5711",
+    "desdobramento": "0",
+    "descricao": "Deixar de conservar nas faixas da direita o veículo lento e de maior porte",
+    "amparo_legal": "185, II",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5720",
+    "desdobramento": "0",
+    "descricao": "Transitar pela contramão de direção em via com duplo sentido de circulação",
+    "amparo_legal": "186, I",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5738",
+    "desdobramento": "0",
+    "descricao": "Transitar pela contramão de direção em via c/ sinalização de regul sentido único",
+    "amparo_legal": "186, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5746",
+    "desdobramento": "1",
+    "descricao": "Transitar em local/horário não permitido pela regul estabelecida p/ autoridade,  rodízio, caminhão",
+    "amparo_legal": "187, I",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5762",
+    "desdobramento": "0",
+    "descricao": "Transitar ao lado de outro veículo, interrompendo ou perturbando o trânsito",
+    "amparo_legal": "188",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5770",
+    "desdobramento": "1",
+    "descricao": "Deixar de dar passagem a veíc precedido de batedores devidamente identificados, Deixar de dar passagem a veíc socorro incêndio/salv serv urgência devid identif, Deixar de dar passagem a veíc de polícia em serviço de urgência devid identif, Deixar de dar passagem a veíc de operação e fiscalização de trânsito devid ident, Deixar de dar passagem a ambulância em serviço de urgência devid identificada",
+    "amparo_legal": "189",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5789",
+    "desdobramento": "0",
+    "descricao": "Seguir veículo em serv urgência devid identific p/ alarme sonoro/ilum vermelha",
+    "amparo_legal": "190",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5797",
+    "desdobramento": "0",
+    "descricao": "Forçar passagem entre veícs trans sent opostos na iminência realiz ultrapassagem",
+    "amparo_legal": "191",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 10X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5800",
+    "desdobramento": "0",
+    "descricao": "Deixar guardar dist segurança lat/front entre seu veíc e demais e ao bordo pista",
+    "amparo_legal": "192",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5819",
+    "desdobramento": "1",
+    "descricao": "Transitar com o veículo em calçadas, passeios, Transitar com o veículo em ciclovias, ciclofaixas - Transitar com o veículo em ajardinamentos, gramados, jardins públicos - Transitar com o veículo em canteiros centrais/divisores de pista de rolamento - Transitar com o veículo em ilhas, refúgios - Transitar com o veículo em marcas de canalização - Transitar com o veículo em acostamentos - Transitar com o veículo em passarelas",
+    "amparo_legal": "193",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss 3X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5827",
+    "desdobramento": "0",
+    "descricao": "Transitar em marcha ré, salvo na distância necessária a pequenas manobras",
+    "amparo_legal": "194",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5835",
+    "desdobramento": "0",
+    "descricao": "Desobedecer às ordens emanadas da autorid compet de trânsito ou de seus agentes",
+    "amparo_legal": "195",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5843",
+    "desdobramento": "1",
+    "descricao": "Deixar de indicar c/ antec, med gesto de braço/luz indicadora, início da marcha - Deixar de indicar c/ antec, med gesto de braço/luz indicadora, manobra de parar - Deixar de indicar c/ antec, med gesto de braço/luz indicadora, mudança direção - Deixar de indicar c/ antec, med gesto de braço/luz indicadora, mudança de faixa",
+    "amparo_legal": "196",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "5851",
+    "desdobramento": "1",
+    "descricao": "Deixar de deslocar c/antecedência veíc p/ faixa mais à esquerda qdo for manobrar - Deixar de deslocar c/antecedência veíc p/ faixa mais à direita qdo for manobrar",
+    "amparo_legal": "197",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5860",
+    "desdobramento": "0",
+    "descricao": "Deixar de dar passagem pela esquerda quando solicitado",
+    "amparo_legal": "198",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5878",
+    "desdobramento": "0",
+    "descricao": "Ultrapassar pela direita, salvo qdo veíc da frente der sinal p/ entrar esquerda",
+    "amparo_legal": "199",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5886",
+    "desdobramento": "0",
+    "descricao": "Ultrap pela direita veíc transp colet/escolar parado para emb/desemb passageiros",
+    "amparo_legal": "200",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5894",
+    "desdobramento": "0",
+    "descricao": "Deixar de guardar a distância lateral de 1,50m ao passar/ultrapassar bicicleta",
+    "amparo_legal": "201",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5908",
+    "desdobramento": "0",
+    "descricao": "Ultrapassar pelo acostamento",
+    "amparo_legal": "202, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5916",
+    "desdobramento": "1",
+    "descricao": "Ultrapassar em interseções - Ultrapassar em passagem de nível",
+    "amparo_legal": "202, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5924",
+    "desdobramento": "1",
+    "descricao": "Ultrapassar pela contramão nas curvas sem visibilidade suficiente - Ultrapassar pela contramão nos aclives ou declives, sem visibilidade suficiente",
+    "amparo_legal": "203, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 – Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5932",
+    "desdobramento": "0",
+    "descricao": "Ultrapassar pela contramão nas faixas de pedestre",
+    "amparo_legal": "203, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 – Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5940",
+    "desdobramento": "1",
+    "descricao": "Ultrapassar pela contramão nas pontes - Ultrapassar pela contramão nos viadutos - Ultrapassar pela contramão nos túneis",
+    "amparo_legal": "203, III",
+    "infrator": "Condutor",
+    "gravidade_original": "7 – Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5959",
+    "desdobramento": "1",
+    "descricao": "Ultrapassar pela contramão veículo parado em fila junto sinal luminoso - Ultrapassar pela contramão veículo parado em fila junto a cancela/porteira - Ultrapassar pela contramão veículo parado em fila junto a cruzamento - Ultrapassar pela contramão veíc parado em fila junto qq impedimento à circulação",
+    "amparo_legal": "203, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "7 – Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5967",
+    "desdobramento": "0",
+    "descricao": "Ultrapassar pela contramão linha de divisão de fluxos opostos, contínua amarela",
+    "amparo_legal": "203, V",
+    "infrator": "Condutor",
+    "gravidade_original": "7 – Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5975",
+    "desdobramento": "0",
+    "descricao": "Deixar de parar no acostamento à direita, p/ cruzar pista ou entrar à esquerda",
+    "amparo_legal": "204",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5983",
+    "desdobramento": "0",
+    "descricao": "Ultrapassar veículo em movimento que integre cortejo/desfile/formação militar",
+    "amparo_legal": "205",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "5991",
+    "desdobramento": "0",
+    "descricao": "Executar operação de retorno em locais proibidos pela sinalização",
+    "amparo_legal": "206, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6009",
+    "desdobramento": "1",
+    "descricao": "Executar operação de retorno nas curvas - Executar operação de retorno nos aclives ou declives - Executar operação de retorno nas pontes - Executar operação de retorno nos viadutos - Executar operação de retorno nos túneis",
+    "amparo_legal": "206, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6017",
+    "desdobramento": "1",
+    "descricao": "Executar operação de retorno passando por cima de calçada, passeio - Executar operação de retorno passando por cima de ilha, refúgio - Executar operação de retorno passando por cima de ajardinamento - Executar operação de retorno passando por cima de canteiro de divisor de pista - Executar operação de retorno passando por cima de faixa de pedestres - Executar operação de retorno passando por cima de faixa de veíc não motorizados",
+    "amparo_legal": "206, III",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6025",
+    "desdobramento": "0",
+    "descricao": "Executar retorno nas interseções, entrando na contramão da via transversal",
+    "amparo_legal": "206, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6033",
+    "desdobramento": "0",
+    "descricao": "Executar retorno c/prejuízo da circulação/segurança ainda que em local permitido",
+    "amparo_legal": "206, V",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6041",
+    "desdobramento": "1",
+    "descricao": "Executar operação de conversão à direita em local proibido pela sinalização - Executar operação de conversão à esquerda em local proibido pela sinalização",
+    "amparo_legal": "207",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6050",
+    "desdobramento": "1",
+    "descricao": "Avançar o sinal vermelho do semáforo - Avançar o sinal de parada obrigatória - Avançar o sinal vermelho do semáforo - fiscalização eletrônica",
+    "amparo_legal": "208",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6068",
+    "desdobramento": "1",
+    "descricao": "Transpor bloqueio viário com ou sem sinalização ou dispositivos auxiliares - Deixar de adentrar às áreas destinadas à pesagem de veículos - Evadir-se para não efetuar o pagamento do pedágio",
+    "amparo_legal": "209",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "6076",
+    "desdobramento": "0",
+    "descricao": "Transpor bloqueio viário policial",
+    "amparo_legal": "210",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "6084",
+    "desdobramento": "1",
+    "descricao": "Ultrapassar veículos motorizados em fila, parados em razão de sinal luminoso - Ultrapassar veículos motorizados em fila, parados em razão de cancela - Ultrapassar veíc motorizados em fila parados em razão de bloqueio viário parcial - Ultrapassar veículos motorizados em fila, parados em razão de qualquer obstáculo",
+    "amparo_legal": "211",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "6092",
+    "desdobramento": "0",
+    "descricao": "Deixar de parar o veículo antes de transpor linha férrea",
+    "amparo_legal": "212",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6106",
+    "desdobramento": "0",
+    "descricao": "Deixar de parar sempre que a marcha for interceptada por agrupamento de pessoas",
+    "amparo_legal": "213, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6114",
+    "desdobramento": "0",
+    "descricao": "Deixar de parar sempre que a marcha for interceptada por agrupamento de veículos",
+    "amparo_legal": "213, II",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6122",
+    "desdobramento": "0",
+    "descricao": "Deixar de dar preferência a pedestre/veic ñ motorizado na faixa a ele destinada",
+    "amparo_legal": "214, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6130",
+    "desdobramento": "0",
+    "descricao": "Deixar de dar preferência a pedestre/veic ñ mot que ñ haja concluído a travessia",
+    "amparo_legal": "214, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6149",
+    "desdobramento": "0",
+    "descricao": "Deixar de dar preferência a pedestre port deficiência fís/criança/idoso/gestante",
+    "amparo_legal": "214, III",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6157",
+    "desdobramento": "0",
+    "descricao": "Deixar de dar preferência a pedestre/veic ñ mot qdo iniciada travessia s/sinaliz",
+    "amparo_legal": "214, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6165",
+    "desdobramento": "0",
+    "descricao": "Deixar de dar preferência a pedestre/veic não mot atravessando a via transversal",
+    "amparo_legal": "214, V",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6173",
+    "desdobramento": "1",
+    "descricao": "Deixar de dar preferência em interseção ñ sinaliz, a veíc circulando por rodovia - Deixar de dar preferência em interseção ñ sinaliz, veíc circulando por rotatória - Deixar de dar prefer em interseção não sinalizada, a veículo que vier da direita",
+    "amparo_legal": "215, I, a",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6181",
+    "desdobramento": "0",
+    "descricao": "Deixar de dar preferência nas interseções com sinalização de Dê a Preferência",
+    "amparo_legal": "215, II",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6190",
+    "desdobramento": "0",
+    "descricao": "Entrar/sair área lindeira sem precaução com a segurança de pedestres e veículos",
+    "amparo_legal": "216",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6203",
+    "desdobramento": "0",
+    "descricao": "Entrar/sair de fila de veículos estacionados sem dar pref a pedestres/veículos",
+    "amparo_legal": "217",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6254",
+    "desdobramento": "0",
+    "descricao": "Transitar em velocidade inferior à metade da máxima da via, salvo faixa direita",
+    "amparo_legal": "219",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6262",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir a veloc qdo se aproximar de passeata/aglomeração/desfile/etc",
+    "amparo_legal": "220, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6270",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir a veloc onde o trânsito esteja sendo controlado pelo agente",
+    "amparo_legal": "220, II",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6289",
+    "desdobramento": "1",
+    "descricao": "Deixar de reduzir a velocidade do veículo ao aproximar-se da guia da calçada - Deixar de reduzir a velocidade do veículo ao aproximar-se do acostamento",
+    "amparo_legal": "220, III",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6297",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir velocidade do veículo ao aproximar-se interseção ñ sinalizada",
+    "amparo_legal": "220, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6300",
+    "desdobramento": "0",
+    "descricao": "Deixar reduzir velocidade nas vias rurais cuja faixa domínio não esteja cercada",
+    "amparo_legal": "220, V",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6319",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir a velocidade nos trechos em curva de pequeno raio",
+    "amparo_legal": "220, VI",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6327",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir veloc ao aproximar local sinaliz advert de obras/trabalhadores",
+    "amparo_legal": "220, VII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6335",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir a velocidade sob chuva/neblina/cerração/ventos fortes",
+    "amparo_legal": "220, VIII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6343",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir a velocidade quando houver má visibilidade",
+    "amparo_legal": "220, IX",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6351",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir veloc qdo pavimento se apresentar escorreg/defeituoso/avariado",
+    "amparo_legal": "220, X",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6360",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir a velocidade à aproximação de animais na pista",
+    "amparo_legal": "220, XI",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6378",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir a velocidade de forma compatível com a segurança, em declive",
+    "amparo_legal": "220, XII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6386",
+    "desdobramento": "0",
+    "descricao": "Deixar de reduzir veloc de forma compatível c/ segurança ao ultrapassar ciclista",
+    "amparo_legal": "220, XIII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6394",
+    "desdobramento": "1",
+    "descricao": "Deixar de reduzir a velocidade nas proximidades de escolas - Deixar de reduzir a velocidade nas proximidades de hospitais - Deixar de reduzir veloc na proxim estação embarque/desembarque passageiros - Deixar de reduzir veloc onde haja intensa movimentação de pedestres",
+    "amparo_legal": "220, XIV",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6408",
+    "desdobramento": "0",
+    "descricao": "Portar no veículo placas de identificação em desacordo c/ especif/modelo Contran",
+    "amparo_legal": "221",
+    "infrator": "Proprietário",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6416",
+    "desdobramento": "0",
+    "descricao": "Confec/distribuir/colocar veíc próprio/terceiro placa identif desacordo Contran",
+    "amparo_legal": "221, § único",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6424",
+    "desdobramento": "0",
+    "descricao": "Deixar de manter ligado em emerg sist ilum vermelha intermitente ainda q parado",
+    "amparo_legal": "222",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6432",
+    "desdobramento": "1",
+    "descricao": "Transitar com farol desregulado perturbando visão outro condutor - Transitar com o facho de luz alta perturbando visão outro condutor",
+    "amparo_legal": "223",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6440",
+    "desdobramento": "0",
+    "descricao": "Fazer uso do facho de luz alta dos faróis em vias providas de iluminação pública",
+    "amparo_legal": "224",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6459",
+    "desdobramento": "1",
+    "descricao": "Deixar de sinalizar via p/ tornar visível local qdo tiver remover veíc da pista - Deixar de sinalizar a via p/ tornar visível o local qdo permanecer acostamento",
+    "amparo_legal": "225, I",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6467",
+    "desdobramento": "0",
+    "descricao": "Deixar de sinalizar a via p/ tornar visível o local qdo a carga for derramada",
+    "amparo_legal": "225, II",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6475",
+    "desdobramento": "0",
+    "descricao": "Deixar de retirar qualquer objeto utilizado para sinalização temporária da via",
+    "amparo_legal": "226",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6483",
+    "desdobramento": "0",
+    "descricao": "Usar buzina que não a de toque breve como advertência a pedestre ou condutores",
+    "amparo_legal": "227, I",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6491",
+    "desdobramento": "0",
+    "descricao": "Usar buzina prolongada e sucessivamente a qualquer pretexto",
+    "amparo_legal": "227, II",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6505",
+    "desdobramento": "0",
+    "descricao": "Usar buzina entre as vinte e duas e as seis horas",
+    "amparo_legal": "227, III",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6513",
+    "desdobramento": "0",
+    "descricao": "Usar buzina em locais e horários proibidos pela sinalização",
+    "amparo_legal": "227, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6521",
+    "desdobramento": "0",
+    "descricao": "Usar buzina em desacordo c/ os padrões e freqüências estabelecidas pelo Contran",
+    "amparo_legal": "227, V",
+    "infrator": "Proprietário",
+    "gravidade_original": "3 - Leve",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6530",
+    "desdobramento": "0",
+    "descricao": "Usar no veículo equip c/ som em volume/freqüência não autorizados pelo Contran",
+    "amparo_legal": "228",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6548",
+    "desdobramento": "0",
+    "descricao": "Usar no veíc alarme/aparelho produz som perturbe sossego púb desac norma Contran",
+    "amparo_legal": "229",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6556",
+    "desdobramento": "1",
+    "descricao": "Conduzir o veículo com o lacre de identificação violado/falsificado - Conduzir o veículo com a inscrição do chassi violada/falsificada - Conduzir o veículo com o selo violado/falsificado - Conduzir o veículo com a placa violada/falsificada - Conduzir o veículo com qualquer outro elem de identificação violado/falsificado",
+    "amparo_legal": "230, I",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6564",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo transportando passageiros em compartimento de carga",
+    "amparo_legal": "230, II",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6572",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo com dispositivo antirradar",
+    "amparo_legal": "230, III",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6580",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo sem qualquer uma das placas de identificação",
+    "amparo_legal": "230, IV",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6599",
+    "desdobramento": "1",
+    "descricao": "Conduzir o veículo que não esteja registrado - Conduzir o veículo registrado que não esteja devidamente licenciado",
+    "amparo_legal": "230, V",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6602",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo com qualquer uma das placas sem legibilidade e visibilidade",
+    "amparo_legal": "230, VI",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6610",
+    "desdobramento": "1",
+    "descricao": "Conduzir o veículo com a cor alterada - Conduzir o veículo com característica alterada",
+    "amparo_legal": "230, VII",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6629",
+    "desdobramento": "0",
+    "descricao": "Conduzir veículo s/ ter sido submetido à inspeção seg veicular, qdo obrigatória",
+    "amparo_legal": "230, VIII",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6637",
+    "desdobramento": "1",
+    "descricao": "Conduzir o veículo sem equipamento obrigatório - Conduzir o veículo com equipamento obrigatório ineficiente/inoperante",
+    "amparo_legal": "230, IX",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6645",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo com equip obrigatório em desacordo com o estab pelo Contran",
+    "amparo_legal": "230, X",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6653",
+    "desdobramento": "1",
+    "descricao": "Conduzir o veículo com descarga livre - Conduzir o veículo com silenciador de motor defeituoso/deficiente/inoperante",
+    "amparo_legal": "230, XI",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6661",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo com equipamento ou acessório proibido",
+    "amparo_legal": "230, XII",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6670",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo c/ equip do sistema de iluminação e de sinalização alterados",
+    "amparo_legal": "230, XIII",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6688",
+    "desdobramento": "0",
+    "descricao": "Conduzir veíc c/ registrador instan inalt de velocidade/tempo viciado/defeituoso",
+    "amparo_legal": "230, XIV",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6696",
+    "desdobramento": "1",
+    "descricao": "Conduzir c/ inscr/adesivo/legenda/símbolo afixado pára-brisa e extensão traseira - Conduzir c/ inscr/adesivo/legenda/símbolo pintado pára-brisa e extensão traseira",
+    "amparo_legal": "230, XV",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6700",
+    "desdobramento": "0",
+    "descricao": "Conduzir veíc com vidro total/parcialmente coberto por película, painéis/pintura",
+    "amparo_legal": "230, XVI",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6718",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo com cortinas ou persianas fechadas",
+    "amparo_legal": "230, XVII",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6726",
+    "desdobramento": "1",
+    "descricao": "Conduzir o veículo em mau estado de conservação, comprometendo a segurança - Conduzir o veículo reprovado na avaliação de inspeção de segurança - Conduzir o veículo reprovado na avaliação de emissão de poluentes e ruído",
+    "amparo_legal": "230, XVIII",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6734",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo sem acionar o limpador de pára-brisa sob chuva",
+    "amparo_legal": "230, XIX",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6742",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veículo sem portar a autorização para condução de escolares",
+    "amparo_legal": "230, XX",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6750",
+    "desdobramento": "0",
+    "descricao": "Conduzir o veíc de carga c/ falta inscrição da tara e demais previstas no CTB",
+    "amparo_legal": "230, XXI",
+    "infrator": "Proprietário",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6769",
+    "desdobramento": "1",
+    "descricao": "Conduzir o veículo com defeito no sistema de iluminação/lâmpada queimada - Conduzir o veículo com defeito no sistema de sinalização/lâmpada queimada",
+    "amparo_legal": "230, XXII",
+    "infrator": "Proprietário",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6777",
+    "desdobramento": "0",
+    "descricao": "Transitar com o veículo danificando a via, suas instalações e equipamentos",
+    "amparo_legal": "231, I",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6785",
+    "desdobramento": "1",
+    "descricao": "Transitar com veículo derramando a carga que esteja transportando - Transitar com veículo lançando a carga que esteja transportando - Transitar com veículo arrastando a carga que esteja transportando",
+    "amparo_legal": "231, II, a",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6793",
+    "desdobramento": "0",
+    "descricao": "Transitar com veíc derramando/lançando combustível/lubrif que esteja utilizando",
+    "amparo_legal": "231, II, b",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6807",
+    "desdobramento": "0",
+    "descricao": "Transitar c/veíc derraman/lançando/arrastando objeto possa acarretar risco acid",
+    "amparo_legal": "231, II, c",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6815",
+    "desdobramento": "0",
+    "descricao": "Transitar com veículo produzindo fumaça, gases ou partículas em desac c/ Contran",
+    "amparo_legal": "231, III",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6823",
+    "desdobramento": "1",
+    "descricao": "Transitar c/ veíc e/ou carga c/ dimensões superiores limite legal s/ autorização - Transitar c/ veíc e/ou carga c/ dimensões superiores est p/sinalização s/autoriz",
+    "amparo_legal": "231, IV",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6831",
+    "desdobramento": "1",
+    "descricao": "Transitar com o veículo com excesso de peso PBT/PBTC - Transitar com o veículo com excesso de peso - Por Eixo - Transitar com o veículo com excesso de peso - PBT/PBTC e Por Eixo",
+    "amparo_legal": "231, V",
+    "infrator": "Emb/Transp",
+    "gravidade_original": "Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6840",
+    "desdobramento": "1",
+    "descricao": "Transitar em desacordo c/ autorização expedida p/veículo c/ dimensões excedentes - Transitar com autorização vencida, expedida p/ veículo c/ dimensões excedentes",
+    "amparo_legal": "231, VI",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6858",
+    "desdobramento": "0",
+    "descricao": "Transitar com o veículo com lotação excedente",
+    "amparo_legal": "231, VII",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "6866",
+    "desdobramento": "1",
+    "descricao": "Transitar efetuando transporte remunerado de pessoas qdo ñ licenciado p/esse fim - Transitar efetuando transporte remunerado de bens qdo não licenciado p/ esse fim",
+    "amparo_legal": "231, VIII",
+    "infrator": "Proprietário",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "6874",
+    "desdobramento": "1",
+    "descricao": "Transitar com o veículo desligado em declive - Transitar com o veículo desengrenado em declive",
+    "amparo_legal": "231, IX",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6882",
+    "desdobramento": "0",
+    "descricao": "Transitar com o veículo excedendo a CMT em até 600 kg",
+    "amparo_legal": "231, X",
+    "infrator": "Proprietário",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6890",
+    "desdobramento": "0",
+    "descricao": "Transitar com o veículo excedendo a CMT entre 601 e 1.000 kg",
+    "amparo_legal": "231, X",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6904",
+    "desdobramento": "0",
+    "descricao": "Transitar com o veículo excedendo a CMT acima de 1.000 kg",
+    "amparo_legal": "231, X",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6912",
+    "desdobramento": "0",
+    "descricao": "Conduzir veículo sem os documentos de porte obrigatório referidos no CTB",
+    "amparo_legal": "232",
+    "infrator": "Condutor",
+    "gravidade_original": "3 - Leve",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6920",
+    "desdobramento": "1",
+    "descricao": "Deixar de efetuar registro do veículo em 30 dias, qdo for transf a propriedade - Deixar de efetuar reg do veíc em 30 dias, qdo mudar o munic de domicilio/resid - Deixar de efetuar reg de veíc em 30 dias, qdo for alterada qquer caract do veic - Deixar de efetuar registro de veículo em 30 dias, qdo houver mudança de categoria",
+    "amparo_legal": "233 c/c 123, I, II, III, IV",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL"
+  },
+  {
+    "codigo_base": "6939",
+    "desdobramento": "1",
+    "descricao": "Falsificar ou adulterar documento de habilitação - Falsificar ou adulterar documento de identificação do veículo",
+    "amparo_legal": "234",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6947",
+    "desdobramento": "1",
+    "descricao": "Conduzir pessoas nas partes externas do veículo - Conduzir animais nas partes externas do veículo - Conduzir carga nas partes externas do veículo",
+    "amparo_legal": "235",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6955",
+    "desdobramento": "0",
+    "descricao": "Rebocar outro veículo com cabo flexível ou corda",
+    "amparo_legal": "236",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "6963",
+    "desdobramento": "0",
+    "descricao": "Trans c/veíc desac c/especificação/falta de inscr/simbologia necessária identif",
+    "amparo_legal": "237",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6971",
+    "desdobramento": "0",
+    "descricao": "Recusar-se a entregar CNH/CRV/CRLV/ outros documentos",
+    "amparo_legal": "238",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "6980",
+    "desdobramento": "0",
+    "descricao": "Retirar do local veículo legalmente retido para regularização, sem permissão",
+    "amparo_legal": "239",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "6998",
+    "desdobramento": "0",
+    "descricao": "Deixar responsável de promover baixa registro de veíc irrecuperável/desmontado",
+    "amparo_legal": "240",
+    "infrator": "Proprietário",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL"
+  },
+  {
+    "codigo_base": "7005",
+    "desdobramento": "1",
+    "descricao": "Deixar de atualizar o cadastro de registro do veículo - Deixar de atualizar o cadastro de habilitação do condutor",
+    "amparo_legal": "241",
+    "infrator": "Proprietário",
+    "gravidade_original": "3 - Leve",
+    "competencia": "ESTADUAL"
+  },
+  {
+    "codigo_base": "7013",
+    "desdobramento": "1",
+    "descricao": "Fazer falsa declaração de domicílio para fins de registro/licenciamento - Fazer falsa declaração de domicílio para fins de habilitação",
+    "amparo_legal": "242",
+    "infrator": "Proprietário",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "ESTADUAL"
+  },
+  {
+    "codigo_base": "7021",
+    "desdobramento": "0",
+    "descricao": "Deixar seguradora de comunicar ocorrência perda total veíc e devolver placas/doc",
+    "amparo_legal": "243",
+    "infrator": "P Jurídica",
+    "gravidade_original": "Grave",
+    "competencia": "ESTADUAL"
+  },
+  {
+    "codigo_base": "7030",
+    "desdobramento": "1",
+    "descricao": "Conduzir motocicleta, motoneta e ciclomotor sem capacete de segurança - Conduzir motocicleta, motoneta e ciclomotor sem vestuário aprovado pelo Contran",
+    "amparo_legal": "244, I",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "7048",
+    "desdobramento": "1",
+    "descricao": "Conduzir motocicleta, motoneta e ciclomotor transportando passageiro s/ capacete - Conduzir motocicleta/motoneta/ciclomotor transportando pas. fora do assento",
+    "amparo_legal": "244, II",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7056",
+    "desdobramento": "1",
+    "descricao": "Conduzir motoc/moton/ciclomotor fazendo malabarismo/equilibrando-se em uma roda - Conduzir ciclo fazendo malabarismo ou equilibrando-se em uma roda",
+    "amparo_legal": "244, III",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7064",
+    "desdobramento": "0",
+    "descricao": "Conduzir motocicleta, motoneta e ciclomotor com os faróis apagados",
+    "amparo_legal": "244, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7072",
+    "desdobramento": "1",
+    "descricao": "Conduzir motocicleta/motoneta/ciclomotor transportando criança menor de 7 anos - Conduzir motoc/moton/ciclom transp criança s/ condição cuidar própria segurança",
+    "amparo_legal": "244, V",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7080",
+    "desdobramento": "0",
+    "descricao": "Conduzir motocicleta, motoneta e ciclomotor rebocando outro veículo",
+    "amparo_legal": "244, VI",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7099",
+    "desdobramento": "1",
+    "descricao": "Conduzir motocicleta/motoneta/ciclomotor sem segurar o guidom com ambas as mãos",
+    "amparo_legal": "244, VII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7102",
+    "desdobramento": "1",
+    "descricao": "Conduzir motocicleta, motoneta e ciclomotor transportando carga incompatível - Conduzir motoc/moton/ transportando carga em desacordo c/ § 2º do Art 139-A CTB",
+    "amparo_legal": "244, VIII",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7110",
+    "desdobramento": "0",
+    "descricao": "Conduzir ciclo transportando passageiro fora da garupa/assento a ele destinado",
+    "amparo_legal": "244, § 1º, a",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7129",
+    "desdobramento": "1",
+    "descricao": "Conduzir ciclo via de trâns rápido ou rodovia salvo se houver acostam/fx própria - Conduzir ciclomotor em via de trânsito rápido - Conduzir ciclomotor em rodovia salvo se houver acostamento ou faixa própria",
+    "amparo_legal": "244, § 1º, b",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7137",
+    "desdobramento": "0",
+    "descricao": "Conduzir ciclo transportando criança s/ condição de cuidar própria segurança",
+    "amparo_legal": "244, § 1º, c",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7145",
+    "desdobramento": "0",
+    "descricao": "Utilizar a via para depósito de mercadorias, materiais ou equipamentos",
+    "amparo_legal": "245",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7153",
+    "desdobramento": "1",
+    "descricao": "Deixar de sinalizar obstáculo à circulação/segurança calçada/pista-s/agravamento - Obstaculizar a via indevidamente-s/agravamento",
+    "amparo_legal": "246",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7161",
+    "desdobramento": "1",
+    "descricao": "Deixar de sinalizar obstáculo circulação/segurança calçada/pista-agravamento 2X - Obstaculizar a via indevidamente-agravamento 2X",
+    "amparo_legal": "246",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss 2X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7170",
+    "desdobramento": "1",
+    "descricao": "Deixar de sinalizar obstáculo circulação/segurança calçada/pista-agravamento 3X - Obstaculizar a via indevidamente-agravamento 3X",
+    "amparo_legal": "246",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss 3X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7188",
+    "desdobramento": "1",
+    "descricao": "Deixar de sinalizar obstáculo circulação/segurança calçada/pista-agravamento 4X - Obstaculizar a via indevidamente-agravamento 4X",
+    "amparo_legal": "246",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss 4X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7196",
+    "desdobramento": "2",
+    "descricao": "Obstaculizar a via indevidamente-agravamento 5X",
+    "amparo_legal": "246",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss 5X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7200",
+    "desdobramento": "1",
+    "descricao": "Deixar de conduzir pelo bordo pista em fila única veíc tração/propulsão humana - Deixar de conduzir pelo bordo da pista em fila única veículo de tração animal",
+    "amparo_legal": "247",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7218",
+    "desdobramento": "0",
+    "descricao": "Transportar em veíc destinado transp passageiros carga excedente desac art.109",
+    "amparo_legal": "248",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "7226",
+    "desdobramento": "1",
+    "descricao": "Deixar de manter acesas à noite as luzes posição qdo o veículo estiver parado - Deixar de manter acesas à noite as luzes de posição veic fazendo carga/descarg a",
+    "amparo_legal": "249",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7234",
+    "desdobramento": "0",
+    "descricao": "Em movimento, deixar de manter acesa a luz baixa durante à noite",
+    "amparo_legal": "250, I, a",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7242",
+    "desdobramento": "0",
+    "descricao": "Em movimento de dia, deixar de manter acesa luz baixa túnel com iluminação pública",
+    "amparo_legal": "250, I, b",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7250",
+    "desdobramento": "0",
+    "descricao": "Em mov, deixar de manter acesa luz baixa veíc transp coletivo faixa/pista excl",
+    "amparo_legal": "250, I, c",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7269",
+    "desdobramento": "0",
+    "descricao": "Em movimento, deixar de manter acesa luz baixa do ciclomotor",
+    "amparo_legal": "250, I, d",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7277",
+    "desdobramento": "0",
+    "descricao": "Em mov deixar de manter acesas luzes de posição sob chuva forte/neblina/cerração",
+    "amparo_legal": "250, II",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7285",
+    "desdobramento": "0",
+    "descricao": "Em movimento, deixar de manter a placa traseira iluminada à noite",
+    "amparo_legal": "250, III",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "7293",
+    "desdobramento": "0",
+    "descricao": "Utilizar o pisca-alerta, exceto em imobilizações ou situações de emergência",
+    "amparo_legal": "251, I",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7307",
+    "desdobramento": "0",
+    "descricao": "Utilizar luz alta e baixa intermitente, exceto quando permitido pelo CTB",
+    "amparo_legal": "251, II",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7315",
+    "desdobramento": "0",
+    "descricao": "Dirigir o veículo com o braço do lado de fora",
+    "amparo_legal": "252, I",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7323",
+    "desdobramento": "1",
+    "descricao": "Dirigir o veículo transport pessoas à sua esquerda ou entre os braços e pernas - Dirigir o veículo transport animais à sua esquerda ou entre os braços e pernas - Dirigir o veículo transport volume à sua esquerda ou entre os braços e pernas",
+    "amparo_legal": "252, II",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "7331",
+    "desdobramento": "0",
+    "descricao": "Dirigir o veículo com incapacidade física ou mental temporária",
+    "amparo_legal": "252, III",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "7340",
+    "desdobramento": "0",
+    "descricao": "Dirigir o veíc usando calçado que ñ se firme nos pés/comprometa utiliz pedais",
+    "amparo_legal": "252, IV",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "7358",
+    "desdobramento": "0",
+    "descricao": "Dirigir o veículo com apenas uma das mãos, exceto quando permitido pelo CTB",
+    "amparo_legal": "252, V",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "7366",
+    "desdobramento": "1",
+    "descricao": "Dirigir o veículo utilizando-se de fones nos ouvidos conec a aparelhagem sonora - Dirigir veículo utilizando-se de telefone celular",
+    "amparo_legal": "252, VI",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "7374",
+    "desdobramento": "0",
+    "descricao": "Bloquear a via com veículo",
+    "amparo_legal": "253",
+    "infrator": "Condutor",
+    "gravidade_original": "7 - Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7382",
+    "desdobramento": "0",
+    "descricao": "É proib ao pedestre permanecer/andar pista, exceto p/ cruzá-las onde permitido",
+    "amparo_legal": "254, I",
+    "infrator": "Pedestre",
+    "gravidade_original": "3 - Leve 50%",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7390",
+    "desdobramento": "1",
+    "descricao": "É proibido ao pedestre cruzar pista de rolamento de viaduto exc onde permitido - de ponte exceto onde permitido - de túneis exceto onde permitido",
+    "amparo_legal": "254, II",
+    "infrator": "Pedestre",
+    "gravidade_original": "3 - Leve 50%",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7404",
+    "desdobramento": "0",
+    "descricao": "É proib ao pedestre atravessar via área cruzamento exc onde permitido p/ sinaliz",
+    "amparo_legal": "254, III",
+    "infrator": "Pedestre",
+    "gravidade_original": "3 - Leve 50%",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7412",
+    "desdobramento": "0",
+    "descricao": "É proib pedestre utilizar via em agrupam que perturbe trâns/prát esporte/desfile",
+    "amparo_legal": "254, IV",
+    "infrator": "Pedestre",
+    "gravidade_original": "3 - Leve 50%",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7420",
+    "desdobramento": "1",
+    "descricao": "É proibido ao pedestre andar fora da faixa própria - andar fora da passarela - andar fora da passagem aérea - andar fora da passagem subterrânea",
+    "amparo_legal": "254, V",
+    "infrator": "Pedestre",
+    "gravidade_original": "3 - Leve 50%",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7439",
+    "desdobramento": "0",
+    "descricao": "É proibido ao pedestre desobedecer a sinalização de trânsito específica",
+    "amparo_legal": "254, VI",
+    "infrator": "Pedestre",
+    "gravidade_original": "3 - Leve 50%",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7447",
+    "desdobramento": "1",
+    "descricao": "Conduzir bicicleta em passeios onde não seja permitida a circulação desta - Conduzir bicicleta de forma agressiva",
+    "amparo_legal": "255",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7455",
+    "desdobramento": "0",
+    "descricao": "Transitar em velocidade superior à máxima permitida em até 20%",
+    "amparo_legal": "218, I",
+    "infrator": "Condutor",
+    "gravidade_original": "4 - Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7463",
+    "desdobramento": "0",
+    "descricao": "Transitar em velocidade superior à máxima permitida em mais de 20% até 50%",
+    "amparo_legal": "218, II",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7471",
+    "desdobramento": "0",
+    "descricao": "Transitar em velocidade superior à máxima permitida em mais de 50%",
+    "amparo_legal": "218, III",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 3X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7480",
+    "desdobramento": "1",
+    "descricao": "Aprovar proj edificação pólo atrativo trânsito s/ anuência órgão/entid trânsito e Aprovar proj edificação pólo atrativo trâns s/ estacion/indicação vias de acesso",
+    "amparo_legal": "93 c/c 95, § 4º",
+    "infrator": "Serv público",
+    "gravidade_original": "---",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7498",
+    "desdobramento": "0",
+    "descricao": "Ñ sinalizar devida/imed obstáculo à circul/segurança veíc/pedestre pista/calçada",
+    "amparo_legal": "94",
+    "infrator": "Serv público",
+    "gravidade_original": "---",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7501",
+    "desdobramento": "0",
+    "descricao": "Utilizar ondulação transversal/sonorizador fora padrão/critério estab p/ Contran",
+    "amparo_legal": "94, § único",
+    "infrator": "Serv público",
+    "gravidade_original": "---",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7510",
+    "desdobramento": "1",
+    "descricao": "Iniciar obra perturbe/interrompa circulação/segurança veíc/pedestres s/permissão e Iniciar evento perturbe/interrompa circulaç/segurança veíc/pedestres s/permissão",
+    "amparo_legal": "95",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "---",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7528",
+    "desdobramento": "1",
+    "descricao": "Não sinalizar a execução ou manutenção da obra e Não sinalizar a execução ou manutenção do evento",
+    "amparo_legal": "95, § 1º",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "---",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7536",
+    "desdobramento": "0",
+    "descricao": "Não avisar comunidade c/ 48h antec interdição via indicando caminho alternativo",
+    "amparo_legal": "95, § 2º",
+    "infrator": "Serv público",
+    "gravidade_original": "---",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7544",
+    "desdobramento": "1",
+    "descricao": "Falta de escrituração livro registro entrada/saída e de uso placa de experiência - Atraso escrituração livro registro entrada/saída e de uso placa de experiência - Fraude escrituração livro registro entrada/saída e de uso placa de experiência - Recusa da exibição do livro registro entrada/saída e de uso placa de experiência",
+    "amparo_legal": "330, § 5º",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss",
+    "competencia": "ESTADUAL"
+  },
+  {
+    "codigo_base": "7552",
+    "desdobramento": "1",
+    "descricao": "Conduzir motoc/moton/ efetuando transp remun mercadoria desac c/ art 139-A CTB - Conduzir motoc/moton/ efet transp remun desac normas ativid profic mototaxistas",
+    "amparo_legal": "244, IX",
+    "infrator": "Condutor",
+    "gravidade_original": "5 - Grave",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "7560",
+    "desdobramento": "0",
+    "descricao": "Conduzir veíc de transp passag ou carga em desacordo c/ as cond do art 67-C CTB",
+    "amparo_legal": "230, XXIII",
+    "infrator": "Condutor",
+    "gravidade_original": "4 – Média",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7579",
+    "desdobramento": "0",
+    "descricao": "Cond que se recusar a se submeter a qq dos proc prev no art. 277 do CTB",
+    "amparo_legal": "277, § 3º, c/c 165",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 10X",
+    "competencia": "ESTADUAL/RODOV"
+  },
+  {
+    "codigo_base": "7587",
+    "desdobramento": "0",
+    "descricao": "Transitar na faixa ou via exclusiva regulam. p/ transp. públ. coletivo passag.",
+    "amparo_legal": "184, III",
+    "infrator": "Condutor",
+    "gravidade_original": "7-Gravíss",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7595",
+    "desdobramento": "0",
+    "descricao": "Dirigir veículo realizando cobrança de tarifa com veículo em movimento",
+    "amparo_legal": "252, VII",
+    "infrator": "Condutor",
+    "gravidade_original": "Média",
+    "competencia": "ESTAD/MUNIC/RODOV"
+  },
+  {
+    "codigo_base": "7609",
+    "desdobramento": "0",
+    "descricao": "Organizar as condutas previstas no caput do art. 253-A",
+    "amparo_legal": "253-A, § 1º",
+    "infrator": "PF ou PJ",
+    "gravidade_original": "Gravíss 100X",
+    "competencia": "MUNICIPAL/RODOV"
+  },
+  {
+    "codigo_base": "7617",
+    "desdobramento": "1",
+    "descricao": "Usar veículo para, deliberadamente, interromper a circulação na via - restringir a circulação na via - perturbar a circulação na via",
+    "amparo_legal": "253-A",
+    "infrator": "Condutor",
+    "gravidade_original": "Gravíss 30 X",
+    "competencia": "MUNICIPAL/RODOV"
+  }
+]
