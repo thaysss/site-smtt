@@ -1,3 +1,5 @@
+import { formatarDescricaoInfracao } from './descricaoInfracao';
+
 // Build the document with textContent so registered data cannot inject HTML.
 export function printAutoInfracao(infracao) {
   const popup = window.open('', '_blank');
@@ -86,7 +88,7 @@ export function printAutoInfracao(infracao) {
   ]);
   section('Enquadramento', [
     ['Código da infração', type.codigo_infracao], ['Desdobramento', infracao.desdobramento],
-    ['Descrição', type.descricao, true], ['Amparo legal', type.amparo_legal], ['Gravidade', type.gravidade],
+    ['Descrição', formatarDescricaoInfracao(type.descricao, infracao.desdobramento), true], ['Amparo legal', type.amparo_legal], ['Gravidade', type.gravidade],
     ['Pontuação', type.pontos],
   ]);
   section('Dados operacionais', [

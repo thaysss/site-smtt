@@ -20,6 +20,7 @@ import AdminDateFilter from '../components/AdminDateFilter';
 import AdminAlvarasSection from '../components/AdminAlvarasSection';
 import AdminOuvidoriaSection from '../components/AdminOuvidoriaSection';
 import { matchesDateFilter } from '../utils/dateFilters';
+import { formatarDescricaoInfracao } from '../utils/descricaoInfracao';
 import { printAutoInfracao } from '../utils/printAutoInfracao';
 import { canAccessAdmin, firstAllowedPanelTab, getAdminPerfil } from '../utils/adminPermissions';
 
@@ -1542,7 +1543,7 @@ function AdminPainel({ defaultTab }) {
                                 <dl>
                                   <div><dt>Código</dt><dd>{inf.tipo_infracao?.codigo_infracao || 'Não informado'}</dd></div>
                                   <div><dt>Amparo legal</dt><dd>{inf.tipo_infracao?.amparo_legal || 'Não informado'}</dd></div>
-                                  <div className="is-full"><dt>Descrição</dt><dd>{inf.tipo_infracao?.descricao || 'Não informada'}</dd></div>
+                                  <div className="is-full"><dt>Descrição</dt><dd>{formatarDescricaoInfracao(inf.tipo_infracao?.descricao, inf.desdobramento) || 'Não informada'}</dd></div>
                                   <div><dt>Gravidade</dt><dd>{gravidade}</dd></div>
                                   <div><dt>Pontuação</dt><dd>{inf.tipo_infracao?.pontos || 0} pontos</dd></div>
                                 </dl>

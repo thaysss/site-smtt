@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, Search, Sparkles, ClipboardCheck, ShieldCheck, Home
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
+import { formatarDescricaoInfracao } from '../utils/descricaoInfracao';
 import { buscarInfracoes, encontrarInfracao } from '../utils/catalogoInfracoes';
 
 function AitStepper({ etapas, etapaAtual, onNavigate }) {
@@ -726,7 +727,7 @@ function AdminInfracoes() {
                                     {sug.gravidade || 'Não informada'}
                                   </span>
                                 </div>
-                                <p className="text-xs text-gray-500">{sug.descricao}</p>
+                                <p className="text-xs text-gray-500">{formatarDescricaoInfracao(sug.descricao, sug.desdobramento)}</p>
                                 <p className="text-xs text-gray-400 mt-1">{sug.amparo_legal} • Desdobramento {sug.desdobramento}</p>
                               </div>
                             </button>
@@ -748,14 +749,18 @@ function AdminInfracoes() {
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Descrição do Enquadramento *</label>
-                    <input 
-                      type="text" 
-                      placeholder="Ex: Estacionar em desacordo com a regulamentação..." 
-                      value={descricaoInfracao} 
-                      onChange={(e) => setDescricaoInfracao(e.target.value)} 
-                      required 
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm" 
-                    />
+                    <div className="flex items-center gap-2 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-primary-500 transition-all text-sm">
+                      {desdobramento !== '' && <span className="shrink-0">{desdobramento} -</span>}
+                      <input
+                        type="text"
+                        aria-label="Descrição do enquadramento"
+                        placeholder="Ex: Estacionar em desacordo com a regulamentação..."
+                        value={descricaoInfracao}
+                        onChange={(e) => setDescricaoInfracao(e.target.value)}
+                        required
+                        className="flex-1 min-w-0 bg-transparent outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -1144,8 +1149,8 @@ function AdminInfracoes() {
                       </div>
                       <div className="mt-2">
                         <span className="text-[9px] uppercase font-bold text-gray-400 block">Enquadramento Legal</span>
-                        <span className="text-xs font-medium text-gray-700 block line-clamp-2" title={descricaoInfracao}>
-                          {descricaoInfracao}
+                        <span className="text-xs font-medium text-gray-700 block line-clamp-2" title={formatarDescricaoInfracao(descricaoInfracao, desdobramento)}>
+                          {formatarDescricaoInfracao(descricaoInfracao, desdobramento)}
                         </span>
                       </div>
                     </div>
